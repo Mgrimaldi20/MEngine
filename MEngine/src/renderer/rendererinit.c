@@ -28,7 +28,7 @@ static const videomode_t videomodes[] =
 	{ "320x240", 320, 240 }
 };
 
-static bool GetVideoModeInfo(long *width, long *height, int mode)
+static bool GetVideoModeInfo(int *width, int *height, int mode)
 {
 	int modesize = (sizeof(videomodes) / sizeof(videomodes[0]));
 	if (mode < -1 || mode >= modesize)
@@ -36,8 +36,12 @@ static bool GetVideoModeInfo(long *width, long *height, int mode)
 
 	if (mode == -1)
 	{
-		*width = Cfg_GetNum(menginecfg, "rWidth");
-		*height = Cfg_GetNum(menginecfg, "rHeight");
+		if (!CVar_GetInt(CVar_Find("rWidth"), width))
+			return(false);
+
+		if (!CVar_GetInt(CVar_Find("rHeight"), height))
+			return(false);
+
 		return(true);
 	}
 
@@ -61,16 +65,28 @@ static void InitOpenGL(void)
 
 bool Render_Init(void)
 {
-	if (!GetVideoModeInfo(&(long)glstate.width, &(long)glstate.height, -1))
+	if (!GetVideoModeInfo(&glstate.width, &glstate.height, -1))
+		return(false);
+
+	bool fs = false;
+	if (!CVar_GetBool(CVar_Find("rFullscreen"), &fs))
+		return(false);
+
+	int ms = 0;
+	if (!CVar_GetInt(CVar_Find("rMultiSamples"), &ms))
+		return(false);
+
+	int rr = 0;
+	if (!CVar_GetInt(CVar_Find("rRefresh"), &rr))
 		return(false);
 
 	glwndparams_t params =
 	{
-		.fullscreen = (bool)Cfg_GetNum(menginecfg, "rFullscreen"),
+		.fullscreen = fs,
 		.width = glstate.width,
 		.height = glstate.height,
-		.multisamples = (long)Cfg_GetNum(menginecfg, "rMultiSamples"),
-		.refreshrate = (long)Cfg_GetNum(menginecfg, "rRefresh"),
+		.multisamples = ms,
+		.refreshrate = rr,
 		.wndname = gameservices.gamename
 	};
 
@@ -79,8 +95,11 @@ bool Render_Init(void)
 	if (!GLWnd_Init(params))	// create the window
 		return(false);
 
-	long vsync = (long)Cfg_GetNum(menginecfg, "rVsync");
-	GLWnd_SetVSync((int)vsync);
+	int vsync = 0;
+	if (!CVar_GetInt(CVar_Find("rVSync"), &vsync))
+		return(false);
+
+	GLWnd_SetVSync(vsync);
 	Log_WriteSeq(LOG_INFO, "Using VSync, value set: %ld", vsync);
 
 	InitOpenGL();

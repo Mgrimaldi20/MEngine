@@ -35,5 +35,3 @@ void InitConsole(void);
 void ShutdownConsole(void);
 void ShowConsole(void);
 void HideConsole(void);
-
-void PrintHelpMsg(void);

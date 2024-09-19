@@ -18,7 +18,20 @@ gameservices_t gameservices;
 static unsigned long long cmdlineflags;
 static uintptr_t gamedllhandle;
 
-cfg_t *menginecfg = NULL;
+void Common_PrintHelpMsg(void)
+{
+	const char *helpmsg = "MEngine\n"
+		"Usage: MEngine [options]\n"
+		"Options:\n"
+		"\t-help\t\tPrint this help message\n"
+		"\t-editor\t\tRun the editor\n"
+		"\t-demo\t\tRun the demo game\n"
+		"\t-ignoreosver\tIgnore OS version check\n"
+		"Press any key to exit...\n";
+
+	printf(helpmsg);
+	Log_WriteSeq(LOG_INFO, helpmsg);
+}
 
 static void ParseCommandLine(char cmdlinein[MAX_CMDLINE_ARGS][MAX_CMDLINE_ARGS])
 {
@@ -55,10 +68,16 @@ static bool InitGame(void)
 
 	else
 	{
-		gamedllhandle = Sys_LoadDLL(Cfg_GetStr(menginecfg, "gGameDLL"));	// grab the library from the engine configs
+		char *gamedllname = NULL;
+		cvar_t *gamedll = CVar_Find("gGameDLL");
+
+		if (gamedll)
+			return(false);
+
+		gamedllhandle = Sys_LoadDLL(gamedll);	// grab the library from the engine configs
 		if (!gamedllhandle)
 		{
-			Log_WriteSeq(LOG_ERROR, "Failed to load game DLL: %s", Cfg_GetStr(menginecfg, "gGameDLL"));
+			Log_WriteSeq(LOG_ERROR, "Failed to load game DLL: %s", gamedllname);
 			return(false);
 		}
 	}
@@ -117,14 +136,13 @@ static void UpdateConfigs(void)
 
 bool Common_Init(char cmdlinein[MAX_CMDLINE_ARGS][MAX_CMDLINE_ARGS])
 {
-	menginecfg = Cfg_Init("MEngineConfigs.cfg");
-	if (!menginecfg)
-		return(false);
-
 	if (!Log_Init())
 		return(false);
 
 	if (!MemCache_Init())
+		return(false);
+
+	if (CVar_Init())
 		return(false);
 
 	ParseCommandLine(cmdlinein);
@@ -145,11 +163,9 @@ void Common_Shutdown(void)
 {
 	ShutdownGame();
 	Sys_Shutdown();
+	CVar_Shutdown();
 	MemCache_Shutdown();
 	Log_Shutdown();
-
-	if (menginecfg)
-		Cfg_Shutdown(menginecfg);
 }
 
 void Common_Frame(void)		// happens every frame

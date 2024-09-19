@@ -5,5 +5,3 @@
 #endif
 
 void ProcessCommandLine(int argc, char **argv, char cmdout[MAX_CMDLINE_ARGS][MAX_CMDLINE_ARGS]);
-
-void PrintHelpMsg(void);

@@ -47,13 +47,13 @@ static bool RemoveOldLogFiles(const char *dir)	// why does this code exist? why 
 	if (filecount <= 0)
 		return(true);	// just return true here too, the next func will create logs
 
-	sysfiledata_t *filelist = malloc(sizeof(*filelist) * filecount);
+	sysfiledata_t *filelist = MemCache_Alloc(sizeof(*filelist) * filecount);
 	if (!filelist)
 		return(false);
 
 	if (!Sys_ListFiles(dir, logfilter, filelist, filecount))
 	{
-		free(filelist);
+		MemCache_Free(filelist);
 		return(false);
 	}
 
@@ -70,7 +70,7 @@ static bool RemoveOldLogFiles(const char *dir)	// why does this code exist? why 
 			remove(oldfile);
 	}
 
-	free(filelist);
+	MemCache_Free(filelist);
 	return(true);
 }
 
@@ -169,8 +169,7 @@ static int ProcessLogQueue(void *args)
 		mtx_unlock(&loglock);
 	}
 
-	//thrd_exit(0); // this is not required, the thread will end in shutdown, path is otherwise unreachable
-	return (0);
+	return(0);
 }
 
 bool Log_Init(void)
@@ -291,7 +290,7 @@ void Log_WriteLargeSeq(logtype_t type, const char *msg, ...)
 	int len = vsnprintf(NULL, 0, msg, arg);
 	va_end(arg);
 
-	char *logmsg = malloc(len + 1);
+	char *logmsg = MemCache_Alloc(len + 1);
 	if (logmsg)
 	{
 		va_start(arg, msg);
@@ -308,7 +307,7 @@ void Log_WriteLargeSeq(logtype_t type, const char *msg, ...)
 		fprintf(logfile, "%s %s %s\n", timestr, logmsgtype[type], logmsg);
 		fflush(logfile);
 
-		free(logmsg);
+		MemCache_Free(logmsg);
 	}
 
 	mtx_unlock(&loglock);

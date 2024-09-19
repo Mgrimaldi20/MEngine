@@ -39,7 +39,7 @@ target_sources(MEngine PRIVATE
 	"src/common/common.h"
 	"src/common/common.c"
 	"src/common/log.c"
-	"src/common/config.c"
+	"src/common/cvar.c"
 	"src/common/memory.c"
 	"src/renderer/renderer.h"
 	"src/renderer/rendererinit.c"
@@ -59,6 +59,13 @@ if(WIN32)
 	elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 		set_target_properties(MEngine PROPERTIES LINK_FLAGS "-mwindows")
 	endif()
+endif()
+
+# Add the OpenGL GLU library to the project and link to target
+if(WIN32)
+	target_link_libraries(MEngine opengl32 glu32)
+elseif(UNIX AND APPLE)
+	target_link_libraries(MEngine GL GLU)
 endif()
 
 if (UNIX AND APPLE)		# Only add GLFW to the project on a Unix system, Windows will use Win32 API
