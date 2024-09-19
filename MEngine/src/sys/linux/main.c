@@ -18,7 +18,7 @@ int main(int argc, char **argv)
 
 	if (Common_HelpMode())
 	{
-		PrintHelpMsg();
+		Common_PrintHelpMsg();
 		Common_Shutdown();
 		return(0);
 	}
@@ -41,18 +41,4 @@ void ProcessCommandLine(int argc, char **argv, char cmdout[MAX_CMDLINE_ARGS][MAX
 			i++;
 		}
 	}
-}
-
-void PrintHelpMsg(void)
-{
-	printf(
-		"MEngine\n"
-		"Usage: MEngine [options]\n"
-		"Options:\n"
-		"\t-help\t\tPrint this help message\n"
-		"\t-editor\t\tRun the editor\n"
-		"\t-demo\t\tRun the demo game\n"
-		"\t-ignoreosver\tIgnore OS version check\n"
-		"Press any key to exit...\n"
-	);
 }

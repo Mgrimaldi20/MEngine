@@ -11,6 +11,24 @@ typedef enum
 	LOG_ERROR
 } logtype_t;
 
+typedef enum
+{
+	CVAR_INT = 0,
+	CVAR_FLOAT,
+	CVAR_STRING,
+	CVAR_BOOL
+} cvartype_t;
+
+typedef enum
+{
+	CVAR_NONE = 0,
+	CVAR_ARCHIVE = 1 << 0,
+	CVAR_READONLY = 1 << 1,
+	CVAR_RENDERER = 1 << 2,
+	CVAR_SYSTEM = 1 << 3,
+	CVAR_GAME = 1 << 4
+} cvarflags_t;
+
 typedef struct
 {
 	int version;

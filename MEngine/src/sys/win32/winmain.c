@@ -3,9 +3,6 @@
 
 #pragma warning(disable: 28251)		// disables windows annotations warning
 
-#pragma comment(lib, "opengl32.lib")
-#pragma comment(lib, "glu32.lib")
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -49,7 +46,7 @@ int WINAPI wWinMain(HINSTANCE hinst, HINSTANCE hprevinst, PWSTR pcmdline, int nc
 	{
 		if (win32state.conshow)
 		{
-			PrintHelpMsg();
+			Common_PrintHelpMsg();
 			Common_Shutdown();
 			return(0);
 		}
@@ -184,18 +181,4 @@ void HideConsole(void)
 {
 	if (ShowWindow(GetConsoleWindow(), SW_HIDE))
 		win32state.conshow = false;
-}
-
-void PrintHelpMsg(void)
-{
-	printf(
-		"MEngine\n"
-		"Usage: MEngine [options]\n"
-		"Options:\n"
-		"\t-help\t\tPrint this help message\n"
-		"\t-editor\t\tRun the editor\n"
-		"\t-demo\t\tRun the demo game\n"
-		"\t-ignoreosver\tIgnore OS version check\n"
-		"Press any key to exit...\n"
-	);
 }

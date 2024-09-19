@@ -14,6 +14,7 @@ extern gameservices_t gameservices;
 bool Common_Init(char cmdlinein[MAX_CMDLINE_ARGS][MAX_CMDLINE_ARGS]);
 void Common_Shutdown(void);
 void Common_Frame(void);
+void Common_PrintHelpMsg(void);
 bool Common_HelpMode(void);
 bool Common_EditorMode(void);
 bool Common_IgnoreOSVer(void);
@@ -35,37 +36,32 @@ void MemCache_Reset(void);
 size_t MemCahce_GetMemUsed(void);
 void MemCache_Dump(void);
 
-#define CFG_TABLE_SIZE 256
-
-typedef struct cfg
+typedef union
 {
-	char *key;
-	char *value;
-	char *lnremaining;
-	char filename[SYS_MAX_PATH];
-	size_t keylen;
-	size_t valuelen;
-	struct cfg *table[CFG_TABLE_SIZE];
-	struct cfg *next;
-} cfg_t;
+	bool b;
+	char *s;
+	int i;
+	float f;
+} cvarvalue_t;
 
-extern cfg_t *menginecfg;
+typedef struct
+{
+	char *name;
+	cvarvalue_t value;
+	char *description;
+	cvartype_t type;
+	unsigned long long flags;
+} cvar_t;
 
-cfg_t *Cfg_Init(const char *filename);
-void Cfg_Shutdown(cfg_t *cfg);
-char *Cfg_GetStr(cfg_t *cfg, const char *key);
-long Cfg_GetNum(cfg_t *cfg, const char *key);
-unsigned long Cfg_GetUNum(cfg_t *cfg, const char *key);
-long long Cfg_GetLNum(cfg_t *cfg, const char *key);
-unsigned long long Cfg_GetULNum(cfg_t *cfg, const char *key);
-float Cfg_GetFloat(cfg_t *cfg, const char *key);
-double Cfg_GetDouble(cfg_t *cfg, const char *key);
-long double Cfg_GetLDouble(cfg_t *cfg, const char *key);
-bool Cfg_SetStr(cfg_t *cfg, const char *key, const char *val);
-bool Cfg_SetNum(cfg_t *cfg, const char *key, const long val);
-bool Cfg_SetUNum(cfg_t *cfg, const char *key, const unsigned long val);
-bool Cfg_SetLNum(cfg_t *cfg, const char *key, const long long val);
-bool Cfg_SetULNum(cfg_t *cfg, const char *key, const unsigned long long val);
-bool Cfg_SetFloat(cfg_t *cfg, const char *key, const float val);
-bool Cfg_SetDouble(cfg_t *cfg, const char *key, const double val);
-bool Cfg_SetLDouble(cfg_t *cfg, const char *key, const long double val);
+bool CVar_Init(void);			// startup and shutdown the CVar System
+void CVar_Shutdown(void);
+cvar_t *CVar_Find(const char *name);
+cvar_t *CVar_Register(const char *name, const cvarvalue_t value, const cvartype_t type, const unsigned long long flags, const char *description);
+bool CVar_GetString(cvar_t *cvar, char *value);
+bool CVar_GetInt(cvar_t *cvar, int *value);
+bool CVar_GetFloat(cvar_t *cvar, float *value);
+bool CVar_GetBool(cvar_t *cvar, bool *value);
+void CVar_SetString(cvar_t *cvar, const char *value);
+void CVar_SetInt(cvar_t *cvar, const int value);
+void CVar_SetFloat(cvar_t *cvar, const float value);
+void CVar_SetBool(cvar_t *cvar, const bool value);
