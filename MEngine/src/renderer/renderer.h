@@ -1,0 +1,46 @@
+#pragma once
+
+#include <gl/gl.h>
+#include <gl/glu.h>
+
+typedef struct
+{
+	int width;
+	int height;
+	bool viewportsized;
+} glstate_t;
+
+extern glstate_t glstate;
+
+bool Render_Init(void);
+void Render_Shutdown(void);
+void Render_StartFrame(void);
+void Render_Frame(void);
+void Render_EndFrame(void);
+
+#define R_DEF_WIN_WIDTH 1920
+#define R_DEF_WIN_HEIGHT 1080
+#define R_DEF_FULLSCREEN true
+#define R_DEF_MULTISAMPLES 4
+#define R_DEF_REFRESH_RATE 60
+#define R_DEF_WIN_NAME "MEngine"
+
+#define MAX_WIN_NAME 256
+
+typedef struct
+{
+	bool fullscreen;
+	int width;
+	int height;
+	int multisamples;
+	int refreshrate;
+	char *wndname;		// propogated from gamename in gameservices, so always 256 chars/wchars
+} glwndparams_t;
+
+// systems specific to the renderer
+bool GLWnd_Init(glwndparams_t params);
+void GLWnd_Shutdown(void);
+bool GLWnd_ChangeScreenParams(glwndparams_t params);
+void GLWnd_SwapBuffers(void);
+void GLWnd_SetVSync(int vsync);
+int GLWnd_GetVSync(void);
