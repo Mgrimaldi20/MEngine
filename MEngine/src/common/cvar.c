@@ -4,11 +4,8 @@
 #include <time.h>
 #include "common.h"
 
-#define MAX_CVAR_NAME 64
-
 typedef struct cvarlist
 {
-	char key[MAX_CVAR_NAME];
 	cvar_t *value;
 	struct cvarlist *next;
 } cvarlist_t;
@@ -41,7 +38,6 @@ bool CVar_Init(void)
 		return(false);
 	}
 
-	cvarlist->key[0] = '\0';
 	cvarlist->value = NULL;
 	cvarlist->next = NULL;
 
@@ -49,6 +45,9 @@ bool CVar_Init(void)
 	char line[1024] = { 0 };
 	while (fgets(line, sizeof(line), cvarfile))
 	{
+		if (line[0] == '\n')
+			continue;
+
 		char *name = NULL;
 		char *value = NULL;
 
@@ -103,19 +102,19 @@ void CVar_Shutdown(void)
 			switch (cvar->type)
 			{
 				case CVAR_BOOL:
-					fprintf(cvarfile, "%s %d\n", current->key, cvar->value.b);
+					fprintf(cvarfile, "%s %d\n", current->value->name, cvar->value.b);
 					break;
 
 				case CVAR_INT:
-					fprintf(cvarfile, "%s %d\n", current->key, cvar->value.i);
+					fprintf(cvarfile, "%s %d\n", current->value->name, cvar->value.i);
 					break;
 
 				case CVAR_FLOAT:
-					fprintf(cvarfile, "%s %f\n", current->key, cvar->value.f);
+					fprintf(cvarfile, "%s %f\n", current->value->name, cvar->value.f);
 					break;
 
 				case CVAR_STRING:
-					fprintf(cvarfile, "%s %s\n", current->key, cvar->value.s);
+					fprintf(cvarfile, "%s %s\n", current->value->name, cvar->value.s);
 					break;
 			}
 		}
@@ -142,12 +141,41 @@ void CVar_Shutdown(void)
 	}
 }
 
+void CVar_ListAllCVars(void)
+{
+	cvarlist_t *current = cvarlist->next;
+	while (current)
+	{
+		cvar_t *cvar = current->value;
+		switch (cvar->type)
+		{
+			case CVAR_BOOL:
+				Log_Write(LOG_INFO, "CVar: %s, Value: %d, Type: %d, Flags: %llu Description: %s", cvar->name, cvar->value.b, cvar->type, cvar->flags, cvar->description);
+				break;
+
+			case CVAR_INT:
+				Log_Write(LOG_INFO, "CVar: %s, Value: %d, Type: %d, Flags: %llu, Description: %s", cvar->name, cvar->value.i, cvar->type, cvar->flags, cvar->description);
+				break;
+
+			case CVAR_FLOAT:
+				Log_Write(LOG_INFO, "CVar: %s, Value: %f, Type: %d, Flags: %llu, Description: %s", cvar->name, cvar->value.f, cvar->type, cvar->flags, cvar->description);
+				break;
+
+			case CVAR_STRING:
+				Log_Write(LOG_INFO, "CVar: %s, Value: %s, Type: %d, Flags: %llu, Description: %s", cvar->name, cvar->value.s, cvar->type, cvar->flags, cvar->description);
+				break;
+		}
+
+		current = current->next;
+	}
+}
+
 cvar_t *CVar_Find(const char *name)
 {
 	cvarlist_t *current = cvarlist->next;
 	while (current)
 	{
-		if (!strcmp(current->key, name))
+		if (!strcmp(current->value->name, name))
 			return(current->value);
 
 		current = current->next;
@@ -190,10 +218,10 @@ cvar_t *CVar_Register(const char *name, const cvarvalue_t value, const cvartype_
 		return(NULL);
 	}
 
-	snprintf(newcvar->key, sizeof(newcvar->key), "%s", name);
 	newcvar->value = cvar;
 	newcvar->next = cvarlist->next;
 	cvarlist->next = newcvar;
+	cvarlist->next->next = NULL;
 
 	return(cvar);
 }

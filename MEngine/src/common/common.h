@@ -58,6 +58,7 @@ typedef struct
 
 bool CVar_Init(void);			// startup and shutdown the CVar System
 void CVar_Shutdown(void);
+void CVar_ListAllCVars(void);
 cvar_t *CVar_Find(const char *name);
 cvar_t *CVar_Register(const char *name, const cvarvalue_t value, const cvartype_t type, const unsigned long long flags, const char *description);
 cvar_t *CVar_RegisterString(const char *name, const char *value, const cvartype_t type, const unsigned long long flags, const char *description);
