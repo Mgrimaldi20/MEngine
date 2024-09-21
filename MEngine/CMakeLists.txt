@@ -29,6 +29,7 @@ elseif(UNIX AND APPLE)
 	target_sources(MEngine PRIVATE
 		"src/sys/linux/linuxlocal.h"
 		"src/sys/linux/main.c"
+		"src/sys/linux/syslinux.c"
 	)	# Apple is not really Linux, but its same code anyway
 endif()
 

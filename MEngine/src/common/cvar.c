@@ -26,7 +26,7 @@ bool CVar_Init(void)
 	char cvarfullname[SYS_MAX_PATH] = { 0 };
 	snprintf(cvarfullname, sizeof(cvarfullname), "%s/%s", cvardir, "MEngine.cfg");
 
-	cvarfile = fopen(cvarfullname, "r");
+	cvarfile = fopen(cvarfullname, "w+");
 	if (!cvarfile)
 	{
 		Log_WriteSeq(LOG_ERROR, "Failed to open cvar file: %s", cvarfullname);
@@ -58,9 +58,16 @@ bool CVar_Init(void)
 			continue;
 
 		// remove the newline character from the value
-		value[strlen(value) - 1] = '\0';
+		size_t slen = strlen(value);
+		if (slen > MAX_CVAR_STR_LEN)
+		{
+			Log_WriteSeq(LOG_ERROR, "CVar value too long: (%s): , skipping", value);
+			continue;
+		}
+
+		value[slen - 1] = '\0';
 		cvarvalue_t cvarvalue = { 0 };
-		cvarvalue.s = value;
+		snprintf(cvarvalue.s, sizeof(cvarvalue.s), "%s", value);
 
 		cvar_t *cvar = CVar_Register(name, cvarvalue, CVAR_STRING, CVAR_NONE, "");
 		if (!cvar)
@@ -83,7 +90,7 @@ void CVar_Shutdown(void)
 	if (!cvarfile)
 	{
 		Log_WriteSeq(LOG_ERROR, "Failed to open cvar file: %s", cvarfullname);
-		return(false);
+		return;
 	}
 
 	// go through the list and write the cvars to the file
@@ -151,14 +158,25 @@ cvar_t *CVar_Find(const char *name)
 
 cvar_t *CVar_Register(const char *name, const cvarvalue_t value, const cvartype_t type, const unsigned long long flags, const char *description)
 {
+	cvar_t *existing = CVar_Find(name);
+	if (existing)
+	{
+		Log_Write(LOG_INFO, "CVar already exists: (%s): updating new parameters", name);
+		existing->value = value;
+		existing->type = type;
+		existing->flags = flags;
+		existing->description = description;
+		return(existing);
+	}
+
 	cvar_t *cvar = MemCache_Alloc(sizeof(*cvar));
 	if (!cvar)
 	{
-		Log_WriteSeq(LOG_ERROR, "Failed to allocate memory for cvar: %s", name);
+		Log_Write(LOG_ERROR, "Failed to allocate memory for cvar: %s", name);
 		return(NULL);
 	}
 
-	snprintf(cvar->name, sizeof(cvar->name), "%s", name);
+	cvar->name = name;
 	cvar->value = value;
 	cvar->type = type;
 	cvar->flags = flags;
@@ -167,7 +185,7 @@ cvar_t *CVar_Register(const char *name, const cvarvalue_t value, const cvartype_
 	cvarlist_t *newcvar = MemCache_Alloc(sizeof(*newcvar));
 	if (!newcvar)
 	{
-		Log_WriteSeq(LOG_ERROR, "Failed to allocate memory for cvar list entry");
+		Log_Write(LOG_ERROR, "Failed to allocate memory for cvar list entry");
 		MemCache_Free(cvar);
 		return(NULL);
 	}
@@ -180,40 +198,64 @@ cvar_t *CVar_Register(const char *name, const cvarvalue_t value, const cvartype_
 	return(cvar);
 }
 
-bool CVar_GetString(cvar_t *cvar, char *value)
+cvar_t *CVar_RegisterString(const char *name, const char *value, const cvartype_t type, const unsigned long long flags, const char *description)
+{
+	cvarvalue_t cvarvalue = { 0 };
+	snprintf(cvarvalue.s, sizeof(cvarvalue.s), "%s", value);
+	return(CVar_Register(name, cvarvalue, type, flags, description));
+}
+
+cvar_t *CVar_RegisterInt(const char *name, const int value, const cvartype_t type, const unsigned long long flags, const char *description)
+{
+	cvarvalue_t cvarvalue = { 0 };
+	cvarvalue.i = value;
+	return(CVar_Register(name, cvarvalue, type, flags, description));
+}
+
+cvar_t *CVar_RegisterFloat(const char *name, const float value, const cvartype_t type, const unsigned long long flags, const char *description)
+{
+	cvarvalue_t cvarvalue = { 0 };
+	cvarvalue.f = value;
+	return(CVar_Register(name, cvarvalue, type, flags, description));
+}
+
+cvar_t *CVar_RegisterBool(const char *name, const bool value, const cvartype_t type, const unsigned long long flags, const char *description)
+{
+	cvarvalue_t cvarvalue = { 0 };
+	cvarvalue.b = value;
+	return(CVar_Register(name, cvarvalue, type, flags, description));
+}
+
+char *CVar_GetString(cvar_t *cvar)
 {
 	if (cvar->type != CVAR_STRING)
-		return(false);
+		return(NULL);
 
-	snprintf(value, MAX_CVAR_NAME, "%s", cvar->value.s);
-	return(true);
+	return(cvar->value.s);
 }
 
-bool CVar_GetInt(cvar_t *cvar, int *value)
+int *CVar_GetInt(cvar_t *cvar)
 {
 	if (cvar->type != CVAR_INT)
-		return(false);
+		return(NULL);
 
-	*value = cvar->value.i;
-	return(true);
+	return(&cvar->value.i);
 }
 
-bool CVar_GetFloat(cvar_t *cvar, float *value)
+float *CVar_GetFloat(cvar_t *cvar)
 {
 	if (cvar->type != CVAR_FLOAT)
-		return(false);
+		return(NULL);
 
-	*value = cvar->value.f;
-	return(true);
+	return(&cvar->value.f);
 }
 
-bool CVar_GetBool(cvar_t *cvar, bool *value)
+bool *CVar_GetBool(cvar_t *cvar)
 {
 	if (cvar->type != CVAR_BOOL)
-		return(false);
+		return(NULL);
 
-	*value = cvar->value.b;
-	return(true);
+	return(&cvar->value.b);
 }
 
 void CVar_SetString(cvar_t *cvar, const char *value)
@@ -221,7 +263,7 @@ void CVar_SetString(cvar_t *cvar, const char *value)
 	if (cvar->type != CVAR_STRING)
 		return;
 
-	cvar->value.s = value;
+	snprintf(cvar->value.s, sizeof(cvar->value.s), "%s", value);
 }
 
 void CVar_SetInt(cvar_t *cvar, const int value)
