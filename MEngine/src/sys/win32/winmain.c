@@ -54,7 +54,7 @@ int WINAPI wWinMain(HINSTANCE hinst, HINSTANCE hprevinst, PWSTR pcmdline, int nc
 		else
 			ShowConsole();
 
-		PrintHelpMsg();
+		Common_PrintHelpMsg();
 
 		volatile bool running = true;
 		while (running)

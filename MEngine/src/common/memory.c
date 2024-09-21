@@ -86,8 +86,6 @@ bool MemCache_Init(void)
 		pool = block;
 	}
 
-	Log_WriteSeq(LOG_INFO, "Memory Cache allocated [bytes: %zu]", freeblocks->size);
-
 	return(true);
 }
 
@@ -128,7 +126,6 @@ void *MemCache_Alloc(size_t size)
 	if (!size)
 		return(NULL);
 
-	//size += sizeof(size_t);	// add space for size at start of block
 	size = (size + sizeof(size_t) - 1) & ~(sizeof(size_t) - 1);
 
 	freeblock_t *prev = NULL;
@@ -290,4 +287,9 @@ void MemCache_Dump(void)
 	}
 
 	Log_Write(LOG_INFO, "End of Memory Cache Dump");
+}
+
+size_t MemCache_GetTotalMemory(void)
+{
+	return(freeblocks->size);
 }

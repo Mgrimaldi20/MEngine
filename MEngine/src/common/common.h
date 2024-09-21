@@ -35,20 +35,23 @@ void MemCache_Free(void *ptr);
 void MemCache_Reset(void);
 size_t MemCahce_GetMemUsed(void);
 void MemCache_Dump(void);
+size_t MemCache_GetTotalMemory(void);
+
+#define MAX_CVAR_STR_LEN 256
 
 typedef union
 {
 	bool b;
-	char *s;
+	char s[MAX_CVAR_STR_LEN];
 	int i;
 	float f;
 } cvarvalue_t;
 
 typedef struct
 {
-	char *name;
+	const char *name;
 	cvarvalue_t value;
-	char *description;
+	const char *description;
 	cvartype_t type;
 	unsigned long long flags;
 } cvar_t;
@@ -57,10 +60,14 @@ bool CVar_Init(void);			// startup and shutdown the CVar System
 void CVar_Shutdown(void);
 cvar_t *CVar_Find(const char *name);
 cvar_t *CVar_Register(const char *name, const cvarvalue_t value, const cvartype_t type, const unsigned long long flags, const char *description);
-bool CVar_GetString(cvar_t *cvar, char *value);
-bool CVar_GetInt(cvar_t *cvar, int *value);
-bool CVar_GetFloat(cvar_t *cvar, float *value);
-bool CVar_GetBool(cvar_t *cvar, bool *value);
+cvar_t *CVar_RegisterString(const char *name, const char *value, const cvartype_t type, const unsigned long long flags, const char *description);
+cvar_t *CVar_RegisterInt(const char *name, const int value, const cvartype_t type, const unsigned long long flags, const char *description);
+cvar_t *CVar_RegisterFloat(const char *name, const float value, const cvartype_t type, const unsigned long long flags, const char *description);
+cvar_t *CVar_RegisterBool(const char *name, const bool value, const cvartype_t type, const unsigned long long flags, const char *description);
+char *CVar_GetString(cvar_t *cvar);
+int *CVar_GetInt(cvar_t *cvar);
+float *CVar_GetFloat(cvar_t *cvar);
+bool *CVar_GetBool(cvar_t *cvar);
 void CVar_SetString(cvar_t *cvar, const char *value);
 void CVar_SetInt(cvar_t *cvar, const int value);
 void CVar_SetFloat(cvar_t *cvar, const float value);

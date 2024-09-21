@@ -68,13 +68,19 @@ static bool InitGame(void)
 
 	else
 	{
-		char *gamedllname = NULL;
-		cvar_t *gamedll = CVar_Find("gGameDLL");
+		cvar_t *gamedll = CVar_Find("g_gamedll");	// get the game DLL name from the CVar system, designed to be overriden by the client
 
-		if (gamedll)
+		if (!gamedll)
 			return(false);
 
-		gamedllhandle = Sys_LoadDLL(gamedll);	// grab the library from the engine configs
+		char *gamedllname = CVar_GetString(gamedll);
+		if (!gamedllname)
+		{
+			Log_WriteSeq(LOG_ERROR, "Failed to get game DLL name from CVar system");
+			return(false);
+		}
+
+		gamedllhandle = Sys_LoadDLL(gamedllname);
 		if (!gamedllhandle)
 		{
 			Log_WriteSeq(LOG_ERROR, "Failed to load game DLL: %s", gamedllname);
@@ -136,13 +142,15 @@ static void UpdateConfigs(void)
 
 bool Common_Init(char cmdlinein[MAX_CMDLINE_ARGS][MAX_CMDLINE_ARGS])
 {
-	if (!Log_Init())
-		return(false);
-
 	if (!MemCache_Init())
 		return(false);
 
-	if (CVar_Init())
+	if (!Log_Init())
+		return(false);
+
+	Log_WriteSeq(LOG_INFO, "Memory Cache allocated [bytes: %zu]", MemCache_GetTotalMemory());
+
+	if (!CVar_Init())
 		return(false);
 
 	ParseCommandLine(cmdlinein);

@@ -36,10 +36,12 @@ static bool GetVideoModeInfo(int *width, int *height, int mode)
 
 	if (mode == -1)
 	{
-		if (!CVar_GetInt(CVar_Find("rWidth"), width))
+		width = CVar_GetInt(CVar_Find("r_width"));
+		if (!width)
 			return(false);
 
-		if (!CVar_GetInt(CVar_Find("rHeight"), height))
+		height = CVar_GetInt(CVar_Find("r_height"));
+		if (!height)
 			return(false);
 
 		return(true);
@@ -68,25 +70,25 @@ bool Render_Init(void)
 	if (!GetVideoModeInfo(&glstate.width, &glstate.height, -1))
 		return(false);
 
-	bool fs = false;
-	if (!CVar_GetBool(CVar_Find("rFullscreen"), &fs))
+	bool *fs = CVar_GetBool(CVar_Find("r_fullscreen"));
+	if (!fs)
 		return(false);
 
-	int ms = 0;
-	if (!CVar_GetInt(CVar_Find("rMultiSamples"), &ms))
+	int *ms = CVar_GetInt(CVar_Find("r_multisamples"));
+	if (!ms)
 		return(false);
 
-	int rr = 0;
-	if (!CVar_GetInt(CVar_Find("rRefresh"), &rr))
+	int *rr = CVar_GetInt(CVar_Find("r_refresh"));
+	if (!rr)
 		return(false);
 
 	glwndparams_t params =
 	{
-		.fullscreen = fs,
+		.fullscreen = *fs,
 		.width = glstate.width,
 		.height = glstate.height,
-		.multisamples = ms,
-		.refreshrate = rr,
+		.multisamples = *ms,
+		.refreshrate = *rr,
 		.wndname = gameservices.gamename
 	};
 
@@ -95,12 +97,12 @@ bool Render_Init(void)
 	if (!GLWnd_Init(params))	// create the window
 		return(false);
 
-	int vsync = 0;
-	if (!CVar_GetInt(CVar_Find("rVSync"), &vsync))
+	int *vsync = CVar_GetInt(CVar_Find("r_vsync"));
+	if (!vsync)
 		return(false);
 
-	GLWnd_SetVSync(vsync);
-	Log_WriteSeq(LOG_INFO, "Using VSync, value set: %ld", vsync);
+	GLWnd_SetVSync(*vsync);
+	Log_WriteSeq(LOG_INFO, "Using VSync, value set: %ld", *vsync);
 
 	InitOpenGL();
 
