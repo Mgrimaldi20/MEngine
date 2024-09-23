@@ -15,6 +15,14 @@ target_sources(DemoGame PRIVATE
 	"src/game.c"
 )
 
+# Specify the .def file for the linker
+if(WIN32)
+	message(STATUS "Binary output directory set: ${CMAKE_CURRENT_SOURCE_DIR}")
+	set_target_properties(DemoGame PROPERTIES
+		LINK_FLAGS "/DEF:${CMAKE_CURRENT_SOURCE_DIR}/demogame.def"
+	)
+endif()
+
 # Set up all the compiler options here
 if(MSVC)
 	target_compile_options(DemoGame PRIVATE "/W4" "/WX" "/permissive-" "/analyze" "/fp:fast")				# Common options for all build types

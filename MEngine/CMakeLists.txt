@@ -104,17 +104,3 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 		target_compile_options(MEngine PRIVATE "-O3" "-flto" "-S")
 	endif()
 endif()
-
-############################################################################################################
-############################################## Install Targets #############################################
-############################################################################################################
-# Install the executable and DLLs to the bin directory
-install(TARGETS MEngine
-	RUNTIME DESTINATION MEngine/bin
-)
-
-# Install header files to the sdk directory, preserving the directory structure
-install(FILES
-	"${CMAKE_SOURCE_DIR}/MEngine/src/mservices.h"
-	DESTINATION MEngine/sdk
-)

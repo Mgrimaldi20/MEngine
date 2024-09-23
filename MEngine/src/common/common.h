@@ -47,18 +47,18 @@ typedef union
 	float f;
 } cvarvalue_t;
 
-typedef struct
+struct cvar
 {
 	const char *name;
 	cvarvalue_t value;
 	const char *description;
 	cvartype_t type;
 	unsigned long long flags;
-} cvar_t;
+};
 
 bool CVar_Init(void);			// startup and shutdown the CVar System
 void CVar_Shutdown(void);
-void CVar_ListAllCVars(void);
+void CVar_ListAllCVars(void);	// mostly for debugging purposes
 cvar_t *CVar_Find(const char *name);
 cvar_t *CVar_Register(const char *name, const cvarvalue_t value, const cvartype_t type, const unsigned long long flags, const char *description);
 cvar_t *CVar_RegisterString(const char *name, const char *value, const cvartype_t type, const unsigned long long flags, const char *description);

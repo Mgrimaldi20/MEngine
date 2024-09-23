@@ -36,6 +36,8 @@ static bool GetVideoModeInfo(int *width, int *height, int mode)
 
 	if (mode == -1)
 	{
+		Log_WriteSeq(LOG_WARN, "Using a custom video mode, might not render correctly if aspect ratio is non standard");
+
 		width = CVar_GetInt(CVar_Find("r_width"));
 		if (!width)
 			return(false);

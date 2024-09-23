@@ -1,14 +1,12 @@
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
-
-#pragma warning(disable: 28251)		// disables windows annotations warning
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include <conio.h>
 #include "../../common/common.h"
+
 #include "winlocal.h"
+
+#pragma warning(disable: 28251)		// disables windows annotations warning
 
 static FILE *outfp, *infp, *errfp;
 
