@@ -223,7 +223,10 @@ uintptr_t Sys_LoadDLL(const char *dllname)
 
 	HMODULE libhandle = LoadLibrary(wdllname);
 	if (!libhandle)
+	{
+		WindowsError();
 		return(0);
+	}
 
 	return((uintptr_t)libhandle);
 }
@@ -241,6 +244,11 @@ void *Sys_GetProcAddress(uintptr_t handle, const char *procname)
 {
 #pragma warning(push)
 #pragma warning(disable: 4152)
-	return(GetProcAddress((HMODULE)handle, procname));	// non standard cast but its a sys function so thats okay
+	FARPROC proc = GetProcAddress((HMODULE)handle, procname);	// non standard cast but its a sys function so thats okay
+	
+	if (!proc)
+		WindowsError();
+
+	return(proc);
 #pragma warning(pop)
 }

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdbool.h>
+
 #define MENGINE_VERSION 1
 
 #define SYS_MAX_PATH 260
@@ -29,6 +31,8 @@ typedef enum
 	CVAR_GAME = 1 << 4
 } cvarflags_t;
 
+typedef struct cvar cvar_t;	// opaque type to cvar struct, only access through CVar_ functions
+
 typedef struct
 {
 	int version;
@@ -52,4 +56,24 @@ typedef struct
 	void (*MemCache_Reset)(void);
 	size_t(*MemCahce_GetMemUsed)(void);
 	void (*MemCache_Dump)(void);
+
+	// cvar system
+	void (*CVar_ListAllCVars)(void);	// will write all cvars to the log, mostly for debugging purposes
+
+	cvar_t *(*CVar_Find)(const char *name);
+
+	cvar_t *(*CVar_RegisterString)(const char *name, const char *value, const cvartype_t type, const unsigned long long flags, const char *description);
+	cvar_t *(*CVar_RegisterInt)(const char *name, const int value, const cvartype_t type, const unsigned long long flags, const char *description);
+	cvar_t *(*CVar_RegisterFloat)(const char *name, const float value, const cvartype_t type, const unsigned long long flags, const char *description);
+	cvar_t *(*CVar_RegisterBool)(const char *name, const bool value, const cvartype_t type, const unsigned long long flags, const char *description);
+
+	char *(*CVar_GetString)(cvar_t *cvar);
+	int *(*CVar_GetInt)(cvar_t *cvar);
+	float *(*CVar_GetFloat)(cvar_t *cvar);
+	bool *(*CVar_GetBool)(cvar_t *cvar);
+	void (*CVar_SetString)(cvar_t *cvar, const char *value);
+
+	void (*CVar_SetInt)(cvar_t *cvar, const int value);
+	void (*CVar_SetFloat)(cvar_t *cvar, const float value);
+	void (*CVar_SetBool)(cvar_t *cvar, const bool value);
 } mservices_t;

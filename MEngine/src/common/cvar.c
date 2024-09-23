@@ -30,16 +30,7 @@ bool CVar_Init(void)
 		return(false);
 	}
 
-	// create the cvar list
-	cvarlist = MemCache_Alloc(sizeof(*cvarlist));
-	if (!cvarlist)
-	{
-		Log_WriteSeq(LOG_ERROR, "Failed to allocate memory for cvar map");
-		return(false);
-	}
-
-	cvarlist->value = NULL;
-	cvarlist->next = NULL;
+	cvarlist = NULL;
 
 	// read the cvar file and populate the cvar list if cvars exist and if the file exists
 	char line[1024] = { 0 };
@@ -93,7 +84,7 @@ void CVar_Shutdown(void)
 	}
 
 	// go through the list and write the cvars to the file
-	cvarlist_t *current = cvarlist->next;
+	cvarlist_t *current = cvarlist;
 	while (current)
 	{
 		cvar_t *cvar = current->value;
@@ -123,7 +114,7 @@ void CVar_Shutdown(void)
 	}
 
 	// loop through the list and free the memory
-	current = cvarlist->next;
+	current = cvarlist;
 	while (current)
 	{
 		cvarlist_t *next = current->next;
@@ -131,8 +122,6 @@ void CVar_Shutdown(void)
 		MemCache_Free(current);
 		current = next;
 	}
-
-	MemCache_Free(cvarlist);
 
 	if (cvarfile)
 	{
@@ -143,7 +132,7 @@ void CVar_Shutdown(void)
 
 void CVar_ListAllCVars(void)
 {
-	cvarlist_t *current = cvarlist->next;
+	cvarlist_t *current = cvarlist;
 	while (current)
 	{
 		cvar_t *cvar = current->value;
@@ -172,7 +161,7 @@ void CVar_ListAllCVars(void)
 
 cvar_t *CVar_Find(const char *name)
 {
-	cvarlist_t *current = cvarlist->next;
+	cvarlist_t *current = cvarlist;
 	while (current)
 	{
 		if (!strcmp(current->value->name, name))
@@ -210,18 +199,27 @@ cvar_t *CVar_Register(const char *name, const cvarvalue_t value, const cvartype_
 	cvar->flags = flags;
 	cvar->description = description;
 
-	cvarlist_t *newcvar = MemCache_Alloc(sizeof(*newcvar));
-	if (!newcvar)
+	cvarlist_t *listnode = MemCache_Alloc(sizeof(*listnode));
+	if (!listnode)
 	{
 		Log_Write(LOG_ERROR, "Failed to allocate memory for cvar list entry");
 		MemCache_Free(cvar);
 		return(NULL);
 	}
 
-	newcvar->value = cvar;
-	newcvar->next = cvarlist->next;
-	cvarlist->next = newcvar;
-	cvarlist->next->next = NULL;
+	// insert the new cvar onto the end of the list
+	cvarlist_t *current = cvarlist;
+	while (current && current->next)
+		current = current->next;
+
+	if (!current)
+		cvarlist = listnode;
+
+	else
+		current->next = listnode;
+
+	listnode->value = cvar;
+	listnode->next = NULL;
 
 	return(cvar);
 }
@@ -256,6 +254,9 @@ cvar_t *CVar_RegisterBool(const char *name, const bool value, const cvartype_t t
 
 char *CVar_GetString(cvar_t *cvar)
 {
+	if (!cvar)
+		return(NULL);
+
 	if (cvar->type != CVAR_STRING)
 		return(NULL);
 
@@ -264,6 +265,9 @@ char *CVar_GetString(cvar_t *cvar)
 
 int *CVar_GetInt(cvar_t *cvar)
 {
+	if (!cvar)
+		return(NULL);
+
 	if (cvar->type != CVAR_INT)
 		return(NULL);
 
@@ -272,6 +276,9 @@ int *CVar_GetInt(cvar_t *cvar)
 
 float *CVar_GetFloat(cvar_t *cvar)
 {
+	if (!cvar)
+		return(NULL);
+
 	if (cvar->type != CVAR_FLOAT)
 		return(NULL);
 
@@ -280,6 +287,9 @@ float *CVar_GetFloat(cvar_t *cvar)
 
 bool *CVar_GetBool(cvar_t *cvar)
 {
+	if (!cvar)
+		return(NULL);
+
 	if (cvar->type != CVAR_BOOL)
 		return(NULL);
 
@@ -288,6 +298,9 @@ bool *CVar_GetBool(cvar_t *cvar)
 
 void CVar_SetString(cvar_t *cvar, const char *value)
 {
+	if (!cvar)
+		return;
+
 	if (cvar->type != CVAR_STRING)
 		return;
 
@@ -296,6 +309,9 @@ void CVar_SetString(cvar_t *cvar, const char *value)
 
 void CVar_SetInt(cvar_t *cvar, const int value)
 {
+	if (!cvar)
+		return;
+
 	if (cvar->type != CVAR_INT)
 		return;
 
@@ -304,6 +320,9 @@ void CVar_SetInt(cvar_t *cvar, const int value)
 
 void CVar_SetFloat(cvar_t *cvar, const float value)
 {
+	if (!cvar)
+		return;
+
 	if (cvar->type != CVAR_FLOAT)
 		return;
 
@@ -312,6 +331,9 @@ void CVar_SetFloat(cvar_t *cvar, const float value)
 
 void CVar_SetBool(cvar_t *cvar, const bool value)
 {
+	if (!cvar)
+		return;
+
 	if (cvar->type != CVAR_BOOL)
 		return;
 
