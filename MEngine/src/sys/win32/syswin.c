@@ -80,6 +80,11 @@ void Sys_Error(const char *error, ...)
 		return;
 
 	MessageBox(NULL, wtext, L"Error", MB_OK);
+
+	Common_Shutdown();
+	ShutdownConsole();
+
+	exit(1);
 }
 
 bool Sys_Mkdir(const char *path)
@@ -215,7 +220,7 @@ unsigned long Sys_GetMaxThreads(void)
 	return(maxthreads);
 }
 
-uintptr_t Sys_LoadDLL(const char *dllname)
+void *Sys_LoadDLL(const char *dllname)
 {
 	wchar_t wdllname[MAX_PATH] = { 0 };
 	if (!MultiByteToWideChar(CP_UTF8, 0, dllname, -1, wdllname, MAX_PATH))
@@ -228,23 +233,23 @@ uintptr_t Sys_LoadDLL(const char *dllname)
 		return(0);
 	}
 
-	return((uintptr_t)libhandle);
+	return(libhandle);
 }
 
-void Sys_UnloadDLL(uintptr_t handle)
+void Sys_UnloadDLL(void *handle)
 {
 	if (handle)
 	{
-		if (!FreeLibrary((HMODULE)handle))
+		if (!FreeLibrary(handle))
 			WindowsError();
 	}
 }
 
-void *Sys_GetProcAddress(uintptr_t handle, const char *procname)
+void *Sys_GetProcAddress(void *handle, const char *procname)
 {
 #pragma warning(push)
 #pragma warning(disable: 4152)
-	FARPROC proc = GetProcAddress((HMODULE)handle, procname);	// non standard cast but its a sys function so thats okay
+	FARPROC proc = GetProcAddress(handle, procname);	// non standard cast but its a sys function so thats okay
 	
 	if (!proc)
 		WindowsError();

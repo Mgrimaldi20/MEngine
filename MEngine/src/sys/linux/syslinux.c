@@ -56,6 +56,10 @@ void Sys_Error(const char *error, ...)
 	printf("Error: %s\n", buffer);
 
 	// TODO: Implement a message box for Linux
+
+	Common_Shutdown();
+
+	exit(1);
 }
 
 bool Sys_Mkdir(const char *path)
@@ -180,17 +184,33 @@ unsigned long Sys_GetMaxThreads(void)
 	return(sysconf(_SC_NPROCESSORS_ONLN));
 }
 
-uintptr_t Sys_LoadDLL(const char *dllname)
+void *Sys_LoadDLL(const char *dllname)
 {
-	return((uintptr_t)dlopen(dllname, RTLD_NOW));
+	void *handle = dlopen(dllname, RTLD_NOW);
+	if (!handle)
+	{
+		Log_WriteSeq(LOG_ERROR, "Failed to load DLL: %s", dlerror());
+		dlerror();		// clear the error
+		return(NULL);
+	}
+
+	return(handle);
 }
 
-void Sys_UnloadDLL(uintptr_t handle)
+void Sys_UnloadDLL(void *handle)
 {
-	dlclose((void *)handle);
+	dlclose(handle);
 }
 
-void *Sys_GetProcAddress(uintptr_t handle, const char *procname)
+void *Sys_GetProcAddress(void *handle, const char *procname)
 {
-	return(dlsym((void *)handle, procname));
+	void *proc = dlsym(handle, procname);
+	if (!proc)
+	{
+		Log_WriteSeq(LOG_ERROR, "Failed to get procedure address: %s", dlerror());
+		dlerror();		// clear the error
+		return(NULL);
+	}
+
+	return(proc);
 }

@@ -55,7 +55,7 @@ typedef struct
 	void (*MemCache_Free)(void *ptr);
 	void (*MemCache_Reset)(void);
 	size_t(*MemCahce_GetMemUsed)(void);
-	void (*MemCache_Dump)(void);
+	void (*MemCache_Dump)(void);		// dump memory cache stats to log, mostly for debugging purposes
 
 	// cvar system
 	void (*CVar_ListAllCVars)(void);	// will write all cvars to the log, mostly for debugging purposes

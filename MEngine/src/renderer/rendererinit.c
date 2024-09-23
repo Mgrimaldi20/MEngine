@@ -10,6 +10,13 @@ typedef struct
 	int height;
 } videomode_t;
 
+static cvar_t *rwidth;
+static cvar_t *rheight;
+static cvar_t *rfullscreen;
+static cvar_t *rmultisamples;
+static cvar_t *rrefresh;
+static cvar_t *rvsync;
+
 static const videomode_t videomodes[] =
 {
 	// all modes are to be 16:9 aspect ratio
@@ -38,13 +45,19 @@ static bool GetVideoModeInfo(int *width, int *height, int mode)
 	{
 		Log_WriteSeq(LOG_WARN, "Using a custom video mode, might not render correctly if aspect ratio is non standard");
 
-		width = CVar_GetInt(CVar_Find("r_width"));
-		if (!width)
-			return(false);
+		int *w = CVar_GetInt(rwidth);
+		if (!w)
+		{
+			Log_WriteSeq(LOG_WARN, "Failed to get r_width cvar, using the default width: %d", R_DEF_WIN_WIDTH);
+			*width = R_DEF_WIN_WIDTH;
+		}
 
-		height = CVar_GetInt(CVar_Find("r_height"));
-		if (!height)
-			return(false);
+		int *h = CVar_GetInt(rheight);
+		if (!h)
+		{
+			Log_WriteSeq(LOG_WARN, "Failed to get r_height cvar, using the default height: %d", R_DEF_WIN_HEIGHT);
+			*height = R_DEF_WIN_HEIGHT;
+		}
 
 		return(true);
 	}
@@ -69,28 +82,56 @@ static void InitOpenGL(void)
 
 bool Render_Init(void)
 {
+	rwidth = CVar_RegisterInt("r_width", R_DEF_WIN_WIDTH, CVAR_INT, CVAR_ARCHIVE | CVAR_RENDERER, "Custom width of the window");
+	rheight = CVar_RegisterInt("r_height", R_DEF_WIN_HEIGHT, CVAR_INT, CVAR_ARCHIVE | CVAR_RENDERER, "Custom height of the window");
+	rfullscreen = CVar_RegisterBool("r_fullscreen", R_DEF_FULLSCREEN, CVAR_BOOL, CVAR_ARCHIVE | CVAR_RENDERER, "Fullscreen mode");
+	rmultisamples = CVar_RegisterInt("r_multisamples", R_DEF_MULTISAMPLES, CVAR_INT, CVAR_ARCHIVE | CVAR_RENDERER, "Multisample anti-aliasing");
+	rrefresh = CVar_RegisterInt("r_refresh", R_DEF_REFRESH_RATE, CVAR_INT, CVAR_ARCHIVE | CVAR_RENDERER, "Refresh rate of the monitor");
+	rvsync = CVar_RegisterInt("r_vsync", R_DEF_VSYNC, CVAR_INT, CVAR_ARCHIVE | CVAR_RENDERER, "Vertical sync");
+
 	if (!GetVideoModeInfo(&glstate.width, &glstate.height, -1))
 		return(false);
 
-	bool *fs = CVar_GetBool(CVar_Find("r_fullscreen"));
+	bool fullscreen = false;
+	bool *fs = CVar_GetBool(rfullscreen);
 	if (!fs)
-		return(false);
+	{
+		Log_WriteSeq(LOG_WARN, "Failed to get r_fullscreen cvar, using the default value: %d", R_DEF_FULLSCREEN);
+		fullscreen = R_DEF_FULLSCREEN;
+	}
 
-	int *ms = CVar_GetInt(CVar_Find("r_multisamples"));
+	else
+		fullscreen = *fs;
+
+	int multisamples = 0;
+	int *ms = CVar_GetInt(rmultisamples);
 	if (!ms)
-		return(false);
+	{
+		Log_WriteSeq(LOG_WARN, "Failed to get r_multisamples cvar, using the default value: %d", R_DEF_MULTISAMPLES);
+		multisamples = R_DEF_MULTISAMPLES;
+	}
 
-	int *rr = CVar_GetInt(CVar_Find("r_refresh"));
+	else
+		multisamples = *ms;
+
+	int refreshrate = 0;
+	int *rr = CVar_GetInt(rrefresh);
 	if (!rr)
-		return(false);
+	{
+		Log_WriteSeq(LOG_WARN, "Failed to get r_refresh cvar, using the default value: %d", R_DEF_REFRESH_RATE);
+		refreshrate = R_DEF_REFRESH_RATE;
+	}
+
+	else
+		refreshrate = *rr;
 
 	glwndparams_t params =
 	{
-		.fullscreen = *fs,
+		.fullscreen = fullscreen,
 		.width = glstate.width,
 		.height = glstate.height,
-		.multisamples = *ms,
-		.refreshrate = *rr,
+		.multisamples = multisamples,
+		.refreshrate = refreshrate,
 		.wndname = gameservices.gamename
 	};
 
@@ -99,12 +140,19 @@ bool Render_Init(void)
 	if (!GLWnd_Init(params))	// create the window
 		return(false);
 
-	int *vsync = CVar_GetInt(CVar_Find("r_vsync"));
-	if (!vsync)
-		return(false);
+	int vsync = 0;
+	int *vs = CVar_GetInt(rvsync);
+	if (!vs)
+	{
+		Log_WriteSeq(LOG_WARN, "Failed to get r_vsync cvar, using the default value: %d", 0);
+		vsync = 0;
+	}
 
-	GLWnd_SetVSync(*vsync);
-	Log_WriteSeq(LOG_INFO, "Using VSync, value set: %ld", *vsync);
+	else
+		vsync = *vs;
+
+	GLWnd_SetVSync(vsync);
+	Log_WriteSeq(LOG_INFO, "Using VSync, value set: %ld", vsync);
 
 	InitOpenGL();
 
