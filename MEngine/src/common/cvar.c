@@ -13,6 +13,35 @@ typedef struct cvarlist
 static cvarlist_t *cvarlist;
 static FILE *cvarfile;
 
+static bool HandleConversionErrors(const char *value, const char *end)
+{
+	if (value == end)
+	{
+		Log_Write(LOG_ERROR, "Failed to convert string to int: %s", value);
+		return(false);
+	}
+
+	if (errno == ERANGE)
+	{
+		Log_Write(LOG_ERROR, "%s: Failed to convert string to int: %s", strerror(errno), value);
+		return(false);
+	}
+
+	if ((errno == 0) && end && (end != 0))
+	{
+		Log_Write(LOG_ERROR, "Invalid characters in string, additional characters remain: %s", value);
+		return(false);
+	}
+
+	if (errno != 0)
+	{
+		Log_Write(LOG_ERROR, "%s: An error occured: %s", value, strerror(errno));
+		return(false);
+	}
+
+	return(true);
+}
+
 bool CVar_Init(void)
 {
 	const char *cvardir = "configs";
@@ -123,6 +152,8 @@ void CVar_Shutdown(void)
 		current = next;
 	}
 
+	cvarlist = NULL;
+
 	if (cvarfile)
 	{
 		fclose(cvarfile);
@@ -164,7 +195,7 @@ cvar_t *CVar_Find(const char *name)
 	cvarlist_t *current = cvarlist;
 	while (current)
 	{
-		if (!strcmp(current->value->name, name))
+		if (strcmp(current->value->name, name) == 0)
 			return(current->value);
 
 		current = current->next;
@@ -179,10 +210,64 @@ cvar_t *CVar_Register(const char *name, const cvarvalue_t value, const cvartype_
 	if (existing)
 	{
 		Log_Write(LOG_INFO, "CVar already exists: (%s): updating new parameters", name);
-		existing->value = value;
+
+		if (strcmp(existing->value.s, "") == 0)		// if the value is empty, overwrite it with the default value supplied by the function call
+		{
+			Log_Write(LOG_WARN, "CVar value is empty, overwriting with default value");
+			existing->value = value;
+		}
+
+		switch (type)
+		{
+			case CVAR_STRING:
+				snprintf(existing->value.s, sizeof(existing->value.s), "%s", value.s);
+				break;
+
+			case CVAR_INT:
+			{
+				errno = 0;
+				char *end = NULL;
+
+				int castval = strtol(value.s, &end, 10);
+				HandleConversionErrors(value.s, end);
+
+				existing->value.i = castval;
+				break;
+			}
+
+			case CVAR_FLOAT:
+			{
+				errno = 0;
+				char *end = NULL;
+
+				float castval = strtof(value.s, &end);
+				HandleConversionErrors(value.s, end);
+
+				existing->value.f = castval;
+				break;
+			}
+
+			case CVAR_BOOL:
+			{
+				errno = 0;
+				char *end = NULL;
+
+				bool castval = strtol(value.s, &end, 10);
+				HandleConversionErrors(value.s, end);
+
+				existing->value.b = castval;
+				break;
+			}
+
+			default:
+				Sys_Error("Invalid cvar type: %d", type);
+				break;
+		}
+
 		existing->type = type;
 		existing->flags = flags;
 		existing->description = description;
+
 		return(existing);
 	}
 
@@ -207,19 +292,10 @@ cvar_t *CVar_Register(const char *name, const cvarvalue_t value, const cvartype_
 		return(NULL);
 	}
 
-	// insert the new cvar onto the end of the list
-	cvarlist_t *current = cvarlist;
-	while (current && current->next)
-		current = current->next;
-
-	if (!current)
-		cvarlist = listnode;
-
-	else
-		current->next = listnode;
-
+	// insert the new cvar at the start of the list
 	listnode->value = cvar;
-	listnode->next = NULL;
+	listnode->next = cvarlist;
+	cvarlist = listnode;
 
 	return(cvar);
 }
@@ -254,10 +330,7 @@ cvar_t *CVar_RegisterBool(const char *name, const bool value, const cvartype_t t
 
 char *CVar_GetString(cvar_t *cvar)
 {
-	if (!cvar)
-		return(NULL);
-
-	if (cvar->type != CVAR_STRING)
+	if ((!cvar) || (cvar->type != CVAR_STRING))
 		return(NULL);
 
 	return(cvar->value.s);
@@ -265,10 +338,7 @@ char *CVar_GetString(cvar_t *cvar)
 
 int *CVar_GetInt(cvar_t *cvar)
 {
-	if (!cvar)
-		return(NULL);
-
-	if (cvar->type != CVAR_INT)
+	if ((!cvar) || (cvar->type != CVAR_INT))
 		return(NULL);
 
 	return(&cvar->value.i);
@@ -276,10 +346,7 @@ int *CVar_GetInt(cvar_t *cvar)
 
 float *CVar_GetFloat(cvar_t *cvar)
 {
-	if (!cvar)
-		return(NULL);
-
-	if (cvar->type != CVAR_FLOAT)
+	if ((!cvar) || (cvar->type != CVAR_FLOAT))
 		return(NULL);
 
 	return(&cvar->value.f);
@@ -287,10 +354,7 @@ float *CVar_GetFloat(cvar_t *cvar)
 
 bool *CVar_GetBool(cvar_t *cvar)
 {
-	if (!cvar)
-		return(NULL);
-
-	if (cvar->type != CVAR_BOOL)
+	if ((!cvar) || (cvar->type != CVAR_BOOL))
 		return(NULL);
 
 	return(&cvar->value.b);
@@ -298,10 +362,7 @@ bool *CVar_GetBool(cvar_t *cvar)
 
 void CVar_SetString(cvar_t *cvar, const char *value)
 {
-	if (!cvar)
-		return;
-
-	if (cvar->type != CVAR_STRING)
+	if ((!cvar) || (cvar->type != CVAR_STRING))
 		return;
 
 	snprintf(cvar->value.s, sizeof(cvar->value.s), "%s", value);
@@ -309,10 +370,7 @@ void CVar_SetString(cvar_t *cvar, const char *value)
 
 void CVar_SetInt(cvar_t *cvar, const int value)
 {
-	if (!cvar)
-		return;
-
-	if (cvar->type != CVAR_INT)
+	if ((!cvar) || (cvar->type != CVAR_INT))
 		return;
 
 	cvar->value.i = value;
@@ -320,10 +378,7 @@ void CVar_SetInt(cvar_t *cvar, const int value)
 
 void CVar_SetFloat(cvar_t *cvar, const float value)
 {
-	if (!cvar)
-		return;
-
-	if (cvar->type != CVAR_FLOAT)
+	if ((!cvar) || (cvar->type != CVAR_FLOAT))
 		return;
 
 	cvar->value.f = value;
@@ -331,10 +386,7 @@ void CVar_SetFloat(cvar_t *cvar, const float value)
 
 void CVar_SetBool(cvar_t *cvar, const bool value)
 {
-	if (!cvar)
-		return;
-
-	if (cvar->type != CVAR_BOOL)
+	if ((!cvar) || (cvar->type != CVAR_BOOL))
 		return;
 
 	cvar->value.b = value;

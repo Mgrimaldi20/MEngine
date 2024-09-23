@@ -10,7 +10,6 @@ int main(int argc, char **argv)
 	if (!Common_Init(cmdline))
 	{
 		Common_Shutdown();
-		ShutdownConsole();
 		return(1);
 	}
 

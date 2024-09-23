@@ -104,6 +104,11 @@ void WindowsError(void)
 
 	MessageBox(NULL, wlpmsgbuf, L"GetLastError", MB_OK | MB_ICONINFORMATION);
 	LocalFree(wlpmsgbuf);
+
+	Common_Shutdown();
+	ShutdownConsole();
+
+	exit(1);
 }
 
 void ProcessCommandLine(PWSTR cmdline, char cmdout[MAX_CMDLINE_ARGS][MAX_CMDLINE_ARGS])

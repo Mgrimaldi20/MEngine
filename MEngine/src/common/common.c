@@ -16,7 +16,7 @@ typedef enum
 gameservices_t gameservices;
 
 static unsigned long long cmdlineflags;
-static uintptr_t gamedllhandle;
+static void *gamedllhandle;
 
 void Common_PrintHelpMsg(void)
 {
@@ -101,7 +101,21 @@ static bool InitGame(void)
 		.MemCache_Free = MemCache_Free,
 		.MemCache_Reset = MemCache_Reset,
 		.MemCahce_GetMemUsed = MemCahce_GetMemUsed,
-		.MemCache_Dump = MemCache_Dump
+		.MemCache_Dump = MemCache_Dump,
+		.CVar_ListAllCVars = CVar_ListAllCVars,
+		.CVar_Find = CVar_Find,
+		.CVar_RegisterString = CVar_RegisterString,
+		.CVar_RegisterInt = CVar_RegisterInt,
+		.CVar_RegisterFloat = CVar_RegisterFloat,
+		.CVar_RegisterBool = CVar_RegisterBool,
+		.CVar_GetString = CVar_GetString,
+		.CVar_GetInt = CVar_GetInt,
+		.CVar_GetFloat = CVar_GetFloat,
+		.CVar_GetBool = CVar_GetBool,
+		.CVar_SetString = CVar_SetString,
+		.CVar_SetInt = CVar_SetInt,
+		.CVar_SetFloat = CVar_SetFloat,
+		.CVar_SetBool = CVar_SetBool
 	};
 
 	GetMServices = (getmservices_t)Sys_GetProcAddress(gamedllhandle, "GetMServices");

@@ -33,6 +33,6 @@ time_t Sys_FileTimeStamp(const char *fname);
 
 unsigned long Sys_GetMaxThreads(void);
 
-uintptr_t Sys_LoadDLL(const char *dllname);
-void Sys_UnloadDLL(uintptr_t handle);
-void *Sys_GetProcAddress(uintptr_t handle, const char *procname);
+void *Sys_LoadDLL(const char *dllname);
+void Sys_UnloadDLL(void *handle);
+void *Sys_GetProcAddress(void *handle, const char *procname);
