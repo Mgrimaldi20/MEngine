@@ -297,16 +297,16 @@ size_t MemCahce_GetMemUsed(void)
 
 void MemCache_Dump(void)
 {
-	Log_Write(LOG_INFO, "Memory Cache Dump [bytes used by the memory cache: %zu]:", memcacheused);
+	Log_Write(LOG_INFO, "\t\tMemory Cache Dump [bytes used by the memory cache: %zu]:", memcacheused);
 
 	freeblock_t *current = freeblocks;
 	while (current)
 	{
-		Log_Write(LOG_INFO, "index: %zu, size: %zu", current->index, current->size);
+		Log_Write(LOG_INFO, "\t\t\tindex: %zu, size: %zu", current->index, current->size);
 		current = current->next;
 	}
 
-	Log_Write(LOG_INFO, "End of Memory Cache Dump");
+	Log_Write(LOG_INFO, "\t\tEnd of Memory Cache Dump");
 }
 
 size_t MemCache_GetTotalMemory(void)

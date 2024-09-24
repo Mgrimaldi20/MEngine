@@ -183,6 +183,11 @@ bool Common_Init(char cmdlinein[MAX_CMDLINE_ARGS][MAX_CMDLINE_ARGS])
 
 void Common_Shutdown(void)
 {
+#if defined(MENGINE_DEBUG)
+	CVar_ListAllCVars();
+	MemCache_Dump();
+#endif
+
 	ShutdownGame();
 	Sys_Shutdown();
 	CVar_Shutdown();
