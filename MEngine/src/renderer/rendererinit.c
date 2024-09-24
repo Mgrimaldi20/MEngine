@@ -59,11 +59,21 @@ static bool GetVideoModeInfo(int *width, int *height, int mode)
 			*height = R_DEF_WIN_HEIGHT;
 		}
 
+		if (w)
+			*width = *w;
+
+		if (h)
+			*height = *h;
+
+		Log_WriteSeq(LOG_INFO, "Using custom video mode: %dx%d", *width, *height);
+
 		return(true);
 	}
 
 	*width = videomodes[mode].width;
 	*height = videomodes[mode].height;
+
+	Log_WriteSeq(LOG_INFO, "Using video mode: %s", videomodes[mode].mode);
 
 	return(true);
 }
