@@ -31,7 +31,16 @@ static freeblock_t *GetFreeBlock(void)
 	}
 
 	else
+	{
 		block = malloc(sizeof(*block));
+
+		if (block)
+		{
+			block->index = 0;
+			block->size = 0;
+			block->next = NULL;
+		}
+	}
 
 	return(block);
 }
@@ -126,7 +135,9 @@ void *MemCache_Alloc(size_t size)
 	if (!size)
 		return(NULL);
 
-	size = (size + sizeof(size_t) - 1) & ~(sizeof(size_t) - 1);
+	// include the space for storing the size itself
+	size_t totalsize = size + sizeof(size_t);
+	totalsize = (totalsize + sizeof(size_t) - 1) & ~(sizeof(size_t) - 1);
 
 	freeblock_t *prev = NULL;
 	freeblock_t *current = freeblocks;
@@ -140,10 +151,10 @@ void *MemCache_Alloc(size_t size)
 
 			ptr = (unsigned char *)ptr + sizeof(size_t);
 
-			if (current->size > size) // shrink block if it is too big
+			if (current->size > totalsize) // shrink block if it is too big
 			{
-				current->index += size;
-				current->size -= size;
+				current->index += totalsize;
+				current->size -= totalsize;
 			}
 
 			else // remove block from free list if it is the exact size
@@ -157,13 +168,15 @@ void *MemCache_Alloc(size_t size)
 				ReturnFreeBlock(current);
 			}
 
-			memcacheused += size;
+			memcacheused += totalsize;
 
 			if (memcacheused >= (lastreported + (1024 * 1024))) // report every 1MB
 			{
 				Log_Write(LOG_INFO, "Memory Cache usage [bytes: %zu]", memcacheused);
 				lastreported = memcacheused;
 			}
+
+			assert((unsigned char *)ptr + size <= memcache + MEM_CACHE_SIZE);
 
 			return(ptr);
 		}
@@ -185,7 +198,9 @@ void MemCache_Free(void *ptr)
 	ptr = (unsigned char *)ptr - sizeof(size_t);
 	size_t size = *(size_t *)ptr;
 
-	memcacheused -= size;
+	size_t totalsize = size + sizeof(size_t);
+
+	memcacheused -= totalsize;
 
 	size_t index = (unsigned char *)ptr - memcache;
 
@@ -194,7 +209,7 @@ void MemCache_Free(void *ptr)
 		return;
 
 	newblock->index = index;
-	newblock->size = size;
+	newblock->size = totalsize;
 
 	freeblock_t *prev = NULL;
 	freeblock_t *current = freeblocks;
@@ -258,12 +273,17 @@ void MemCache_Reset(void)
 	freeblocks->size = MEM_CACHE_SIZE;
 	freeblocks->next = NULL;
 
-	// faster than memsetting MEM_CACHE_SIZE directly, but slower if the cache is completely full, no need to do this
-	freeblock_t *allocated = freeblocks->next;
-	while (allocated)
+	if (memcacheused == MEM_CACHE_SIZE)
+		memset(memcache, 0, MEM_CACHE_SIZE);
+
+	else
 	{
-		memset(memcache + allocated->index, 0, allocated->size);
-		allocated = allocated->next;
+		freeblock_t *allocated = freeblocks->next;
+		while (allocated)
+		{
+			memset(memcache + allocated->index, 0, allocated->size);
+			allocated = allocated->next;
+		}
 	}
 
 	memcacheused = 0;
