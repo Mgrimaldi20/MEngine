@@ -4,13 +4,12 @@
 #include <time.h>
 #include "common.h"
 
-typedef struct cvarlist
+typedef struct cvarentry
 {
 	cvar_t *value;
-	struct cvarlist *next;
-} cvarlist_t;
+	struct cvarentry *next;
+} cvarentry_t;
 
-static cvarlist_t *cvarlist;
 static FILE *cvarfile;
 
 static bool HandleConversionErrors(const char *value, const char *end)
@@ -69,26 +68,31 @@ bool CVar_Init(void)
 	char line[1024] = { 0 };
 	while (fgets(line, sizeof(line), cvarfile))
 	{
-		if (line[0] == '\n')
+		if (line[0] == '\n' || line[0] == '\r' || line[0] == ' ')
 			continue;
 
 		char *name = NULL;
 		char *value = NULL;
 
-		name = Sys_Strtok(line, " ", &value);
+		name = Sys_Strtok(line, " \t\n\r", &value);
 
 		if (!name || !value)
-			continue;
-
-		// remove the newline character from the value
-		size_t slen = strlen(value);
-		if (slen > MAX_CVAR_STR_LEN)
 		{
-			Log_WriteSeq(LOG_ERROR, "CVar value too long: (%s): , skipping", value);
+			Log_WriteSeq(LOG_ERROR, "Invalid cvar parsed, line: %s", line);
 			continue;
 		}
 
-		value[slen - 1] = '\0';
+		size_t slen = strlen(value);
+		if (slen > MAX_CVAR_STR_LEN)
+		{
+			Log_WriteSeq(LOG_ERROR, "CVar value too long: %s", value);
+			continue;
+		}
+
+		// remove the newline character from the value
+		if (value[slen - 1] == '\n')
+			value[slen - 1] = '\0';
+
 		cvarvalue_t cvarvalue = { 0 };
 		snprintf(cvarvalue.s, sizeof(cvarvalue.s), "%s", value);
 
@@ -232,7 +236,7 @@ cvar_t *CVar_Register(const char *name, const cvarvalue_t value, const cvartype_
 				errno = 0;
 				char *end = NULL;
 
-				int castval = strtol(value.s, &end, 10);
+				int castval = strtol(existing->value.s, &end, 10);
 				HandleConversionErrors(value.s, end);
 
 				existing->value.i = castval;
@@ -244,8 +248,8 @@ cvar_t *CVar_Register(const char *name, const cvarvalue_t value, const cvartype_
 				errno = 0;
 				char *end = NULL;
 
-				float castval = strtof(value.s, &end);
-				HandleConversionErrors(value.s, end);
+				float castval = strtof(existing->value.s, &end);
+				HandleConversionErrors(existing->value.s, end);
 
 				existing->value.f = castval;
 				break;
@@ -256,8 +260,8 @@ cvar_t *CVar_Register(const char *name, const cvarvalue_t value, const cvartype_
 				errno = 0;
 				char *end = NULL;
 
-				bool castval = strtol(value.s, &end, 10);
-				HandleConversionErrors(value.s, end);
+				bool castval = strtol(existing->value.s, &end, 10);
+				HandleConversionErrors(existing->value.s, end);
 
 				existing->value.b = castval;
 				break;
@@ -282,7 +286,17 @@ cvar_t *CVar_Register(const char *name, const cvarvalue_t value, const cvartype_
 		return(NULL);
 	}
 
-	cvar->name = name;
+	char *dupname = MemCache_Alloc(MAX_CVAR_STR_LEN);
+	if (!dupname)
+	{
+		Log_Write(LOG_ERROR, "Failed to allocate memory for cvar name: %s", dupname);
+		MemCache_Free(cvar);
+		return(NULL);
+	}
+
+	snprintf(dupname, MAX_CVAR_STR_LEN, "%s", name);
+
+	cvar->name = dupname;
 	cvar->value = value;
 	cvar->type = type;
 	cvar->flags = flags;
