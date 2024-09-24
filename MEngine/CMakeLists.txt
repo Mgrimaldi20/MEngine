@@ -15,6 +15,12 @@ if(WIN32)
 	target_compile_definitions(MEngine PRIVATE _CRT_SECURE_NO_WARNINGS)			# Disable some annoying warnings, the CRT secure version are no safer than the normal ones
 endif()
 
+# Define global macros for the project
+target_compile_definitions(MEngine PRIVATE MENGINE_VERSION=1)
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+	target_compile_definitions(MEngine PRIVATE MENGINE_DEBUG)
+endif()
+
 # Check the Operating System and include the appropriate file for execution
 if(WIN32)
 	target_sources(MEngine PRIVATE

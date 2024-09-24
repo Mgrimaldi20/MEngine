@@ -2,8 +2,6 @@
 
 #include <stdbool.h>
 
-#define MENGINE_VERSION 1
-
 #define SYS_MAX_PATH 260
 
 typedef enum
