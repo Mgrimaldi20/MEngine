@@ -37,19 +37,19 @@ size_t MemCahce_GetMemUsed(void);
 void MemCache_Dump(void);
 size_t MemCache_GetTotalMemory(void);
 
-#define MAX_CVAR_STR_LEN 256
+#define CVAR_MAX_STR_LEN 256
 
 typedef union
 {
 	bool b;
-	char s[MAX_CVAR_STR_LEN];
+	char s[CVAR_MAX_STR_LEN];
 	int i;
 	float f;
 } cvarvalue_t;
 
 struct cvar
 {
-	const char *name;
+	char *name;
 	cvarvalue_t value;
 	const char *description;
 	cvartype_t type;
