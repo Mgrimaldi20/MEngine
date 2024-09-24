@@ -52,11 +52,15 @@ bool CVar_Init(void)
 	char cvarfullname[SYS_MAX_PATH] = { 0 };
 	snprintf(cvarfullname, sizeof(cvarfullname), "%s/%s", cvardir, "MEngine.cfg");
 
-	cvarfile = fopen(cvarfullname, "w+");
+	cvarfile = fopen(cvarfullname, "r");
 	if (!cvarfile)
 	{
-		Log_WriteSeq(LOG_ERROR, "Failed to open cvar file: %s", cvarfullname);
-		return(false);
+		cvarfile = fopen(cvarfullname, "w+");	// try to just recreate file, will lose cvars if file cant be read properly
+		if (!cvarfile)
+		{
+			Log_WriteSeq(LOG_ERROR, "Failed to open cvar file: %s", cvarfullname);
+			return(false);
+		}
 	}
 
 	cvarlist = NULL;
