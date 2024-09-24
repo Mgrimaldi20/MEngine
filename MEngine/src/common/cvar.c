@@ -99,7 +99,7 @@ bool CVar_Init(void)
 		char *name = NULL;
 		char *value = NULL;
 
-		name = Sys_Strtok(line, " \t\n\r", &value);
+		name = Sys_Strtok(line, " \n", &value);
 
 		if (!name || !value)
 		{
@@ -192,6 +192,8 @@ void CVar_Shutdown(void)
 
 void CVar_ListAllCVars(void)
 {
+	Log_Write(LOG_INFO, "\t\tCVar Dump [number of cvars: %zu, cvar map capacity: %zu]", cvarmap->numcvars, cvarmap->capacity);
+
 	size_t numcvars = 0;
 	for (size_t i=0; i<cvarmap->capacity; i++)
 	{
@@ -202,19 +204,19 @@ void CVar_ListAllCVars(void)
 			switch (cvar->type)
 			{
 				case CVAR_BOOL:
-					Log_Write(LOG_INFO, "CVar: %s, Value: %d, Type: %d, Flags: %llu Description: %s", cvar->name, cvar->value.b, cvar->type, cvar->flags, cvar->description);
+					Log_Write(LOG_INFO, "\t\t\tCVar: %s, Value: %d, Type: %d, Flags: %llu Description: %s", cvar->name, cvar->value.b, cvar->type, cvar->flags, cvar->description);
 					break;
 
 				case CVAR_INT:
-					Log_Write(LOG_INFO, "CVar: %s, Value: %d, Type: %d, Flags: %llu, Description: %s", cvar->name, cvar->value.i, cvar->type, cvar->flags, cvar->description);
+					Log_Write(LOG_INFO, "\t\t\tCVar: %s, Value: %d, Type: %d, Flags: %llu, Description: %s", cvar->name, cvar->value.i, cvar->type, cvar->flags, cvar->description);
 					break;
 
 				case CVAR_FLOAT:
-					Log_Write(LOG_INFO, "CVar: %s, Value: %f, Type: %d, Flags: %llu, Description: %s", cvar->name, cvar->value.f, cvar->type, cvar->flags, cvar->description);
+					Log_Write(LOG_INFO, "\t\t\tCVar: %s, Value: %f, Type: %d, Flags: %llu, Description: %s", cvar->name, cvar->value.f, cvar->type, cvar->flags, cvar->description);
 					break;
 
 				case CVAR_STRING:
-					Log_Write(LOG_INFO, "CVar: %s, Value: %s, Type: %d, Flags: %llu, Description: %s", cvar->name, cvar->value.s, cvar->type, cvar->flags, cvar->description);
+					Log_Write(LOG_INFO, "\t\t\tCVar: %s, Value: %s, Type: %d, Flags: %llu, Description: %s", cvar->name, cvar->value.s, cvar->type, cvar->flags, cvar->description);
 					break;
 			}
 
@@ -222,6 +224,8 @@ void CVar_ListAllCVars(void)
 			current = current->next;
 		}
 	}
+
+	Log_Write(LOG_INFO, "\t\tEnd of CVar Dump");
 }
 
 cvar_t *CVar_Find(const char *name)
