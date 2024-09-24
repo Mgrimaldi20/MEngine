@@ -145,8 +145,6 @@ bool Render_Init(void)
 		.wndname = gameservices.gamename
 	};
 
-	params.fullscreen = false;	// TODO: just for testing, remove later in production
-
 	if (!GLWnd_Init(params))	// create the window
 		return(false);
 

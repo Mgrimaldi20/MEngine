@@ -4,13 +4,34 @@
 #include <time.h>
 #include "common.h"
 
+#define DEF_CVAR_MAP_CAPACITY 256
+
 typedef struct cvarentry
 {
 	cvar_t *value;
 	struct cvarentry *next;
 } cvarentry_t;
 
+typedef struct
+{
+	size_t numcvars;
+	size_t capacity;
+	cvarentry_t **cvars;
+} cvarmap_t;
+
+static cvarmap_t *cvarmap;
 static FILE *cvarfile;
+
+static size_t HashFunction(const char *name)
+{
+	size_t hash = 0;
+	size_t len = strlen(name);
+
+	for (size_t i=0; i<len; i++)
+		hash = (hash * 31) + name[i];
+
+	return(hash % cvarmap->capacity);
+}
 
 static bool HandleConversionErrors(const char *value, const char *end)
 {
@@ -62,7 +83,11 @@ bool CVar_Init(void)
 		}
 	}
 
-	cvarlist = NULL;
+	cvarmap = MemCache_Alloc(sizeof(*cvarmap));
+	cvarmap->capacity = DEF_CVAR_MAP_CAPACITY;
+	cvarmap->numcvars = 0;
+
+	cvarmap->cvars = MemCache_Alloc(sizeof(*cvarmap->cvars) * cvarmap->capacity);
 
 	// read the cvar file and populate the cvar list if cvars exist and if the file exists
 	char line[1024] = { 0 };
@@ -83,7 +108,7 @@ bool CVar_Init(void)
 		}
 
 		size_t slen = strlen(value);
-		if (slen > MAX_CVAR_STR_LEN)
+		if (slen > CVAR_MAX_STR_LEN)
 		{
 			Log_WriteSeq(LOG_ERROR, "CVar value too long: %s", value);
 			continue;
@@ -120,47 +145,43 @@ void CVar_Shutdown(void)
 		return;
 	}
 
-	// go through the list and write the cvars to the file
-	cvarlist_t *current = cvarlist;
-	while (current)
+	// go through the map and write all the cvars to the file and free the memory
+	for (size_t i=0; i<cvarmap->capacity; i++)
 	{
-		cvar_t *cvar = current->value;
-		if (cvar->flags & CVAR_ARCHIVE)
+		cvarentry_t *current = cvarmap->cvars[i];
+		while (current)
 		{
-			switch (cvar->type)
+			cvar_t *cvar = current->value;
+
+			if (cvar->flags & CVAR_ARCHIVE)
 			{
-				case CVAR_BOOL:
-					fprintf(cvarfile, "%s %d\n", current->value->name, cvar->value.b);
-					break;
+				switch (cvar->type)
+				{
+					case CVAR_BOOL:
+						fprintf(cvarfile, "%s %d\n", cvar->name, cvar->value.b);
+						break;
 
-				case CVAR_INT:
-					fprintf(cvarfile, "%s %d\n", current->value->name, cvar->value.i);
-					break;
+					case CVAR_INT:
+						fprintf(cvarfile, "%s %d\n", cvar->name, cvar->value.i);
+						break;
 
-				case CVAR_FLOAT:
-					fprintf(cvarfile, "%s %f\n", current->value->name, cvar->value.f);
-					break;
+					case CVAR_FLOAT:
+						fprintf(cvarfile, "%s %f\n", cvar->name, cvar->value.f);
+						break;
 
-				case CVAR_STRING:
-					fprintf(cvarfile, "%s %s\n", current->value->name, cvar->value.s);
-					break;
+					case CVAR_STRING:
+						fprintf(cvarfile, "%s %s\n", cvar->name, cvar->value.s);
+						break;
+				}
 			}
+
+			cvarentry_t *next = current->next;
+			MemCache_Free(current->value->name);
+			MemCache_Free(current->value);
+			MemCache_Free(current);
+			current = next;
 		}
-
-		current = current->next;
 	}
-
-	// loop through the list and free the memory
-	current = cvarlist;
-	while (current)
-	{
-		cvarlist_t *next = current->next;
-		MemCache_Free(current->value);
-		MemCache_Free(current);
-		current = next;
-	}
-
-	cvarlist = NULL;
 
 	if (cvarfile)
 	{
@@ -171,39 +192,45 @@ void CVar_Shutdown(void)
 
 void CVar_ListAllCVars(void)
 {
-	cvarlist_t *current = cvarlist;
-	while (current)
+	size_t numcvars = 0;
+	for (size_t i=0; i<cvarmap->capacity; i++)
 	{
-		cvar_t *cvar = current->value;
-		switch (cvar->type)
+		cvarentry_t *current = cvarmap->cvars[i];
+		while (current)
 		{
-			case CVAR_BOOL:
-				Log_Write(LOG_INFO, "CVar: %s, Value: %d, Type: %d, Flags: %llu Description: %s", cvar->name, cvar->value.b, cvar->type, cvar->flags, cvar->description);
-				break;
+			cvar_t *cvar = current->value;
+			switch (cvar->type)
+			{
+				case CVAR_BOOL:
+					Log_Write(LOG_INFO, "CVar: %s, Value: %d, Type: %d, Flags: %llu Description: %s", cvar->name, cvar->value.b, cvar->type, cvar->flags, cvar->description);
+					break;
 
-			case CVAR_INT:
-				Log_Write(LOG_INFO, "CVar: %s, Value: %d, Type: %d, Flags: %llu, Description: %s", cvar->name, cvar->value.i, cvar->type, cvar->flags, cvar->description);
-				break;
+				case CVAR_INT:
+					Log_Write(LOG_INFO, "CVar: %s, Value: %d, Type: %d, Flags: %llu, Description: %s", cvar->name, cvar->value.i, cvar->type, cvar->flags, cvar->description);
+					break;
 
-			case CVAR_FLOAT:
-				Log_Write(LOG_INFO, "CVar: %s, Value: %f, Type: %d, Flags: %llu, Description: %s", cvar->name, cvar->value.f, cvar->type, cvar->flags, cvar->description);
-				break;
+				case CVAR_FLOAT:
+					Log_Write(LOG_INFO, "CVar: %s, Value: %f, Type: %d, Flags: %llu, Description: %s", cvar->name, cvar->value.f, cvar->type, cvar->flags, cvar->description);
+					break;
 
-			case CVAR_STRING:
-				Log_Write(LOG_INFO, "CVar: %s, Value: %s, Type: %d, Flags: %llu, Description: %s", cvar->name, cvar->value.s, cvar->type, cvar->flags, cvar->description);
-				break;
+				case CVAR_STRING:
+					Log_Write(LOG_INFO, "CVar: %s, Value: %s, Type: %d, Flags: %llu, Description: %s", cvar->name, cvar->value.s, cvar->type, cvar->flags, cvar->description);
+					break;
+			}
+
+			numcvars++;
+			current = current->next;
 		}
-
-		current = current->next;
 	}
 }
 
 cvar_t *CVar_Find(const char *name)
 {
-	cvarlist_t *current = cvarlist;
+	size_t index = HashFunction(name);
+	cvarentry_t *current = cvarmap->cvars[index];
 	while (current)
 	{
-		if (strcmp(current->value->name, name) == 0)
+		if (!strcmp(current->value->name, name))
 			return(current->value);
 
 		current = current->next;
@@ -286,7 +313,7 @@ cvar_t *CVar_Register(const char *name, const cvarvalue_t value, const cvartype_
 		return(NULL);
 	}
 
-	char *dupname = MemCache_Alloc(MAX_CVAR_STR_LEN);
+	char *dupname = MemCache_Alloc(CVAR_MAX_STR_LEN);
 	if (!dupname)
 	{
 		Log_Write(LOG_ERROR, "Failed to allocate memory for cvar name: %s", dupname);
@@ -294,7 +321,7 @@ cvar_t *CVar_Register(const char *name, const cvarvalue_t value, const cvartype_
 		return(NULL);
 	}
 
-	snprintf(dupname, MAX_CVAR_STR_LEN, "%s", name);
+	snprintf(dupname, CVAR_MAX_STR_LEN, "%s", name);
 
 	cvar->name = dupname;
 	cvar->value = value;
@@ -302,18 +329,70 @@ cvar_t *CVar_Register(const char *name, const cvarvalue_t value, const cvartype_
 	cvar->flags = flags;
 	cvar->description = description;
 
-	cvarlist_t *listnode = MemCache_Alloc(sizeof(*listnode));
-	if (!listnode)
+	size_t index = HashFunction(name);
+	cvarentry_t *entry = MemCache_Alloc(sizeof(*entry));
+	if (!entry)
 	{
-		Log_Write(LOG_ERROR, "Failed to allocate memory for cvar list entry");
+		Log_Write(LOG_ERROR, "Failed to allocate memory for cvar entry: %s", name);
 		MemCache_Free(cvar);
+		MemCache_Free(dupname);
 		return(NULL);
 	}
 
-	// insert the new cvar at the start of the list
-	listnode->value = cvar;
-	listnode->next = cvarlist;
-	cvarlist = listnode;
+	entry->value = cvar;
+	entry->next = NULL;
+
+	if (!cvarmap->cvars[index])
+		cvarmap->cvars[index] = entry;
+
+	else	// collision, add to start of list
+	{
+		entry->next = cvarmap->cvars[index];
+		cvarmap->cvars[index] = entry;
+	}
+
+	cvarmap->numcvars++;
+
+	// if the number of cvars is st 75% capacity, resize the map to double, move all the cvars to the new map, and free the old map
+	if (cvarmap->numcvars >= (cvarmap->capacity * 0.75))
+	{
+		cvarmap->capacity *= 2;
+		cvarentry_t **newcvars = MemCache_Alloc(sizeof(*newcvars) * cvarmap->capacity);
+		if (!newcvars)
+		{
+			Log_Write(LOG_ERROR, "Failed to allocate memory for new cvar map");
+			MemCache_Free(cvarmap->cvars);
+			MemCache_Free(cvarmap);
+			return(NULL);
+		}
+
+		for (size_t i=0; i<cvarmap->capacity; i++)
+			newcvars[i] = NULL;
+
+		for (size_t i=0; i<cvarmap->capacity / 2; i++)
+		{
+			cvarentry_t *current = cvarmap->cvars[i];
+			while (current)
+			{
+				cvarentry_t *next = current->next;
+				size_t newindex = HashFunction(current->value->name);
+
+				if (!newcvars[newindex])
+					newcvars[newindex] = current;
+
+				else
+				{
+					current->next = newcvars[newindex];
+					newcvars[newindex] = current;
+				}
+
+				current = next;
+			}
+		}
+
+		MemCache_Free(cvarmap->cvars);
+		cvarmap->cvars = newcvars;
+	}
 
 	return(cvar);
 }

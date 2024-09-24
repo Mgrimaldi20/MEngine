@@ -17,7 +17,7 @@ void Render_EndFrame(void);
 
 #define R_DEF_WIN_WIDTH 1920
 #define R_DEF_WIN_HEIGHT 1080
-#define R_DEF_FULLSCREEN true
+#define R_DEF_FULLSCREEN false
 #define R_DEF_MULTISAMPLES 4
 #define R_DEF_REFRESH_RATE 60
 #define R_DEF_VSYNC 1
