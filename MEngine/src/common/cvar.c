@@ -22,7 +22,7 @@ typedef struct
 static cvarmap_t *cvarmap;
 static FILE *cvarfile;
 
-static size_t HashFunction(const char *name)
+static size_t HashFunction(const char *name)	// this function is actually okay for resizing, a new hash is generated for the new map size
 {
 	size_t hash = 0;
 	size_t len = strlen(name);
