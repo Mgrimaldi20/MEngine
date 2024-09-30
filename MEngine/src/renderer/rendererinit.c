@@ -92,6 +92,14 @@ static void InitOpenGL(void)
 
 bool Render_Init(void)
 {
+	glstate = (glstate_t)
+	{
+		.viewportsized = false,
+		.width = 0,
+		.height = 0,
+		.fov = 60.0
+	};
+
 	rwidth = CVar_RegisterInt("r_width", R_DEF_WIN_WIDTH, CVAR_INT, CVAR_ARCHIVE | CVAR_RENDERER, "Custom width of the window");
 	rheight = CVar_RegisterInt("r_height", R_DEF_WIN_HEIGHT, CVAR_INT, CVAR_ARCHIVE | CVAR_RENDERER, "Custom height of the window");
 	rfullscreen = CVar_RegisterBool("r_fullscreen", R_DEF_FULLSCREEN, CVAR_BOOL, CVAR_ARCHIVE | CVAR_RENDERER, "Fullscreen mode");

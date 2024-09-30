@@ -7,25 +7,31 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include "../../common/common.h"
+#include "linuxlocal.h"
 
 bool Sys_Init(void)
 {
 	// get the OS version information, only run if the OS version is high enough
-	struct utsname osinfo;
-	if (uname(&osinfo) == -1)
+	if (uname(&linuxstate.osinfo) == -1)
 	{
 		Log_WriteSeq(LOG_ERROR, "Failed to get OS version information");
 		return(false);
 	}
 
-	Log_WriteSeq(LOG_INFO, "OS: %s %s %s %s", osinfo.sysname, osinfo.nodename, osinfo.release, osinfo.version);
+	Log_WriteSeq(LOG_INFO, "OS: %s %s %s %s",
+		linuxstate.osinfo.sysname,
+		linuxstate.osinfo.nodename,
+		linuxstate.osinfo.release,
+		linuxstate.osinfo.version
+	);
 
 	if (Common_IgnoreOSVer())
 		Log_WriteSeq(LOG_WARN, "Ignoring OS version check... "
-			"This code has only been tested on Ubuntu 20.04 and version 5.4 "
-			"but should work on older OS versions, use with caution");
+			"This code has only been tested on Windows systems so far "
+			"but the common and shared code should work the same, use with caution, "
+			"some of the system frameworks might not work as expected");
 
-	else if (strcmp(osinfo.sysname, "Linux") != 0)
+	else if (strcmp(linuxstate.osinfo.sysname, "Linux") != 0)
 	{
 		Sys_Error("Requires Linux OS");
 		return(false);
@@ -53,9 +59,7 @@ void Sys_Error(const char *error, ...)
 	va_end(argptr);
 
 	Log_WriteSeq(LOG_ERROR, buffer);
-	printf("Error: %s\n", buffer);
-
-	// TODO: Implement a message box for Linux
+	fprintf(stderr, "Error: %s\n", buffer);
 
 	Common_Shutdown();
 

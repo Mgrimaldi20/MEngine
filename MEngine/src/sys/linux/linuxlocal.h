@@ -4,4 +4,22 @@
 #error Include is for Linux and Apple only
 #endif
 
+#include "glfw/glfw3.h"
+
+typedef struct
+{
+	bool fullscreen;
+	int swapinterval;
+	int desktopwidth;		// get all the desktop params
+	int desktopheight;
+	int argc;
+	char **argv;
+	struct utsname osinfo;
+	glfwWindow *window;
+} linuxvars_t;
+
+extern linuxvars_t linuxstate;
+
+void RegisterCallbacks(void);
+
 void ProcessCommandLine(int argc, char **argv, char cmdout[MAX_CMDLINE_ARGS][MAX_CMDLINE_ARGS]);

@@ -29,7 +29,7 @@ typedef enum
 	CVAR_GAME = 1 << 4
 } cvarflags_t;
 
-typedef struct cvar cvar_t;	// opaque type to cvar struct, only access through CVar_ functions
+typedef struct cvar cvar_t;		// opaque type to cvar struct, only access through CVar_ functions
 
 typedef struct
 {
@@ -44,19 +44,19 @@ typedef struct
 	int version;
 
 	// logging service
-	void (*Log_Write)(logtype_t, const char *, ...);
-	void (*Log_WriteSeq)(logtype_t type, const char *msg, ...);
-	void (*Log_WriteLargeSeq)(logtype_t type, const char *msg, ...);
+	void (*Log_Write)(logtype_t type, const char *msg, ...);			// write a log message MT
+	void (*Log_WriteSeq)(logtype_t type, const char *msg, ...);			// write a log message sequentially
+	void (*Log_WriteLargeSeq)(logtype_t type, const char *msg, ...);	// write a log over the max log length, will allocte heap memory
 
 	// memory cache allocator and manager
 	void *(*MemCache_Alloc)(size_t size);
 	void (*MemCache_Free)(void *ptr);
-	void (*MemCache_Reset)(void);
+	void (*MemCache_Reset)(void);			// reset memory cache, will free all allocated memory and NULL all pointers
 	size_t(*MemCahce_GetMemUsed)(void);
-	void (*MemCache_Dump)(void);		// dump memory cache stats to log, mostly for debugging purposes
+	void (*MemCache_Dump)(void);			// dump memory cache stats to log, mostly for debugging purposes
 
 	// cvar system
-	void (*CVar_ListAllCVars)(void);	// will write all cvars to the log, mostly for debugging purposes
+	void (*CVar_ListAllCVars)(void);		// will write all cvars to the log, mostly for debugging purposes
 
 	cvar_t *(*CVar_Find)(const char *name);
 

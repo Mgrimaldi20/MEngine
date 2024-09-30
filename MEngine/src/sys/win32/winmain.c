@@ -14,6 +14,8 @@ win32vars_t win32state;
 
 int WINAPI wWinMain(HINSTANCE hinst, HINSTANCE hprevinst, PWSTR pcmdline, int ncmdshow)
 {
+	win32state = (win32vars_t){ 0 };
+
 	if (hprevinst)
 		return(1);
 
