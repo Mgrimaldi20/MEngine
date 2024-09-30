@@ -35,7 +35,9 @@ elseif(UNIX AND APPLE)
 	target_sources(MEngine PRIVATE
 		"src/sys/linux/linuxlocal.h"
 		"src/sys/linux/main.c"
+		"src/sys/linux/wndcb.c"
 		"src/sys/linux/syslinux.c"
+		"src/sys/linux/linuxglwnd.c"		# On Linux systems using GLFW for the windowing system instead of X11 or Wayland, should be POSIX portable
 	)	# Apple is not really Linux, but its same code anyway
 endif()
 

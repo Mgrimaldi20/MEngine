@@ -2,9 +2,10 @@
 
 typedef struct
 {
+	bool viewportsized;
 	int width;
 	int height;
-	bool viewportsized;
+	double fov;
 } glstate_t;
 
 extern glstate_t glstate;
