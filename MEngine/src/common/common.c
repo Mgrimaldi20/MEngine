@@ -162,7 +162,11 @@ bool Common_Init(char cmdlinein[MAX_CMDLINE_ARGS][MAX_CMDLINE_ARGS])
 	if (!Log_Init())
 		return(false);
 
-	Log_WriteSeq(LOG_INFO, "Memory Cache allocated [bytes: %zu]", MemCache_GetTotalMemory());
+	if (!MemCache_UseCache())
+		Log_WriteSeq(LOG_WARN, "Not enough system memory for the memory cache, using the default allocator");
+
+	else
+		Log_WriteSeq(LOG_INFO, "Memory Cache allocated [bytes: %zu]", MemCache_GetTotalMemory());
 
 	if (!CVar_Init())
 		return(false);
