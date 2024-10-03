@@ -36,6 +36,7 @@ void MemCache_Reset(void);
 size_t MemCahce_GetMemUsed(void);
 void MemCache_Dump(void);
 size_t MemCache_GetTotalMemory(void);
+bool MemCache_UseCache(void);
 
 #define CVAR_MAX_STR_LEN 256
 

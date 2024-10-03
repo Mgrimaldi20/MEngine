@@ -84,10 +84,27 @@ bool CVar_Init(void)
 	}
 
 	cvarmap = MemCache_Alloc(sizeof(*cvarmap));
+	if (!cvarmap)
+	{
+		Log_WriteSeq(LOG_ERROR, "Failed to allocate memory for cvar map");
+		fclose(cvarfile);
+		return(false);
+	}
+
 	cvarmap->capacity = DEF_CVAR_MAP_CAPACITY;
 	cvarmap->numcvars = 0;
 
 	cvarmap->cvars = MemCache_Alloc(sizeof(*cvarmap->cvars) * cvarmap->capacity);
+	if (!cvarmap->cvars)
+	{
+		Log_WriteSeq(LOG_ERROR, "Failed to allocate memory for cvar map entries");
+		MemCache_Free(cvarmap);
+		fclose(cvarfile);
+		return(false);
+	}
+
+	for (size_t i=0; i<cvarmap->capacity; i++)
+		cvarmap->cvars[i] = NULL;
 
 	// read the cvar file and populate the cvar list if cvars exist and if the file exists
 	char line[1024] = { 0 };
@@ -234,7 +251,7 @@ cvar_t *CVar_Find(const char *name)
 	cvarentry_t *current = cvarmap->cvars[index];
 	while (current)
 	{
-		if (!strcmp(current->value->name, name))
+		if (strcmp(current->value->name, name) == 0)
 			return(current->value);
 
 		current = current->next;
