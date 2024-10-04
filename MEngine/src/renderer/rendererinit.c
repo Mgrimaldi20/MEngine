@@ -100,12 +100,12 @@ bool Render_Init(void)
 		.fov = 60.0
 	};
 
-	rwidth = CVar_RegisterInt("r_width", R_DEF_WIN_WIDTH, CVAR_INT, CVAR_ARCHIVE | CVAR_RENDERER, "Custom width of the window");
-	rheight = CVar_RegisterInt("r_height", R_DEF_WIN_HEIGHT, CVAR_INT, CVAR_ARCHIVE | CVAR_RENDERER, "Custom height of the window");
-	rfullscreen = CVar_RegisterBool("r_fullscreen", R_DEF_FULLSCREEN, CVAR_BOOL, CVAR_ARCHIVE | CVAR_RENDERER, "Fullscreen mode");
-	rmultisamples = CVar_RegisterInt("r_multisamples", R_DEF_MULTISAMPLES, CVAR_INT, CVAR_ARCHIVE | CVAR_RENDERER, "Multisample anti-aliasing");
-	rrefresh = CVar_RegisterInt("r_refresh", R_DEF_REFRESH_RATE, CVAR_INT, CVAR_ARCHIVE | CVAR_RENDERER, "Refresh rate of the monitor");
-	rvsync = CVar_RegisterInt("r_vsync", R_DEF_VSYNC, CVAR_INT, CVAR_ARCHIVE | CVAR_RENDERER, "Vertical sync");
+	rwidth = CVar_RegisterInt("r_width", R_DEF_WIN_WIDTH, CVAR_ARCHIVE | CVAR_RENDERER, "Custom width of the window");
+	rheight = CVar_RegisterInt("r_height", R_DEF_WIN_HEIGHT, CVAR_ARCHIVE | CVAR_RENDERER, "Custom height of the window");
+	rfullscreen = CVar_RegisterBool("r_fullscreen", R_DEF_FULLSCREEN, CVAR_ARCHIVE | CVAR_RENDERER, "Fullscreen mode");
+	rmultisamples = CVar_RegisterInt("r_multisamples", R_DEF_MULTISAMPLES, CVAR_ARCHIVE | CVAR_RENDERER, "Multisample anti-aliasing");
+	rrefresh = CVar_RegisterInt("r_refresh", R_DEF_REFRESH_RATE, CVAR_ARCHIVE | CVAR_RENDERER, "Refresh rate of the monitor");
+	rvsync = CVar_RegisterInt("r_vsync", R_DEF_VSYNC, CVAR_ARCHIVE | CVAR_RENDERER, "Vertical sync");
 
 	if (!GetVideoModeInfo(&glstate.width, &glstate.height, -1))
 		return(false);

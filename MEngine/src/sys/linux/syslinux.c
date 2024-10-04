@@ -39,7 +39,7 @@ bool Sys_Init(void)
 
 	Log_WriteSeq(LOG_INFO, "System memory: %lluMB", Sys_GetSystemMemory());
 
-	CVar_RegisterString("g_gamedll", "DemoGame.so", CVAR_STRING, CVAR_GAME, "The name of the game DLL for Linux systems");
+	CVar_RegisterString("g_gamedll", "DemoGame.so", CVAR_GAME, "The name of the game DLL for Linux systems");
 
 	return(true);
 }

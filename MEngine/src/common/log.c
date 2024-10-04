@@ -138,7 +138,9 @@ static int ProcessLogQueue(void *args)
 				strftime(timestr, LOG_TIMESTR_LEN, LOG_TIME_FMT, &timeinfo);
 
 				fprintf(logfile, "%s %s %s\n", timestr, logmsgtype[entry->type], entry->msg);
-				fflush(logfile);
+
+				if (entry->type == LOG_ERROR)
+					fflush(logfile);
 			}
 
 			logcount = 0;
@@ -234,7 +236,7 @@ void Log_Shutdown(void)
 	}
 }
 
-void Log_Write(logtype_t type, const char *msg, ...)
+void Log_Write(const logtype_t type, const char *msg, ...)
 {
 	if (logcount >= MAX_LOG_ENTRIES)
 		return;
@@ -258,7 +260,7 @@ void Log_Write(logtype_t type, const char *msg, ...)
 	cnd_signal(&logcond);
 }
 
-void Log_WriteSeq(logtype_t type, const char *msg, ...)
+void Log_WriteSeq(const logtype_t type, const char *msg, ...)
 {
 	mtx_lock(&loglock);
 
@@ -276,12 +278,14 @@ void Log_WriteSeq(logtype_t type, const char *msg, ...)
 	va_end(arg);
 
 	fprintf(logfile, "%s %s %s\n", timestr, logmsgtype[type], logmsg);
-	fflush(logfile);
+
+	if (type == LOG_ERROR)
+		fflush(logfile);
 
 	mtx_unlock(&loglock);
 }
 
-void Log_WriteLargeSeq(logtype_t type, const char *msg, ...)
+void Log_WriteLargeSeq(const logtype_t type, const char *msg, ...)
 {
 	mtx_lock(&loglock);
 
@@ -305,7 +309,9 @@ void Log_WriteLargeSeq(logtype_t type, const char *msg, ...)
 		strftime(timestr, LOG_TIMESTR_LEN, LOG_TIME_FMT, &timeinfo);
 
 		fprintf(logfile, "%s %s %s\n", timestr, logmsgtype[type], logmsg);
-		fflush(logfile);
+
+		if (type == LOG_ERROR)
+			fflush(logfile);
 
 		MemCache_Free(logmsg);
 	}

@@ -37,7 +37,6 @@ static size_t lastreported;
 
 static freeblock_t *freeblocks;		// this is the actual free block list which stores alloc info
 static freeblock_t *pool;			// this is the pool of free blocks to use instead of allocating new blocks every time
-
 static taglist_t *taglist;			// this is used by the default allocator only
 
 static allocator_t allocator;		// if system memory is less than 4GB, use malloc/free, else use the cache allocator
@@ -316,8 +315,7 @@ static void CacheReset(void)
 	freeblocks->size = MEM_CACHE_SIZE;
 	freeblocks->next = NULL;
 
-#if defined(MENGINE_DEBUG)
-	if (memcacheused == MEM_CACHE_SIZE)			// dont really have to do the following resetting to 0, just making the blocks point to NULL is enough
+	if (memcacheused == (MEM_CACHE_SIZE / 2))			// dont really have to do the following resetting to 0, just making the blocks point to NULL is enough
 		memset(memcache, 0, MEM_CACHE_SIZE);
 
 	else
@@ -329,7 +327,6 @@ static void CacheReset(void)
 			allocated = allocated->next;
 		}
 	}
-#endif
 
 	memcacheused = 0;
 	lastreported = 0;

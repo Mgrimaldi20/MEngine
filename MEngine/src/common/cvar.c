@@ -390,7 +390,7 @@ cvar_t *CVar_Register(const char *name, const cvarvalue_t value, const cvartype_
 		for (size_t i=0; i<cvarmap->capacity; i++)
 			newcvars[i] = NULL;
 
-		for (size_t i=0; i<cvarmap->capacity / 2; i++)
+		for (size_t i=0; i<cvarmap->capacity/2; i++)
 		{
 			cvarentry_t *current = cvarmap->cvars[i];
 			while (current)
@@ -418,32 +418,32 @@ cvar_t *CVar_Register(const char *name, const cvarvalue_t value, const cvartype_
 	return(cvar);
 }
 
-cvar_t *CVar_RegisterString(const char *name, const char *value, const cvartype_t type, const unsigned long long flags, const char *description)
+cvar_t *CVar_RegisterString(const char *name, const char *value, const unsigned long long flags, const char *description)
 {
 	cvarvalue_t cvarvalue = { 0 };
 	snprintf(cvarvalue.s, sizeof(cvarvalue.s), "%s", value);
-	return(CVar_Register(name, cvarvalue, type, flags, description));
+	return(CVar_Register(name, cvarvalue, CVAR_STRING, flags, description));
 }
 
-cvar_t *CVar_RegisterInt(const char *name, const int value, const cvartype_t type, const unsigned long long flags, const char *description)
+cvar_t *CVar_RegisterInt(const char *name, const int value, const unsigned long long flags, const char *description)
 {
 	cvarvalue_t cvarvalue = { 0 };
 	cvarvalue.i = value;
-	return(CVar_Register(name, cvarvalue, type, flags, description));
+	return(CVar_Register(name, cvarvalue, CVAR_INT, flags, description));
 }
 
-cvar_t *CVar_RegisterFloat(const char *name, const float value, const cvartype_t type, const unsigned long long flags, const char *description)
+cvar_t *CVar_RegisterFloat(const char *name, const float value, const unsigned long long flags, const char *description)
 {
 	cvarvalue_t cvarvalue = { 0 };
 	cvarvalue.f = value;
-	return(CVar_Register(name, cvarvalue, type, flags, description));
+	return(CVar_Register(name, cvarvalue, CVAR_FLOAT, flags, description));
 }
 
-cvar_t *CVar_RegisterBool(const char *name, const bool value, const cvartype_t type, const unsigned long long flags, const char *description)
+cvar_t *CVar_RegisterBool(const char *name, const bool value, const unsigned long long flags, const char *description)
 {
 	cvarvalue_t cvarvalue = { 0 };
 	cvarvalue.b = value;
-	return(CVar_Register(name, cvarvalue, type, flags, description));
+	return(CVar_Register(name, cvarvalue, CVAR_BOOL, flags, description));
 }
 
 char *CVar_GetString(cvar_t *cvar)
