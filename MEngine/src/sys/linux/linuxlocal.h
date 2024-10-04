@@ -15,7 +15,7 @@ typedef struct
 	int argc;
 	char **argv;
 	struct utsname osinfo;
-	glfwWindow *window;
+	GLFWwindow *window;
 } linuxvars_t;
 
 extern linuxvars_t linuxstate;
