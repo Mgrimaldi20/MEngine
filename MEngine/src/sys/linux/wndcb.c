@@ -26,6 +26,10 @@ static void WindowSizeCallback(GLFWwindow *window, int width, int height)
 
 static void FramebufferSizeCallback(GLFWwindow *window, int width, int height)
 {
+	glstate.width = width;		// let GLFW control the framebuffer size
+	glstate.height = height;
+
+	glstate.viewportsized = true;
 }
 
 static void WindowCloseCallback(GLFWwindow *window)

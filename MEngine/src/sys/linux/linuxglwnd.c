@@ -4,10 +4,20 @@
 
 bool GLWnd_Init(glwndparams_t params)
 {
+	RegisterCallbacks();
 }
 
 void GLWnd_Shutdown(void)
 {
+	Log_WriteSeq(LOG_INFO, "Shutting down OpenGL system");
+
+	if (linuxstate.window)
+	{
+		glfwDestroyWindow(linuxstate.window);
+		linuxstate.window = NULL;
+	}
+
+	glfwTerminate();
 }
 
 bool GLWnd_ChangeScreenParams(glwndparams_t params)

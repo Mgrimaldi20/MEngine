@@ -33,6 +33,7 @@ typedef struct
 
 typedef struct
 {
+	// engine version number
 	int version;
 
 	// logging service
