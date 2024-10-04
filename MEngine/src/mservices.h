@@ -13,14 +13,6 @@ typedef enum
 
 typedef enum
 {
-	CVAR_INT = 0,
-	CVAR_FLOAT,
-	CVAR_STRING,
-	CVAR_BOOL
-} cvartype_t;
-
-typedef enum
-{
 	CVAR_NONE = 0,
 	CVAR_ARCHIVE = 1 << 0,
 	CVAR_READONLY = 1 << 1,
@@ -60,10 +52,10 @@ typedef struct
 
 	cvar_t *(*CVar_Find)(const char *name);
 
-	cvar_t *(*CVar_RegisterString)(const char *name, const char *value, const cvartype_t type, const unsigned long long flags, const char *description);
-	cvar_t *(*CVar_RegisterInt)(const char *name, const int value, const cvartype_t type, const unsigned long long flags, const char *description);
-	cvar_t *(*CVar_RegisterFloat)(const char *name, const float value, const cvartype_t type, const unsigned long long flags, const char *description);
-	cvar_t *(*CVar_RegisterBool)(const char *name, const bool value, const cvartype_t type, const unsigned long long flags, const char *description);
+	cvar_t *(*CVar_RegisterString)(const char *name, const char *value, const unsigned long long flags, const char *description);
+	cvar_t *(*CVar_RegisterInt)(const char *name, const int value, const unsigned long long flags, const char *description);
+	cvar_t *(*CVar_RegisterFloat)(const char *name, const float value, const unsigned long long flags, const char *description);
+	cvar_t *(*CVar_RegisterBool)(const char *name, const bool value, const unsigned long long flags, const char *description);
 
 	char *(*CVar_GetString)(cvar_t *cvar);
 	int *(*CVar_GetInt)(cvar_t *cvar);
