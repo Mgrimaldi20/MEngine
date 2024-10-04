@@ -48,7 +48,7 @@ typedef enum
 	CVAR_BOOL
 } cvartype_t;
 
-typedef union
+typedef struct
 {
 	bool b;
 	char s[CVAR_MAX_STR_LEN];

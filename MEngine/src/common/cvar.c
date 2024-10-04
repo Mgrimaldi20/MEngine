@@ -116,7 +116,7 @@ bool CVar_Init(void)
 		char *name = NULL;
 		char *value = NULL;
 
-		name = Sys_Strtok(line, " \n", &value);
+		name = Sys_Strtok(line, " ", &value);
 
 		if (!name || !value)
 		{
