@@ -47,7 +47,7 @@ static bool HandleConversionErrors(const char *value, const char *end)
 		return(false);
 	}
 
-	if ((errno == 0) && end && (end != 0))
+	if ((errno == 0) && end && (end != 0) && (strcmp(end, "")))
 	{
 		Log_Write(LOG_ERROR, "Invalid characters in string, additional characters remain: %s", value);
 		return(false);
@@ -132,10 +132,7 @@ bool CVar_Init(void)
 			continue;
 		}
 
-		cvarvalue_t cvarvalue = { 0 };
-		snprintf(cvarvalue.s, sizeof(cvarvalue.s), "%s", value);
-
-		cvar_t *cvar = CVar_RegisterString(name, cvarvalue.s, CVAR_NONE, "");
+		cvar_t *cvar = CVar_RegisterString(name, value, CVAR_NONE, "");
 		if (!cvar)
 		{
 			Log_WriteSeq(LOG_ERROR, "Failed to register cvar: %s", name);
