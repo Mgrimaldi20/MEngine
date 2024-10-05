@@ -117,6 +117,7 @@ bool CVar_Init(void)
 		char *value = NULL;
 
 		name = Sys_Strtok(line, " ", &value);
+		value = Sys_Strtok(NULL, "\n", &value);
 
 		if (!name || !value)
 		{
@@ -131,14 +132,10 @@ bool CVar_Init(void)
 			continue;
 		}
 
-		// remove the newline character from the value
-		if (value[slen - 1] == '\n')
-			value[slen - 1] = '\0';
-
 		cvarvalue_t cvarvalue = { 0 };
 		snprintf(cvarvalue.s, sizeof(cvarvalue.s), "%s", value);
 
-		cvar_t *cvar = CVar_Register(name, cvarvalue, CVAR_STRING, CVAR_NONE, "");
+		cvar_t *cvar = CVar_RegisterString(name, cvarvalue.s, CVAR_NONE, "");
 		if (!cvar)
 		{
 			Log_WriteSeq(LOG_ERROR, "Failed to register cvar: %s", name);
