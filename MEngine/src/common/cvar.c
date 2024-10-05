@@ -47,7 +47,7 @@ static bool HandleConversionErrors(const char *value, const char *end)
 		return(false);
 	}
 
-	if ((errno == 0) && end && (end != 0) && (strcmp(end, "")))
+	if ((errno == 0) && end && (end != 0) && (strcmp(end, "") != 0))
 	{
 		Log_Write(LOG_ERROR, "Invalid characters in string, additional characters remain: %s", value);
 		return(false);
