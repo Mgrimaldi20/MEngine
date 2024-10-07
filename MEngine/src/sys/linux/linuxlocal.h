@@ -12,6 +12,7 @@ typedef struct
 	int swapinterval;
 	int desktopwidth;		// get all the desktop params
 	int desktopheight;
+	int desktoprefresh;
 	int argc;
 	char **argv;
 	struct utsname osinfo;
@@ -20,6 +21,4 @@ typedef struct
 
 extern linuxvars_t linuxstate;
 
-void RegisterCallbacks(void);
-
-void ProcessCommandLine(int argc, char **argv, char cmdout[MAX_CMDLINE_ARGS][MAX_CMDLINE_ARGS]);
+void RegisterCallbacks(GLFWwindow *window);

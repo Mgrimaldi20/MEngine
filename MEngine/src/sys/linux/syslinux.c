@@ -66,6 +66,23 @@ void Sys_Error(const char *error, ...)
 	exit(1);
 }
 
+void Sys_ProcessCommandLine(char cmdout[SYS_MAX_CMDLINE_ARGS][SYS_MAX_CMDLINE_ARGS])
+{
+	char *saveptr = NULL;
+	int i = 0;
+
+	for (int j=1; j<linuxstate.argc&&i<SYS_MAX_CMDLINE_ARGS; j++)
+	{
+		char *token = Sys_Strtok(linuxstate.argv[j], " -", &saveptr);
+		while (token != NULL)
+		{
+			snprintf(cmdout[i], SYS_MAX_CMDLINE_ARGS, "%s", token);
+			token = Sys_Strtok(NULL, " -", &saveptr);
+			i++;
+		}
+	}
+}
+
 bool Sys_Mkdir(const char *path)
 {
 	if (mkdir(path, 0777) != 0)

@@ -33,9 +33,9 @@ void Common_PrintHelpMsg(void)
 	Log_WriteSeq(LOG_INFO, helpmsg);
 }
 
-static void ParseCommandLine(char cmdlinein[MAX_CMDLINE_ARGS][MAX_CMDLINE_ARGS])
+static void ParseCommandLine(char cmdlinein[SYS_MAX_CMDLINE_ARGS][SYS_MAX_CMDLINE_ARGS])
 {
-	for (int i=0; i<MAX_CMDLINE_ARGS; i++)
+	for (int i=0; i<SYS_MAX_CMDLINE_ARGS; i++)
 	{
 		if (!cmdlinein[i][0])
 			break;
@@ -88,10 +88,7 @@ static bool InitGame(void)
 		}
 	}
 
-	mservices_t mservices;
-	getmservices_t GetMServices;
-
-	mservices = (mservices_t)
+	mservices_t mservices =
 	{
 		.version = MENGINE_VERSION,
 		.Log_Write = Log_Write,
@@ -118,7 +115,7 @@ static bool InitGame(void)
 		.CVar_SetBool = CVar_SetBool
 	};
 
-	GetMServices = (getmservices_t)Sys_GetProcAddress(gamedllhandle, "GetMServices");
+	getmservices_t GetMServices = (getmservices_t)Sys_GetProcAddress(gamedllhandle, "GetMServices");
 	if (!GetMServices)
 	{
 		Sys_Error("Failed to get GetMServices function, handshake failed, could not load function pointers");
@@ -129,7 +126,7 @@ static bool InitGame(void)
 
 	if (gameservices.version != MENGINE_VERSION)
 	{
-		Log_WriteSeq(LOG_ERROR, "Game DLL version and Engine version mismatch: %d", gameservices.version);
+		Log_WriteSeq(LOG_ERROR, "Game DLL version and Engine version mismatch: (Game: %d), (Engine: %d)", gameservices.version, MENGINE_VERSION);
 		return(false);
 	}
 
@@ -154,7 +151,7 @@ static void UpdateConfigs(void)
 {
 }
 
-bool Common_Init(char cmdlinein[MAX_CMDLINE_ARGS][MAX_CMDLINE_ARGS])
+bool Common_Init(void)
 {
 	if (!MemCache_Init())
 		return(false);
@@ -171,7 +168,9 @@ bool Common_Init(char cmdlinein[MAX_CMDLINE_ARGS][MAX_CMDLINE_ARGS])
 	if (!CVar_Init())
 		return(false);
 
-	ParseCommandLine(cmdlinein);
+	char cmdline[SYS_MAX_CMDLINE_ARGS][SYS_MAX_CMDLINE_ARGS];
+	Sys_ProcessCommandLine(cmdline);
+	ParseCommandLine(cmdline);
 
 	if (!Sys_Init())
 		return(false);

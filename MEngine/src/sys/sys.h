@@ -10,9 +10,12 @@
 #error Unknown GL libraries.
 #endif
 
+#define SYS_MAX_CMDLINE_ARGS 32
+
 bool Sys_Init(void);
 void Sys_Shutdown(void);
 void Sys_Error(const char *error, ...);
+void Sys_ProcessCommandLine(char cmdout[SYS_MAX_CMDLINE_ARGS][SYS_MAX_CMDLINE_ARGS]);
 
 bool Sys_Mkdir(const char *path);
 char *Sys_Strtok(char *string, const char *delimiter, char **context);
