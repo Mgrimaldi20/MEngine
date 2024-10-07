@@ -44,16 +44,16 @@ static void WindowIconifyCallback(GLFWwindow *window, int iconified)
 {
 }
 
-void RegisterCallbacks(void)
+void RegisterCallbacks(GLFWwindow *window)
 {
-	glfwSetKeyCallback(linuxstate.window, KeyCallback);
-	glfwSetCursorPosCallback(linuxstate.window, MouseMoveCallback);
-	glfwSetMouseButtonCallback(linuxstate.window, MouseButtonCallback);
-	glfwSetScrollCallback(linuxstate.window, MouseScrollCallback);
-	glfwSetCharCallback(linuxstate.window, CharCallback);
-	glfwSetWindowSizeCallback(linuxstate.window, WindowSizeCallback);
-	glfwSetFramebufferSizeCallback(linuxstate.window, FramebufferSizeCallback);
-	glfwSetWindowCloseCallback(linuxstate.window, WindowCloseCallback);
-	glfwSetWindowFocusCallback(linuxstate.window, WindowFocusCallback);
-	glfwSetWindowIconifyCallback(linuxstate.window, WindowIconifyCallback);
+	glfwSetKeyCallback(window, KeyCallback);
+	glfwSetCursorPosCallback(window, MouseMoveCallback);
+	glfwSetMouseButtonCallback(window, MouseButtonCallback);
+	glfwSetScrollCallback(window, MouseScrollCallback);
+	glfwSetCharCallback(window, CharCallback);
+	glfwSetWindowSizeCallback(window, WindowSizeCallback);
+	glfwSetFramebufferSizeCallback(window, FramebufferSizeCallback);
+	glfwSetWindowCloseCallback(window, WindowCloseCallback);
+	glfwSetWindowFocusCallback(window, WindowFocusCallback);
+	glfwSetWindowIconifyCallback(window, WindowIconifyCallback);
 }

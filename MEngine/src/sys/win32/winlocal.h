@@ -33,7 +33,6 @@ extern win32vars_t win32state;
 LRESULT CALLBACK MainWndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam);
 
 void WindowsError(void);
-void ProcessCommandLine(PWSTR cmdline, char cmdout[MAX_CMDLINE_ARGS][MAX_CMDLINE_ARGS]);
 void InitConsole(void);
 void ShutdownConsole(void);
 void ShowConsole(void);

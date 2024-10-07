@@ -29,11 +29,8 @@ int WINAPI wWinMain(HINSTANCE hinst, HINSTANCE hprevinst, PWSTR pcmdline, int nc
 		InitConsole();
 		HideConsole();
 	}
-
-	char cmdline[MAX_CMDLINE_ARGS][MAX_CMDLINE_ARGS];
-	ProcessCommandLine(pcmdline, cmdline);
 	
-	if (!Common_Init(cmdline))
+	if (!Common_Init())
 	{
 		Common_Shutdown();
 		ShutdownConsole();
@@ -111,20 +108,6 @@ void WindowsError(void)
 	ShutdownConsole();
 
 	exit(1);
-}
-
-void ProcessCommandLine(PWSTR cmdline, char cmdout[MAX_CMDLINE_ARGS][MAX_CMDLINE_ARGS])
-{
-	wchar_t *saveptr = NULL;
-	int i = 0;
-
-	wchar_t *token = wcstok(cmdline, L" -", &saveptr);
-	while (token != NULL)
-	{
-		WideCharToMultiByte(CP_UTF8, 0, token, -1, cmdout[i], MAX_CMDLINE_ARGS, NULL, NULL);
-		token = wcstok(NULL, L" -", &saveptr);
-		i++;
-	}
 }
 
 void InitConsole(void)

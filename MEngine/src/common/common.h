@@ -9,9 +9,7 @@ typedef gameservices_t *(*getmservices_t)(mservices_t *services);
 
 extern gameservices_t gameservices;
 
-#define MAX_CMDLINE_ARGS 32
-
-bool Common_Init(char cmdlinein[MAX_CMDLINE_ARGS][MAX_CMDLINE_ARGS]);
+bool Common_Init(void);
 void Common_Shutdown(void);
 void Common_Frame(void);
 void Common_PrintHelpMsg(void);

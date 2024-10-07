@@ -87,6 +87,20 @@ void Sys_Error(const char *error, ...)
 	exit(1);
 }
 
+void Sys_ProcessCommandLine(char cmdout[SYS_MAX_CMDLINE_ARGS][SYS_MAX_CMDLINE_ARGS])
+{
+	wchar_t *saveptr = NULL;
+	int i = 0;
+
+	wchar_t *token = wcstok(win32state.pcmdline, L" -", &saveptr);
+	while (token != NULL)
+	{
+		WideCharToMultiByte(CP_UTF8, 0, token, -1, cmdout[i], SYS_MAX_CMDLINE_ARGS, NULL, NULL);
+		token = wcstok(NULL, L" -", &saveptr);
+		i++;
+	}
+}
+
 bool Sys_Mkdir(const char *path)
 {
 	if (_mkdir(path) != 0)
