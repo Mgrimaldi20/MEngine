@@ -18,21 +18,6 @@ gameservices_t gameservices;
 static unsigned long long cmdlineflags;
 static void *gamedllhandle;
 
-void Common_PrintHelpMsg(void)
-{
-	const char *helpmsg = "MEngine\n"
-		"Usage: MEngine [options]\n"
-		"Options:\n"
-		"\t-help\t\tPrint this help message\n"
-		"\t-editor\t\tRun the editor\n"
-		"\t-demo\t\tRun the demo game\n"
-		"\t-ignoreosver\tIgnore OS version check\n"
-		"Press any key to exit...\n";
-
-	printf(helpmsg);
-	Log_WriteSeq(LOG_INFO, helpmsg);
-}
-
 static void ParseCommandLine(char cmdlinein[SYS_MAX_CMDLINE_ARGS][SYS_MAX_CMDLINE_ARGS])
 {
 	for (int i=0; i<SYS_MAX_CMDLINE_ARGS; i++)
@@ -207,6 +192,21 @@ void Common_Frame(void)		// happens every frame
 	Render_StartFrame();
 	Render_Frame();
 	Render_EndFrame();
+}
+
+void Common_PrintHelpMsg(void)
+{
+	const char *helpmsg = "MEngine\n"
+		"Usage: MEngine [options]\n"
+		"Options:\n"
+		"\t-help\t\tPrint this help message\n"
+		"\t-editor\t\tRun the editor\n"
+		"\t-demo\t\tRun the demo game\n"
+		"\t-ignoreosver\tIgnore OS version check\n"
+		"Press any key to exit...\n";
+
+	printf(helpmsg);
+	Log_WriteSeq(LOG_INFO, helpmsg);
 }
 
 bool Common_HelpMode(void)
