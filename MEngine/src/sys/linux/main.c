@@ -11,11 +11,8 @@ int main(int argc, char **argv)
 
 	linuxstate.argc = argc;
 	linuxstate.argv = argv;
-
-	cmdline[MAX_CMDLINE_ARGS][MAX_CMDLINE_ARGS];
-	ProcessCommandLine(argc, argv, cmdline);
 	
-	if (!Common_Init(cmdline))
+	if (!Common_Init())
 	{
 		Common_Shutdown();
 		return(1);
