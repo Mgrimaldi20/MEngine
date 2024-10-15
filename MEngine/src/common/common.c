@@ -18,61 +18,32 @@ gameservices_t gameservices;
 static unsigned long long cmdlineflags;
 static void *gamedllhandle;
 
-static void ParseCommandLine(char cmdlinein[SYS_MAX_CMDLINE_ARGS][SYS_MAX_CMDLINE_ARGS])
+static void ParseCommandLine(void)
 {
+	char cmdline[SYS_MAX_CMDLINE_ARGS][SYS_MAX_CMDLINE_ARGS];
+	Sys_ProcessCommandLine(cmdline);
+
 	for (int i=0; i<SYS_MAX_CMDLINE_ARGS; i++)
 	{
-		if (!cmdlinein[i][0])
+		if (!cmdline[i][0])
 			break;
 
-		if (!strcmp(cmdlinein[i], "help"))
+		if (!strcmp(cmdline[i], "help"))
 			cmdlineflags |= CMD_MODE_HELP;
 
-		else if (!strcmp(cmdlinein[i], "editor"))
+		else if (!strcmp(cmdline[i], "editor"))
 			cmdlineflags |= CMD_MODE_EDITOR;
 
-		else if (!strcmp(cmdlinein[i], "ignoreosver"))
+		else if (!strcmp(cmdline[i], "ignoreosver"))
 			cmdlineflags |= CMD_IGNORE_OSVER;
 
-		else if (!strcmp(cmdlinein[i], "demo"))
+		else if (!strcmp(cmdline[i], "demo"))
 			cmdlineflags |= CMD_RUN_DEMO_GAME;
 	}
 }
 
-static bool InitGame(void)
+static mservices_t CreateMServices(void)
 {
-	if (Common_RunDemoGame())
-	{
-		gamedllhandle = Sys_LoadDLL("DemoGame.dll");
-		if (!gamedllhandle)
-		{
-			Log_WriteSeq(LOG_ERROR, "Failed to load DemoGame.dll");
-			return(false);
-		}
-	}
-
-	else
-	{
-		cvar_t *gamedll = CVar_Find("g_gamedll");	// get the game DLL name from the CVar system, designed to be overriden by the client
-
-		if (!gamedll)
-			return(false);
-
-		char *gamedllname = CVar_GetString(gamedll);
-		if (!gamedllname)
-		{
-			Log_WriteSeq(LOG_ERROR, "Failed to get game DLL name from CVar system");
-			return(false);
-		}
-
-		gamedllhandle = Sys_LoadDLL(gamedllname);
-		if (!gamedllhandle)
-		{
-			Log_WriteSeq(LOG_ERROR, "Failed to load game DLL: %s", gamedllname);
-			return(false);
-		}
-	}
-
 	mservices_t mservices =
 	{
 		.version = MENGINE_VERSION,
@@ -99,6 +70,41 @@ static bool InitGame(void)
 		.CVar_SetFloat = CVar_SetFloat,
 		.CVar_SetBool = CVar_SetBool
 	};
+
+	return(mservices);
+}
+
+static bool InitGame(void)
+{
+	cvar_t *gamedll = NULL;
+
+	if (Common_RunDemoGame())
+		gamedll = CVar_Find("g_demogamedll");
+
+	else
+		gamedll = CVar_Find("g_gamedll");	// get the game DLL name from the CVar system, designed to be overriden by the client
+
+	if (!gamedll)
+	{
+		Log_WriteSeq(LOG_ERROR, "Failed to find game DLL name in CVar system");
+		return(false);
+	}
+
+	char *gamedllname = CVar_GetString(gamedll);
+	if (!gamedllname)
+	{
+		Log_WriteSeq(LOG_ERROR, "Failed to get game DLL name from CVar system");
+		return(false);
+	}
+
+	gamedllhandle = Sys_LoadDLL(gamedllname);
+	if (!gamedllhandle)
+	{
+		Log_WriteSeq(LOG_ERROR, "Failed to load game DLL: %s", gamedllname);
+		return(false);
+	}
+
+	mservices_t mservices = CreateMServices();
 
 	getmservices_t GetMServices = (getmservices_t)Sys_GetProcAddress(gamedllhandle, "GetMServices");
 	if (!GetMServices)
@@ -153,9 +159,7 @@ bool Common_Init(void)
 	if (!CVar_Init())
 		return(false);
 
-	char cmdline[SYS_MAX_CMDLINE_ARGS][SYS_MAX_CMDLINE_ARGS];
-	Sys_ProcessCommandLine(cmdline);
-	ParseCommandLine(cmdline);
+	ParseCommandLine();
 
 	if (!Sys_Init())
 		return(false);
