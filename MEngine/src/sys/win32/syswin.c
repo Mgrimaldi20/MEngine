@@ -55,6 +55,7 @@ bool Sys_Init(void)
 	Log_WriteSeq(LOG_INFO, "System memory: %lluMB", Sys_GetSystemMemory());
 
 	CVar_RegisterString("g_gamedll", "DemoGame.dll", CVAR_GAME, "The name of the game DLL for Windows systems");
+	CVar_RegisterString("g_demogamedll", "DemoGame.dll", CVAR_GAME, "The name of the game DLL for Windows systems");
 
 	return(true);
 }
