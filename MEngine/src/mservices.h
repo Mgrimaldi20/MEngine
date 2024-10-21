@@ -67,4 +67,14 @@ typedef struct
 	void (*CVar_SetInt)(cvar_t *cvar, const int value);
 	void (*CVar_SetFloat)(cvar_t *cvar, const float value);
 	void (*CVar_SetBool)(cvar_t *cvar, const bool value);
+
+	// system services
+	bool (*Sys_Mkdir)(const char *path);
+	char *(*Sys_Strtok)(char *string, const char *delimiter, char **context);
+	void (*Sys_Sleep)(unsigned long milliseconds);
+	void (*Sys_Localtime)(struct tm *buf, const time_t *timer);
+
+	void *(*Sys_LoadDLL)(const char *dllname);			// returns the DLL handle
+	void (*Sys_UnloadDLL)(void *handle);
+	void *(*Sys_GetProcAddress)(void *handle, const char *procname);
 } mservices_t;
