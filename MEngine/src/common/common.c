@@ -68,7 +68,14 @@ static mservices_t CreateMServices(void)
 		.CVar_SetString = CVar_SetString,
 		.CVar_SetInt = CVar_SetInt,
 		.CVar_SetFloat = CVar_SetFloat,
-		.CVar_SetBool = CVar_SetBool
+		.CVar_SetBool = CVar_SetBool,
+		.Sys_Mkdir = Sys_Mkdir,
+		.Sys_Strtok = Sys_Strtok,
+		.Sys_Sleep = Sys_Sleep,
+		.Sys_Localtime = Sys_Localtime,
+		.Sys_LoadDLL = Sys_LoadDLL,
+		.Sys_UnloadDLL = Sys_UnloadDLL,
+		.Sys_GetProcAddress = Sys_GetProcAddress
 	};
 
 	return(mservices);
