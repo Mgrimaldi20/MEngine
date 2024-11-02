@@ -22,7 +22,10 @@ typedef enum
 	CVAR_GAME = 1 << 4
 } cvarflags_t;
 
-typedef struct cvar cvar_t;		// opaque type to cvar struct, only access through CVar_ functions
+typedef struct cvar cvar_t;			// opaque type to cvar struct, only access through CVar_ functions
+typedef struct thread thread_t;		// opaque type to thread struct, only access through Sys_ thread functions
+typedef struct mutex mutex_t;		// opaque type to mutex struct, only access through Sys_ mutex functions
+typedef struct condvar condvar_t;	// opaque type to condvar struct, only access through Sys_ condvar functions
 
 typedef struct
 {
