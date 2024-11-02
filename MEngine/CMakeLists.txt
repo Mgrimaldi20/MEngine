@@ -5,7 +5,7 @@
 # Add source to this project's executable.
 add_executable(MEngine)
 
-if(CMAKE_VERSION VERSION_GREATER 3.16)
+if(CMAKE_VERSION VERSION_GREATER 3.25)
 	set_property(TARGET MEngine PROPERTY CXX_STANDARD 20)
 	set_property(TARGET MEngine PROPERTY C_STANDARD 17)
 endif()
@@ -31,7 +31,7 @@ if(WIN32)
 		"src/sys/win32/syswin.c"
 		"src/sys/win32/glwnd.c"
 	)
-elseif(UNIX AND APPLE)
+elseif(LINUX AND APPLE)
 	target_sources(MEngine PRIVATE
 		"src/sys/linux/linuxlocal.h"
 		"src/sys/linux/main.c"
