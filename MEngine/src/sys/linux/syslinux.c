@@ -206,6 +206,56 @@ unsigned long Sys_GetMaxThreads(void)
 	return(sysconf(_SC_NPROCESSORS_ONLN));
 }
 
+bool Sys_CreateThread(thread_t *thread, void *(*func)(void *), void *arg)
+{
+	return(pthread_create(&thread->thread, NULL, func, arg) == 0);
+}
+
+void Sys_JoinThread(thread_t *thread)
+{
+	pthread_join(thread->thread, NULL);
+}
+
+bool Sys_CreateMutex(mutex_t *mutex)
+{
+	return(pthread_mutex_init(&mutex->mutex, NULL) == 0);
+}
+
+void Sys_DestroyMutex(mutex_t *mutex)
+{
+	pthread_mutex_destroy(&mutex->mutex);
+}
+
+void Sys_LockMutex(mutex_t *mutex)
+{
+	pthread_mutex_lock(&mutex->mutex);
+}
+
+void Sys_UnlockMutex(mutex_t *mutex)
+{
+	pthread_mutex_unlock(&mutex->mutex);
+}
+
+bool Sys_CreateCondVar(condvar_t *condvar)
+{
+	return(pthread_cond_init(&condvar->cond, NULL) == 0);
+}
+
+void Sys_DestroyCondVar(condvar_t *condvar)
+{
+	pthread_cond_destroy(&condvar->cond);
+}
+
+void Sys_WaitCondVar(condvar_t *condvar, mutex_t *mutex)
+{
+	pthread_cond_wait(&condvar->cond, &mutex->mutex);
+}
+
+void Sys_SignalCondVar(condvar_t *condvar)
+{
+	pthread_cond_signal(&condvar->cond);
+}
+
 void *Sys_LoadDLL(const char *dllname)
 {
 	void *handle = dlopen(dllname, RTLD_NOW);
