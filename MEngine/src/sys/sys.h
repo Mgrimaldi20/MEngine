@@ -65,6 +65,19 @@ struct condvar
 
 unsigned long Sys_GetMaxThreads(void);
 
+bool Sys_CreateThread(thread_t *thread, void *(*func)(void *), void *arg);
+void Sys_JoinThread(thread_t *thread);
+
+bool Sys_CreateMutex(mutex_t *mutex);
+void Sys_DestroyMutex(mutex_t *mutex);
+void Sys_LockMutex(mutex_t *mutex);
+void Sys_UnlockMutex(mutex_t *mutex);
+
+bool Sys_CreateCondVar(condvar_t *condvar);
+void Sys_DestroyCondVar(condvar_t *condvar);
+void Sys_WaitCondVar(condvar_t *condvar, mutex_t *mutex);
+void Sys_SignalCondVar(condvar_t *condvar);
+
 void *Sys_LoadDLL(const char *dllname);
 void Sys_UnloadDLL(void *handle);
 void *Sys_GetProcAddress(void *handle, const char *procname);

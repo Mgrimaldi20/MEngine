@@ -235,6 +235,56 @@ unsigned long Sys_GetMaxThreads(void)
 	return(maxthreads);
 }
 
+bool Sys_CreateThread(thread_t *thread, void *(*func)(void *), void *arg)
+{
+	return(thrd_create(&thread->thread, func, arg) == thrd_success);
+}
+
+void Sys_JoinThread(thread_t *thread)
+{
+	thrd_join(thread->thread, NULL);
+}
+
+bool Sys_CreateMutex(mutex_t *mutex)
+{
+	return(mtx_init(&mutex->mutex, mtx_plain) == thrd_success);
+}
+
+void Sys_DestroyMutex(mutex_t *mutex)
+{
+	mtx_destroy(&mutex->mutex);
+}
+
+void Sys_LockMutex(mutex_t *mutex)
+{
+	mtx_lock(&mutex->mutex);
+}
+
+void Sys_UnlockMutex(mutex_t *mutex)
+{
+	mtx_unlock(&mutex->mutex);
+}
+
+bool Sys_CreateCondVar(condvar_t *condvar)
+{
+	return(cnd_init(&condvar->cond) == thrd_success);
+}
+
+void Sys_DestroyCondVar(condvar_t *condvar)
+{
+	cnd_destroy(&condvar->cond);
+}
+
+void Sys_WaitCondVar(condvar_t *condvar, mutex_t *mutex)
+{
+	cnd_wait(&condvar->cond, &mutex->mutex);
+}
+
+void Sys_SignalCondVar(condvar_t *condvar)
+{
+	cnd_signal(&condvar->cond);
+}
+
 void *Sys_LoadDLL(const char *dllname)
 {
 	wchar_t wdllname[MAX_PATH] = { 0 };
