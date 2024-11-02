@@ -237,7 +237,7 @@ unsigned long Sys_GetMaxThreads(void)
 
 bool Sys_CreateThread(thread_t *thread, void *(*func)(void *), void *arg)
 {
-	return(thrd_create(&thread->thread, func, arg) == thrd_success);
+	return(thrd_create(&thread->thread, (thrd_start_t)func, arg) == thrd_success);
 }
 
 void Sys_JoinThread(thread_t *thread)

@@ -4,7 +4,7 @@
 #include <time.h>
 #include <string.h>
 #include <limits.h>
-#include <threads.h>
+#include <threads.h>	// TODO: replace with sys thread functions
 #include "common.h"
 
 #define LOG_TIMESTR_LEN 100
