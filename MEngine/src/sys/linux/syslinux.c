@@ -211,9 +211,9 @@ bool Sys_CreateThread(thread_t *thread, void *(*func)(void *), void *arg)
 	return(pthread_create(&thread->thread, NULL, func, arg) == 0);
 }
 
-void Sys_JoinThread(thread_t *thread)
+void Sys_JoinThread(thread_t thread)
 {
-	pthread_join(thread->thread, NULL);
+	pthread_join(thread.thread, NULL);
 }
 
 bool Sys_CreateMutex(mutex_t *mutex)

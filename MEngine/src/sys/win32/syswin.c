@@ -240,9 +240,9 @@ bool Sys_CreateThread(thread_t *thread, void *(*func)(void *), void *arg)
 	return(thrd_create(&thread->thread, (thrd_start_t)func, arg) == thrd_success);
 }
 
-void Sys_JoinThread(thread_t *thread)
+void Sys_JoinThread(thread_t thread)
 {
-	thrd_join(thread->thread, NULL);
+	thrd_join(thread.thread, NULL);
 }
 
 bool Sys_CreateMutex(mutex_t *mutex)
