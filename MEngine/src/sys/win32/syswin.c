@@ -262,7 +262,10 @@ void Sys_LockMutex(mutex_t *mutex)
 
 void Sys_UnlockMutex(mutex_t *mutex)
 {
-	mtx_unlock(&mutex->mutex);
+#pragma warning(push)
+#pragma warning(disable: 26110)
+	mtx_unlock(&mutex->mutex);		// complains about not acquiring lock before unlocking, but its just a simple wrapper
+#pragma warning(pop)
 }
 
 bool Sys_CreateCondVar(condvar_t *condvar)
