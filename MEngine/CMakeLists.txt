@@ -21,6 +21,12 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 	target_compile_definitions(MEngine PRIVATE MENGINE_DEBUG)
 endif()
 
+if(WIN32)
+	target_compile_definitions(MEngine PRIVATE MENGINE_PLATFORM_WINDOWS)
+elseif(LINUX AND APPLE)
+	target_compile_definitions(MEngine PRIVATE MENGINE_PLATFORM_UNIX)
+endif()
+
 # Check the Operating System and include the appropriate file for execution
 if(WIN32)
 	target_sources(MEngine PRIVATE

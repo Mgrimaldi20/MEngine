@@ -1,11 +1,13 @@
 #pragma once
 
-#if defined(_WIN64) || defined(WIN64) || defined(__WIN64) || defined(__WIN64__) || defined(__MINGW64__)
+#if defined(MENGINE_PLATFORM_WINDOWS)
 #define WIN32_LEAN_AND_MEAN		// stupidly needed for GLU on Windows
 #include <Windows.h>
 #include <gl/GLU.h>
-#elif defined(linux) || defined(__linux) || defined(__linux__) || defined(unix) || defined(__unix__) || defined(__unix) || defined(__APPLE__) || defined(__MACH__)
+#include <threads.h>
+#elif defined(MENGINE_PLATFORM_UNIX)
 #include <GL/glu.h>
+#include <pthread.h>
 #else
 #error Unknown GL libraries.
 #endif
@@ -33,6 +35,33 @@ typedef struct
 bool Sys_ListFiles(const char *directory, const char *filter, sysfiledata_t *filelist, unsigned int numfiles);
 unsigned int Sys_CountFiles(const char *directory, const char *filter);
 time_t Sys_FileTimeStamp(const char *fname);
+
+struct thread
+{
+#if defined(MENGINE_PLATFORM_WINDOWS)
+	thrd_t thread;
+#elif defined(MENGINE_PLATFORM_UNIX)
+	pthread_t thread;
+#endif
+};
+
+struct mutex
+{
+#if defined(MENGINE_PLATFORM_WINDOWS)
+	mtx_t mutex;
+#elif defined(MENGINE_PLATFORM_UNIX)
+	pthread_mutex_t mutex;
+#endif
+};
+
+struct condvar
+{
+#if defined(MENGINE_PLATFORM_WINDOWS)
+	cnd_t cond;
+#elif defined(MENGINE_PLATFORM_UNIX)
+	pthread_cond_t cond;
+#endif
+};
 
 unsigned long Sys_GetMaxThreads(void);
 
