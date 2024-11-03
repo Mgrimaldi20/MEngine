@@ -34,7 +34,7 @@ typedef struct
 	char iconpath[260];			// games icon path
 	char smiconpath[260];		// games icon path for small icon
 
-	void (*Init)(void);			// initialize game code, called once at startup
+	bool (*Init)(void);			// initialize game code, called once at startup
 	void (*Shutdown)(void);		// shutdown game code, called once at shutdown
 	void (*RunFrame)(void);		// called once per frame // TODO: add a return value that signals a command to the engine to execute an action
 } gameservices_t;

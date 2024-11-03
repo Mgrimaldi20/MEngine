@@ -4,8 +4,9 @@
 mservices_t mservices;
 gameservices_t gameservices;
 
-static void Init(void)
+static bool Init(void)
 {
+	return(true);
 }
 
 static void Shutdown(void)
