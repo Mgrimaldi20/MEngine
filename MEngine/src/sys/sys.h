@@ -36,6 +36,7 @@ bool Sys_ListFiles(const char *directory, const char *filter, sysfiledata_t *fil
 unsigned int Sys_CountFiles(const char *directory, const char *filter);
 time_t Sys_FileTimeStamp(const char *fname);
 
+// TODO: make these opaque pointers without the ugly preprocessor hacks
 struct thread
 {
 #if defined(MENGINE_PLATFORM_WINDOWS)
