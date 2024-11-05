@@ -189,17 +189,17 @@ static void *CacheAlloc(size_t size)
 		if (current->size >= size)
 		{
 			void *ptr = memcache + current->index;
-			*(size_t *)ptr = size;	// store size at start of allocation
+			*(size_t *)ptr = size;			// store size at start of allocation
 
 			ptr = (unsigned char *)ptr + sizeof(size_t);
 
-			if (current->size > totalsize) // shrink block if it is too big
+			if (current->size > totalsize)	// shrink block if it is too big
 			{
 				current->index += totalsize;
 				current->size -= totalsize;
 			}
 
-			else // remove block from free list if it is the exact size
+			else	// remove block from free list if it is the exact size
 			{
 				if (!prev)
 					freeblocks = current->next;
@@ -315,6 +315,7 @@ static void CacheReset(void)
 	freeblocks->size = MEM_CACHE_SIZE;
 	freeblocks->next = NULL;
 
+#if defined(MENGINE_DEBUG)
 	if (memcacheused == (MEM_CACHE_SIZE / 2))			// dont really have to do the following resetting to 0, just making the blocks point to NULL is enough
 		memset(memcache, 0, MEM_CACHE_SIZE);
 
@@ -327,6 +328,7 @@ static void CacheReset(void)
 			allocated = allocated->next;
 		}
 	}
+#endif
 
 	memcacheused = 0;
 	lastreported = 0;
@@ -353,7 +355,8 @@ static size_t CacheTotalMemory(void)
 
 bool MemCache_Init(void)
 {
-	if (Sys_GetSystemMemory() < (4 * 1024))	// if system memory is less than 4GB, use malloc/free, else use the cache allocator
+	// if system memory is less than 4GB or the default allocator cmd arg is parsed use malloc/free, else use the cache allocator
+	if ((Sys_GetSystemMemory() < (4 * 1024)) || Common_UseDefaultAlloc())
 	{
 		allocator = (allocator_t)
 		{

@@ -10,10 +10,16 @@ typedef enum
 	CMD_MODE_HELP = 0,
 	CMD_MODE_EDITOR = 1 << 0,
 	CMD_IGNORE_OSVER = 1 << 1,
-	CMD_RUN_DEMO_GAME = 1 << 2
+	CMD_RUN_DEMO_GAME = 1 << 2,
+	CMD_USE_DEF_ALLOC = 1 << 3
 } cmdlineflags_t;
 
 gameservices_t gameservices;
+
+static log_t log;
+static memcache_t memcache;
+static cvarsystem_t cvarsystem;
+static sys_t sys;
 
 static unsigned long long cmdlineflags;
 static void *gamedllhandle;
@@ -39,53 +45,76 @@ static void ParseCommandLine(void)
 
 		else if (!strcmp(cmdline[i], "demo"))
 			cmdlineflags |= CMD_RUN_DEMO_GAME;
+
+		else if (!strcmp(cmdline[i], "nocache"))
+			cmdlineflags |= CMD_USE_DEF_ALLOC;
 	}
 }
 
 static mservices_t CreateMServices(void)
 {
+	log = (log_t)
+	{
+		.Write = Log_Write,
+		.WriteSeq = Log_WriteSeq,
+		.WriteLargeSeq = Log_WriteLargeSeq
+	};
+
+	memcache = (memcache_t)
+	{
+		.Alloc = MemCache_Alloc,
+		.Free = MemCache_Free,
+		.Reset = MemCache_Reset,
+		.GetMemUsed = MemCache_GetTotalMemory,
+		.Dump = MemCache_Dump
+	};
+
+	cvarsystem = (cvarsystem_t)
+	{
+		.ListAllCVars = CVar_ListAllCVars,
+		.Find = CVar_Find,
+		.RegisterString = CVar_RegisterString,
+		.RegisterInt = CVar_RegisterInt,
+		.RegisterFloat = CVar_RegisterFloat,
+		.RegisterBool = CVar_RegisterBool,
+		.GetString = CVar_GetString,
+		.GetInt = CVar_GetInt,
+		.GetFloat = CVar_GetFloat,
+		.GetBool = CVar_GetBool,
+		.SetString = CVar_SetString,
+		.SetInt = CVar_SetInt,
+		.SetFloat = CVar_SetFloat,
+		.SetBool = CVar_SetBool
+	};
+
+	sys = (sys_t)
+	{
+		.Mkdir = Sys_Mkdir,
+		.Strtok = Sys_Strtok,
+		.Sleep = Sys_Sleep,
+		.Localtime = Sys_Localtime,
+		.CreateThread = Sys_CreateThread,
+		.JoinThread = Sys_JoinThread,
+		.InitMutex = Sys_CreateMutex,
+		.DestroyMutex = Sys_DestroyMutex,
+		.LockMutex = Sys_LockMutex,
+		.UnlockMutex = Sys_UnlockMutex,
+		.CreateCondVar = Sys_CreateCondVar,
+		.DestroyCondVar = Sys_DestroyCondVar,
+		.WaitCondVar = Sys_WaitCondVar,
+		.SignalCondVar = Sys_SignalCondVar,
+		.LoadDLL = Sys_LoadDLL,
+		.UnloadDLL = Sys_UnloadDLL,
+		.GetProcAddress = Sys_GetProcAddress
+	};
+
 	mservices_t mservices =
 	{
 		.version = MENGINE_VERSION,
-		.Log_Write = Log_Write,
-		.Log_WriteSeq = Log_WriteSeq,
-		.Log_WriteLargeSeq = Log_WriteLargeSeq,
-		.MemCache_Alloc = MemCache_Alloc,
-		.MemCache_Free = MemCache_Free,
-		.MemCache_Reset = MemCache_Reset,
-		.MemCahce_GetMemUsed = MemCahce_GetMemUsed,
-		.MemCache_Dump = MemCache_Dump,
-		.CVar_ListAllCVars = CVar_ListAllCVars,
-		.CVar_Find = CVar_Find,
-		.CVar_RegisterString = CVar_RegisterString,
-		.CVar_RegisterInt = CVar_RegisterInt,
-		.CVar_RegisterFloat = CVar_RegisterFloat,
-		.CVar_RegisterBool = CVar_RegisterBool,
-		.CVar_GetString = CVar_GetString,
-		.CVar_GetInt = CVar_GetInt,
-		.CVar_GetFloat = CVar_GetFloat,
-		.CVar_GetBool = CVar_GetBool,
-		.CVar_SetString = CVar_SetString,
-		.CVar_SetInt = CVar_SetInt,
-		.CVar_SetFloat = CVar_SetFloat,
-		.CVar_SetBool = CVar_SetBool,
-		.Sys_Mkdir = Sys_Mkdir,
-		.Sys_Strtok = Sys_Strtok,
-		.Sys_Sleep = Sys_Sleep,
-		.Sys_Localtime = Sys_Localtime,
-		.Sys_CreateThread = Sys_CreateThread,
-		.Sys_JoinThread = Sys_JoinThread,
-		.Sys_CreateMutex = Sys_CreateMutex,
-		.Sys_DestroyMutex = Sys_DestroyMutex,
-		.Sys_LockMutex = Sys_LockMutex,
-		.Sys_UnlockMutex = Sys_UnlockMutex,
-		.Sys_CreateCondVar = Sys_CreateCondVar,
-		.Sys_DestroyCondVar = Sys_DestroyCondVar,
-		.Sys_WaitCondVar = Sys_WaitCondVar,
-		.Sys_SignalCondVar = Sys_SignalCondVar,
-		.Sys_LoadDLL = Sys_LoadDLL,
-		.Sys_UnloadDLL = Sys_UnloadDLL,
-		.Sys_GetProcAddress = Sys_GetProcAddress
+		.log = &log,
+		.memcache = &memcache,
+		.cvarsystem = &cvarsystem,
+		.sys = &sys
 	};
 
 	return(mservices);
@@ -144,11 +173,15 @@ static bool InitGame(void)
 		return(false);
 	}
 
+	gameservices.Init();		// run the games startup code
+
 	return(true);
 }
 
 static void ShutdownGame(void)
 {
+	gameservices.Shutdown();	// run the games shutdown code
+
 	Render_Shutdown();
 
 	Sys_UnloadDLL(gamedllhandle);
@@ -224,6 +257,7 @@ void Common_PrintHelpMsg(void)
 		"\t-editor\t\tRun the editor\n"
 		"\t-demo\t\tRun the demo game\n"
 		"\t-ignoreosver\tIgnore OS version check\n"
+		"\t-nocache\tDo not use the memory cache allocator\n"
 		"Press any key to exit...\n";
 
 	printf(helpmsg);
@@ -248,4 +282,9 @@ bool Common_IgnoreOSVer(void)
 bool Common_RunDemoGame(void)
 {
 	return((cmdlineflags & CMD_RUN_DEMO_GAME) != 0);
+}
+
+bool Common_UseDefaultAlloc(void)
+{
+	return((cmdlineflags & CMD_USE_DEF_ALLOC) != 0);
 }

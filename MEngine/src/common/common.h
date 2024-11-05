@@ -17,6 +17,7 @@ bool Common_HelpMode(void);
 bool Common_EditorMode(void);
 bool Common_IgnoreOSVer(void);
 bool Common_RunDemoGame(void);
+bool Common_UseDefaultAlloc(void);
 
 #define LOG_MAX_LEN 1024
 
