@@ -209,7 +209,7 @@ bool Common_Init(void)
 	if (!CVar_Init())
 		return(false);
 
-	ParseCommandLine();
+	ParseCommandLine();		// TODO: make this much better, it kinda sucks at the moment
 
 	if (!Sys_Init())
 		return(false);
