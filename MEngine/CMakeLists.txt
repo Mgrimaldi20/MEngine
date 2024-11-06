@@ -37,7 +37,7 @@ if(WIN32)
 		"src/sys/win32/syswin.c"
 		"src/sys/win32/glwnd.c"
 	)
-elseif(LINUX AND APPLE)
+elseif(LINUX OR APPLE)
 	target_sources(MEngine PRIVATE
 		"src/sys/linux/linuxlocal.h"
 		"src/sys/linux/main.c"
