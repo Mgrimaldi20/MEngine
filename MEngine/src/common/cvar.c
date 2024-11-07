@@ -22,6 +22,10 @@ typedef struct
 static cvarmap_t *cvarmap;
 static FILE *cvarfile;
 
+static const char *cvardir = "configs";
+static const char *cvarfilename = "MEngine.cfg";
+static const char *overridefile = "overrides.cfg";
+
 static size_t HashFunction(const char *name)	// this function is actually okay for resizing, a new hash is generated for the new map size
 {
 	size_t hash = 0;
@@ -64,13 +68,11 @@ static bool HandleConversionErrors(const char *value, const char *end)
 
 bool CVar_Init(void)
 {
-	const char *cvardir = "configs";
-
 	if (!Sys_Mkdir(cvardir))
 		return(false);
 
 	char cvarfullname[SYS_MAX_PATH] = { 0 };
-	snprintf(cvarfullname, sizeof(cvarfullname), "%s/%s", cvardir, "MEngine.cfg");
+	snprintf(cvarfullname, sizeof(cvarfullname), "%s/%s", cvardir, cvarfilename);
 
 	cvarfile = fopen(cvarfullname, "r");
 	if (!cvarfile)
@@ -148,8 +150,10 @@ bool CVar_Init(void)
 
 void CVar_Shutdown(void)
 {
-	const char *cvarfullname = "configs/MEngine.cfg";
-	cvarfile = fopen("configs/MEngine.cfg", "w");
+	char cvarfullname[SYS_MAX_PATH] = { 0 };
+	snprintf(cvarfullname, sizeof(cvarfullname), "%s/%s", cvardir, cvarfilename);
+
+	cvarfile = fopen(cvarfullname, "w");
 	if (!cvarfile)
 	{
 		Log_WriteSeq(LOG_ERROR, "Failed to open cvar file: %s", cvarfullname);
