@@ -112,13 +112,13 @@ bool CVar_Init(void)
 	char line[1024] = { 0 };
 	while (fgets(line, sizeof(line), cvarfile))
 	{
-		if (line[0] == '\n' || line[0] == '\r' || line[0] == ' ')
+		if (line[0] == '\n' || line[0] == '\r' || line[0] == ' ' || line[0] == '#')
 			continue;
 
 		char *name = NULL;
 		char *value = NULL;
 
-		name = Sys_Strtok(line, " ", &value);
+		name = Sys_Strtok(line, " ", &value);		// pointers returned by Sys_Strtok should be null terminated
 		value = Sys_Strtok(NULL, "\n", &value);
 
 		if (!name || !value)
