@@ -16,6 +16,7 @@ typedef enum
 
 gameservices_t gameservices;
 
+static mservices_t mservices;
 static log_t log;
 static memcache_t memcache;
 static cvarsystem_t cvarsystem;
@@ -150,7 +151,7 @@ static bool InitGame(void)
 		return(false);
 	}
 
-	mservices_t mservices = CreateMServices();
+	mservices = CreateMServices();
 
 	getmservices_t GetMServices = (getmservices_t)Sys_GetProcAddress(gamedllhandle, "GetMServices");
 	if (!GetMServices)
