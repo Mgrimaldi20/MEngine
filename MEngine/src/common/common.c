@@ -134,7 +134,7 @@ static mservices_t CreateMServices(void)
 		.sys = &sys
 	};
 
-	return(mservices);
+	return(mserviceslocal);
 }
 
 static bool InitGame(void)
