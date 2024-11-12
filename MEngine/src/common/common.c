@@ -232,7 +232,7 @@ bool Common_Init(void)
 
 	ParseCommandLine();
 
-	if (!Common_HelpMode())
+	if (Common_HelpMode())
 	{
 		PrintHelpMsg();
 		return(false);		// just print the help message and exit, return false even though the operation was successful to shut down the engine
