@@ -68,7 +68,7 @@ static void PrintHelpMsg(void)
 	Log_WriteSeq(LOG_INFO, helpmsg);
 }
 
-static mservices_t CreateMServices(void)
+static void CreateMServices(void)
 {
 	log = (log_t)
 	{
@@ -125,7 +125,7 @@ static mservices_t CreateMServices(void)
 		.GetProcAddress = Sys_GetProcAddress
 	};
 
-	mservices_t mserviceslocal =
+	mservices = (mservices_t)
 	{
 		.version = MENGINE_VERSION,
 		.log = &log,
@@ -133,8 +133,6 @@ static mservices_t CreateMServices(void)
 		.cvarsystem = &cvarsystem,
 		.sys = &sys
 	};
-
-	return(mserviceslocal);
 }
 
 static bool InitGame(void)
@@ -167,7 +165,7 @@ static bool InitGame(void)
 		return(false);
 	}
 
-	mservices = CreateMServices();
+	CreateMServices();		// populate the mservices struct with the function pointers
 
 	getmservices_t GetMServices = (getmservices_t)Sys_GetProcAddress(gamedllhandle, "GetMServices");
 	if (!GetMServices)
