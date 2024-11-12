@@ -125,7 +125,7 @@ static mservices_t CreateMServices(void)
 		.GetProcAddress = Sys_GetProcAddress
 	};
 
-	mservices_t mservices =
+	mservices_t mserviceslocal =
 	{
 		.version = MENGINE_VERSION,
 		.log = &log,
