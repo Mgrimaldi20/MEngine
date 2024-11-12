@@ -52,6 +52,22 @@ static void ParseCommandLine(void)
 	}
 }
 
+static void PrintHelpMsg(void)
+{
+	const char *helpmsg = "MEngine\n"
+		"Usage: MEngine [options]\n"
+		"Options:\n"
+		"\t-help\t\tPrint this help message\n"
+		"\t-editor\t\tRun the editor\n"
+		"\t-demo\t\tRun the demo game\n"
+		"\t-ignoreosver\tIgnore OS version check\n"
+		"\t-nocache\tDo not use the memory cache allocator\n"
+		"Press any key to exit...\n";
+
+	printf(helpmsg);
+	Log_WriteSeq(LOG_INFO, helpmsg);
+}
+
 static mservices_t CreateMServices(void)
 {
 	log = (log_t)
@@ -170,11 +186,15 @@ static bool InitGame(void)
 
 	if (!Render_Init())
 	{
-		Sys_Error("Failed to initialize renderer");
+		Log_WriteSeq(LOG_ERROR, "Failed to initialize renderer");
 		return(false);
 	}
 
-	gameservices.Init();		// run the games startup code
+	if (!gameservices.Init())	// run the games startup code
+	{
+		Log_WriteSeq(LOG_ERROR, "Failed to initialize the game");
+		return(false);
+	}
 
 	return(true);
 }
@@ -210,16 +230,19 @@ bool Common_Init(void)
 	if (!CVar_Init())
 		return(false);
 
-	ParseCommandLine();		// TODO: make this much better, it kinda sucks at the moment
+	ParseCommandLine();
+
+	if (!Common_HelpMode())
+	{
+		PrintHelpMsg();
+		return(false);		// just print the help message and exit, return false even though the operation was successful to shut down the engine
+	}
 
 	if (!Sys_Init())
 		return(false);
 
-	if (!Common_HelpMode())
-	{
-		if (!InitGame())
-			return(false);
-	}
+	if (!InitGame())
+		return(false);
 
 	return(true);
 }
@@ -247,22 +270,6 @@ void Common_Frame(void)		// happens every frame
 	Render_StartFrame();
 	Render_Frame();
 	Render_EndFrame();
-}
-
-void Common_PrintHelpMsg(void)
-{
-	const char *helpmsg = "MEngine\n"
-		"Usage: MEngine [options]\n"
-		"Options:\n"
-		"\t-help\t\tPrint this help message\n"
-		"\t-editor\t\tRun the editor\n"
-		"\t-demo\t\tRun the demo game\n"
-		"\t-ignoreosver\tIgnore OS version check\n"
-		"\t-nocache\tDo not use the memory cache allocator\n"
-		"Press any key to exit...\n";
-
-	printf(helpmsg);
-	Log_WriteSeq(LOG_INFO, helpmsg);
 }
 
 bool Common_HelpMode(void)

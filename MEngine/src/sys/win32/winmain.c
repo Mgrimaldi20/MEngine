@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include <conio.h>
 #include "../../common/common.h"
 
 #include "winlocal.h"
@@ -38,30 +37,6 @@ int WINAPI wWinMain(HINSTANCE hinst, HINSTANCE hprevinst, PWSTR pcmdline, int nc
 	}
 
 	Log_WriteSeq(LOG_INFO, "Engine Initialized successfully...");
-
-	if (Common_HelpMode())
-	{
-		if (win32state.conshow)
-		{
-			Common_PrintHelpMsg();
-			Common_Shutdown();
-			return(0);
-		}
-
-		else
-			ShowConsole();
-
-		Common_PrintHelpMsg();
-
-		volatile bool running = true;
-		while (running)
-		{
-			if (_kbhit())
-				running = false;
-		}
-
-		PostQuitMessage(0);
-	}
 
 	MSG msg;
 	while (1)

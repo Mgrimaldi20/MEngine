@@ -20,12 +20,12 @@ int main(int argc, char **argv)
 
 	Log_WriteSeq(LOG_INFO, "Engine Initialized successfully...");
 
-	if (Common_HelpMode())
+	/*if (Common_HelpMode())
 	{
 		Common_PrintHelpMsg();
 		Common_Shutdown();
 		return(0);
-	}
+	}*/
 	
 	return(0);
 }
