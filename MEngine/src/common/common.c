@@ -66,6 +66,8 @@ static void PrintHelpMsg(void)
 
 	printf(helpmsg);
 	Log_WriteSeq(LOG_INFO, helpmsg);
+
+	fflush(stdout);
 }
 
 static void CreateMServices(void)
