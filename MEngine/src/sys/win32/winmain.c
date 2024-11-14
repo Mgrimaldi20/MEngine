@@ -22,12 +22,20 @@ int WINAPI wWinMain(HINSTANCE hinst, HINSTANCE hprevinst, PWSTR pcmdline, int nc
 	win32state.pcmdline = pcmdline;
 	win32state.ncmdshow = ncmdshow;
 
+	win32state.conshow = false;
+
+#if defined(MENGINE_DEBUG)
 	win32state.conshow = true;
+#endif
+
 	if (!GetConsoleWindow())
 	{
 		InitConsole();
 		HideConsole();
 	}
+
+	if (win32state.conshow)
+		ShutdownConsole();
 	
 	if (!Common_Init())
 	{

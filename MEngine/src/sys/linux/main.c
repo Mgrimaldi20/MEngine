@@ -20,12 +20,14 @@ int main(int argc, char **argv)
 
 	Log_WriteSeq(LOG_INFO, "Engine Initialized successfully...");
 
-	/*if (Common_HelpMode())
+	while (!glfwWindowShouldClose(linuxstate.window))
 	{
-		Common_PrintHelpMsg();
-		Common_Shutdown();
-		return(0);
-	}*/
+		Common_Frame();
+		glfwPollEvents();
+	}
+
+	Log_WriteSeq(LOG_INFO, "Engine shutting down...");
+	Common_Shutdown();
 	
 	return(0);
 }
