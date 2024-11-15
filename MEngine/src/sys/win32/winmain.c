@@ -144,12 +144,10 @@ void ShutdownConsole(void)
 
 void ShowConsole(void)
 {
-	if (ShowWindow(GetConsoleWindow(), SW_SHOW))
-		win32state.conshow = true;
+	ShowWindow(GetConsoleWindow(), SW_SHOW);
 }
 
 void HideConsole(void)
 {
-	if (ShowWindow(GetConsoleWindow(), SW_HIDE))
-		win32state.conshow = false;
+	ShowWindow(GetConsoleWindow(), SW_HIDE);
 }

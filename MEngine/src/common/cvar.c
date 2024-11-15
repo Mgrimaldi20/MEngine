@@ -29,7 +29,7 @@ static const char *overridefile = "overrides.cfg";
 static size_t HashFunction(const char *name)	// this function is actually okay for resizing, a new hash is generated for the new map size
 {
 	size_t hash = 0;
-	size_t len = strlen(name);
+	size_t len = strnlen(name, CVAR_MAX_STR_LEN);
 
 	for (size_t i=0; i<len; i++)
 		hash = (hash * 31) + name[i];
@@ -127,7 +127,7 @@ bool CVar_Init(void)
 			continue;
 		}
 
-		size_t slen = strlen(value);
+		size_t slen = strnlen(value, CVAR_MAX_STR_LEN);
 		if (slen > CVAR_MAX_STR_LEN)
 		{
 			Log_WriteSeq(LOG_ERROR, "CVar value too long: %s", value);
