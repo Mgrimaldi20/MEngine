@@ -35,7 +35,7 @@ int WINAPI wWinMain(HINSTANCE hinst, HINSTANCE hprevinst, PWSTR pcmdline, int nc
 	}
 
 	if (win32state.conshow)
-		ShutdownConsole();
+		ShowConsole();
 	
 	if (!Common_Init())
 	{

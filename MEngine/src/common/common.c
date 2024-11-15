@@ -9,9 +9,10 @@ typedef enum
 {
 	CMD_MODE_HELP = 0,
 	CMD_MODE_EDITOR = 1 << 0,
-	CMD_IGNORE_OSVER = 1 << 1,
-	CMD_RUN_DEMO_GAME = 1 << 2,
-	CMD_USE_DEF_ALLOC = 1 << 3
+	CMD_MODE_DEBUG = 1 << 1,
+	CMD_IGNORE_OSVER = 1 << 2,
+	CMD_RUN_DEMO_GAME = 1 << 3,
+	CMD_USE_DEF_ALLOC = 1 << 4
 } cmdlineflags_t;
 
 gameservices_t gameservices;
@@ -41,6 +42,9 @@ static void ParseCommandLine(void)
 		else if (!strcmp(cmdline[i], "editor"))
 			cmdlineflags |= CMD_MODE_EDITOR;
 
+		else if (!strcmp(cmdline[i], "debug"))
+			cmdlineflags |= CMD_MODE_DEBUG;
+
 		else if (!strcmp(cmdline[i], "ignoreosver"))
 			cmdlineflags |= CMD_IGNORE_OSVER;
 
@@ -59,6 +63,7 @@ static void PrintHelpMsg(void)
 		"Options:\n"
 		"\t-help\t\tPrint this help message\n"
 		"\t-editor\t\tRun the editor\n"
+		"\t-debug\t\tRun the game in debug mode\n"
 		"\t-demo\t\tRun the demo game\n"
 		"\t-ignoreosver\tIgnore OS version check\n"
 		"\t-nocache\tDo not use the memory cache allocator\n"
@@ -249,10 +254,11 @@ bool Common_Init(void)
 
 void Common_Shutdown(void)
 {
-#if defined(MENGINE_DEBUG)
-	CVar_ListAllCVars();
-	MemCache_Dump();
-#endif
+	if (Common_DebugMode())
+	{
+		CVar_ListAllCVars();
+		MemCache_Dump();
+	}
 
 	ShutdownGame();
 	Sys_Shutdown();
@@ -280,6 +286,11 @@ bool Common_HelpMode(void)
 bool Common_EditorMode(void)
 {
 	return((cmdlineflags & CMD_MODE_EDITOR) != 0);
+}
+
+bool Common_DebugMode(void)
+{
+	return((cmdlineflags & CMD_MODE_DEBUG) != 0);
 }
 
 bool Common_IgnoreOSVer(void)
