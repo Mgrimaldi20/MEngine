@@ -9,6 +9,28 @@
 #include "../../common/common.h"
 #include "linuxlocal.h"
 
+struct thread
+{
+	pthread_t thread;
+	bool used;
+};
+
+struct mutex
+{
+	pthread_mutex_t mutex;
+	bool used;
+};
+
+struct condvar
+{
+	pthread_cond_t cond;
+	bool used;
+};
+
+static struct thread threads[SYS_MAX_THREADS];
+static struct mutex mutexes[SYS_MAX_MUTEXES];
+static struct condvar condvars[SYS_MAX_COND_VARS];
+
 bool Sys_Init(void)
 {
 	// get the OS version information, only run if the OS version is high enough
@@ -208,22 +230,74 @@ unsigned long Sys_GetMaxThreads(void)
 
 bool Sys_CreateThread(thread_t *thread, void *(*func)(void *), void *arg)
 {
-	return(pthread_create(&thread->thread, NULL, func, arg) == 0);
+	thread_t *handle = NULL;
+	for (int i=0; !handle && i<SYS_MAX_THREADS; i++)
+	{
+		if (!threads[i].used)
+		{
+			handle = &threads[i];
+			break;
+		}
+	}
+
+	if (!handle)
+		return(false);
+
+	handle->used = true;
+
+	if (pthread_create(&handle->thread, NULL, func, arg) != 0)
+	{
+		handle->used = false;
+		return(false);
+	}
+
+	*thread = *handle;
+	return(true);
 }
 
-void Sys_JoinThread(thread_t thread)
+void Sys_JoinThread(thread_t *thread)
 {
-	pthread_join(thread.thread, NULL);
+	if (thread)
+	{
+		pthread_join(thread->thread, NULL);
+		thread->used = false;
+	}
 }
 
 bool Sys_CreateMutex(mutex_t *mutex)
 {
-	return(pthread_mutex_init(&mutex->mutex, NULL) == 0);
+	mutex_t *handle = NULL;
+	for (int i=0; !handle && i<SYS_MAX_MUTEXES; i++)
+	{
+		if (!mutexes[i].used)
+		{
+			handle = &mutexes[i];
+			break;
+		}
+	}
+
+	if (!handle)
+		return(false);
+
+	handle->used = true;
+
+	if (pthread_mutex_init(&handle->mutex, NULL) != 0)
+	{
+		handle->used = false;
+		return(false);
+	}
+
+	*mutex = *handle;
+	return(true);
 }
 
 void Sys_DestroyMutex(mutex_t *mutex)
 {
-	pthread_mutex_destroy(&mutex->mutex);
+	if (mutex)
+	{
+		pthread_mutex_destroy(&mutex->mutex);
+		mutex->used = false;
+	}
 }
 
 void Sys_LockMutex(mutex_t *mutex)
@@ -238,12 +312,38 @@ void Sys_UnlockMutex(mutex_t *mutex)
 
 bool Sys_CreateCondVar(condvar_t *condvar)
 {
-	return(pthread_cond_init(&condvar->cond, NULL) == 0);
+	condvar_t *handle = NULL;
+	for (int i=0; !handle && i<SYS_MAX_COND_VARS; i++)
+	{
+		if (!condvars[i].used)
+		{
+			handle = &condvars[i];
+			break;
+		}
+	}
+
+	if (!handle)
+		return(false);
+
+	handle->used = true;
+
+	if (pthread_cond_init(&handle->cond, NULL) != 0)
+	{
+		handle->used = false;
+		return(false);
+	}
+
+	*condvar = *handle;
+	return(true);
 }
 
 void Sys_DestroyCondVar(condvar_t *condvar)
 {
-	pthread_cond_destroy(&condvar->cond);
+	if (condvar)
+	{
+		pthread_cond_destroy(&condvar->cond);
+		condvar->used = false;
+	}
 }
 
 void Sys_WaitCondVar(condvar_t *condvar, mutex_t *mutex)

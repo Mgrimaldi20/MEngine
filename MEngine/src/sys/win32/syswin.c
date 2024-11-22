@@ -8,6 +8,28 @@
 #include "../../common/common.h"
 #include "winlocal.h"
 
+struct thread
+{
+	thrd_t thread;
+	bool used;
+};
+
+struct mutex
+{
+	mtx_t mutex;
+	bool used;
+};
+
+struct condvar
+{
+	cnd_t cond;
+	bool used;
+};
+
+static struct thread threads[SYS_MAX_THREADS];
+static struct mutex mutexes[SYS_MAX_MUTEXES];
+static struct condvar condvars[SYS_MAX_CONDVARS];
+
 bool Sys_Init(void)
 {
 	DWORDLONG dwlcondmask = 0;
@@ -237,22 +259,74 @@ unsigned long Sys_GetMaxThreads(void)
 
 bool Sys_CreateThread(thread_t *thread, void *(*func)(void *), void *arg)
 {
-	return(thrd_create(&thread->thread, (thrd_start_t)func, arg) == thrd_success);
+	thread_t *handle = NULL;
+	for (int i=0; !handle && i<SYS_MAX_THREADS; i++)
+	{
+		if (!threads[i].used)
+		{
+			handle = &threads[i];
+			break;
+		}
+	}
+
+	if (!handle)
+		return(false);
+
+	handle->used = true;
+
+	if (thrd_create(&handle->thread, (thrd_start_t)func, arg) != thrd_success)
+	{
+		handle->used = false;
+		return(false);
+	}
+
+	*thread = *handle;
+	return(true);
 }
 
-void Sys_JoinThread(thread_t thread)
+void Sys_JoinThread(thread_t *thread)
 {
-	thrd_join(thread.thread, NULL);
+	if (thread)
+	{
+		thrd_join(thread->thread, NULL);
+		thread->used = false;
+	}
 }
 
 bool Sys_CreateMutex(mutex_t *mutex)
 {
-	return(mtx_init(&mutex->mutex, mtx_plain) == thrd_success);
+	mutex_t *handle = NULL;
+	for (int i=0; !handle && i<SYS_MAX_MUTEXES; i++)
+	{
+		if (!mutexes[i].used)
+		{
+			handle = &mutexes[i];
+			break;
+		}
+	}
+
+	if (!handle)
+		return(false);
+
+	handle->used = true;
+
+	if (mtx_init(&handle->mutex, mtx_plain) != thrd_success)
+	{
+		handle->used = false;
+		return(false);
+	}
+
+	*mutex = *handle;
+	return(true);
 }
 
 void Sys_DestroyMutex(mutex_t *mutex)
 {
-	mtx_destroy(&mutex->mutex);
+	if (mutex)
+	{
+		mtx_destroy(&mutex->mutex);
+		mutex->used = false;
+	}
 }
 
 void Sys_LockMutex(mutex_t *mutex)
@@ -270,12 +344,38 @@ void Sys_UnlockMutex(mutex_t *mutex)
 
 bool Sys_CreateCondVar(condvar_t *condvar)
 {
-	return(cnd_init(&condvar->cond) == thrd_success);
+	condvar_t *handle = NULL;
+	for (int i=0; !handle && i<SYS_MAX_CONDVARS; i++)
+	{
+		if (!condvars[i].used)
+		{
+			handle = &condvars[i];
+			break;
+		}
+	}
+
+	if (!handle)
+		return(false);
+
+	handle->used = true;
+
+	if (cnd_init(&handle->cond) != thrd_success)
+	{
+		handle->used = false;
+		return(false);
+	}
+
+	*condvar = *handle;
+	return(true);
 }
 
 void Sys_DestroyCondVar(condvar_t *condvar)
 {
-	cnd_destroy(&condvar->cond);
+	if (condvar)
+	{
+		cnd_destroy(&condvar->cond);
+		condvar->used = false;
+	}
 }
 
 void Sys_WaitCondVar(condvar_t *condvar, mutex_t *mutex)

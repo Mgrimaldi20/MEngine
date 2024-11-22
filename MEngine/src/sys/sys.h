@@ -36,38 +36,14 @@ bool Sys_ListFiles(const char *directory, const char *filter, sysfiledata_t *fil
 unsigned int Sys_CountFiles(const char *directory, const char *filter);
 time_t Sys_FileTimeStamp(const char *fname);
 
-// TODO: make these opaque pointers without the ugly preprocessor hacks
-struct thread
-{
-#if defined(MENGINE_PLATFORM_WINDOWS)
-	thrd_t thread;
-#elif defined(MENGINE_PLATFORM_UNIX)
-	pthread_t thread;
-#endif
-};
-
-struct mutex
-{
-#if defined(MENGINE_PLATFORM_WINDOWS)
-	mtx_t mutex;
-#elif defined(MENGINE_PLATFORM_UNIX)
-	pthread_mutex_t mutex;
-#endif
-};
-
-struct condvar
-{
-#if defined(MENGINE_PLATFORM_WINDOWS)
-	cnd_t cond;
-#elif defined(MENGINE_PLATFORM_UNIX)
-	pthread_cond_t cond;
-#endif
-};
+#define SYS_MAX_THREADS 64
+#define SYS_MAX_MUTEXES 64
+#define SYS_MAX_CONDVARS 64
 
 unsigned long Sys_GetMaxThreads(void);
 
 bool Sys_CreateThread(thread_t *thread, void *(*func)(void *), void *arg);
-void Sys_JoinThread(thread_t thread);
+void Sys_JoinThread(thread_t *thread);
 
 bool Sys_CreateMutex(mutex_t *mutex);
 void Sys_DestroyMutex(mutex_t *mutex);
