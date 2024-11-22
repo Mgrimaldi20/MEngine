@@ -26,9 +26,9 @@ struct condvar
 	bool used;
 };
 
-static struct thread threads[SYS_MAX_THREADS];
-static struct mutex mutexes[SYS_MAX_MUTEXES];
-static struct condvar condvars[SYS_MAX_CONDVARS];
+static thread_t threads[SYS_MAX_THREADS];
+static mutex_t mutexes[SYS_MAX_MUTEXES];
+static condvar_t condvars[SYS_MAX_CONDVARS];
 
 bool Sys_Init(void)
 {
@@ -280,7 +280,7 @@ bool Sys_CreateThread(thread_t *thread, void *(*func)(void *), void *arg)
 		return(false);
 	}
 
-	*thread = *handle;
+	thread = handle;
 	return(true);
 }
 
@@ -316,7 +316,7 @@ bool Sys_CreateMutex(mutex_t *mutex)
 		return(false);
 	}
 
-	*mutex = *handle;
+	mutex = handle;
 	return(true);
 }
 
@@ -365,7 +365,7 @@ bool Sys_CreateCondVar(condvar_t *condvar)
 		return(false);
 	}
 
-	*condvar = *handle;
+	condvar = handle;
 	return(true);
 }
 
