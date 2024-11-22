@@ -73,7 +73,7 @@ typedef struct		// system services
 	void (*Localtime)(struct tm *buf, const time_t *timer);
 
 	bool (*CreateThread)(thread_t *thread, void *(*func)(void *), void *arg);
-	void (*JoinThread)(thread_t thread);
+	void (*JoinThread)(thread_t *thread);
 
 	bool (*InitMutex)(mutex_t *mutex);
 	void (*DestroyMutex)(mutex_t *mutex);

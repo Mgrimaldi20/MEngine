@@ -26,9 +26,9 @@ static const char *logmsgtype[] =
 };
 
 static FILE *logfile;
-static mutex_t loglock;
-static condvar_t logcond;
-static thread_t logthread;
+static mutex_t *loglock;
+static condvar_t *logcond;
+static thread_t *logthread;
 static volatile bool stopthreads;
 static unsigned int logcount;
 static logentry_t logqueue[MAX_LOG_ENTRIES];
@@ -119,10 +119,10 @@ static void *ProcessLogQueue(void *args)
 
 	while (1)
 	{
-		Sys_LockMutex(&loglock);
+		Sys_LockMutex(loglock);
 
 		while (logcount == 0 && !stopthreads)
-			Sys_WaitCondVar(&logcond, &loglock);
+			Sys_WaitCondVar(logcond, loglock);
 
 		if (stopthreads)
 		{
@@ -144,7 +144,7 @@ static void *ProcessLogQueue(void *args)
 
 			logcount = 0;
 
-			Sys_UnlockMutex(&loglock);
+			Sys_UnlockMutex(loglock);
 			break;
 		}
 
@@ -167,7 +167,7 @@ static void *ProcessLogQueue(void *args)
 				logqueue[i] = logqueue[i + 1];
 		}
 
-		Sys_UnlockMutex(&loglock);
+		Sys_UnlockMutex(loglock);
 	}
 
 	return(NULL);
@@ -195,13 +195,13 @@ bool Log_Init(void)
 
 	stopthreads = false;
 
-	if (!Sys_CreateMutex(&loglock) ||
-		!Sys_CreateCondVar(&logcond) ||
-		!Sys_CreateThread(&logthread, ProcessLogQueue, NULL))
+	if (!Sys_CreateMutex(loglock) ||
+		!Sys_CreateCondVar(logcond) ||
+		!Sys_CreateThread(logthread, ProcessLogQueue, NULL))
 	{
 		Sys_JoinThread(logthread);
-		Sys_DestroyCondVar(&logcond);
-		Sys_DestroyMutex(&loglock);
+		Sys_DestroyCondVar(logcond);
+		Sys_DestroyMutex(loglock);
 
 		fclose(logfile);
 		logfile = NULL;
@@ -221,11 +221,11 @@ void Log_Shutdown(void)
 
 	stopthreads = true;
 
-	Sys_SignalCondVar(&logcond);
+	Sys_SignalCondVar(logcond);
 
 	Sys_JoinThread(logthread);
-	Sys_DestroyCondVar(&logcond);
-	Sys_DestroyMutex(&loglock);
+	Sys_DestroyCondVar(logcond);
+	Sys_DestroyMutex(loglock);
 
 	if (logfile)
 	{
@@ -240,7 +240,7 @@ void Log_Write(const logtype_t type, const char *msg, ...)
 	if (logcount >= MAX_LOG_ENTRIES)
 		return;
 
-	Sys_LockMutex(&loglock);
+	Sys_LockMutex(loglock);
 
 	logentry_t *entry = &logqueue[logcount];
 
@@ -254,14 +254,14 @@ void Log_Write(const logtype_t type, const char *msg, ...)
 
 	logcount++;
 
-	Sys_UnlockMutex(&loglock);
+	Sys_UnlockMutex(loglock);
 
-	Sys_SignalCondVar(&logcond);
+	Sys_SignalCondVar(logcond);
 }
 
 void Log_WriteSeq(const logtype_t type, const char *msg, ...)
 {
-	Sys_LockMutex(&loglock);
+	Sys_LockMutex(loglock);
 
 	struct tm timeinfo;
 	char timestr[LOG_TIMESTR_LEN] = { 0 };
@@ -281,12 +281,12 @@ void Log_WriteSeq(const logtype_t type, const char *msg, ...)
 	if (type == LOG_ERROR)
 		fflush(logfile);
 
-	Sys_UnlockMutex(&loglock);
+	Sys_UnlockMutex(loglock);
 }
 
 void Log_WriteLargeSeq(const logtype_t type, const char *msg, ...)
 {
-	Sys_LockMutex(&loglock);
+	Sys_LockMutex(loglock);
 
 	va_list arg;
 	va_start(arg, msg);
@@ -315,5 +315,5 @@ void Log_WriteLargeSeq(const logtype_t type, const char *msg, ...)
 		MemCache_Free(logmsg);
 	}
 
-	Sys_UnlockMutex(&loglock);
+	Sys_UnlockMutex(loglock);
 }
