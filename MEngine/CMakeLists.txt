@@ -119,3 +119,11 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 		target_compile_options(MEngine PRIVATE "-O3" "-flto" "-S")
 	endif()
 endif()
+
+# Add options for doing a memory check with ASAN
+option(CHECK_MEMORY "Uses ASAN to check if there are any memory leaks" OFF)
+
+if(CHECK_MEMORY)
+target_compile_definitions(MEngine PRIVATE MemCache_Alloc=malloc)
+target_compile_definitions(MEngine PRIVATE MemCache_Free=free)
+endif()
