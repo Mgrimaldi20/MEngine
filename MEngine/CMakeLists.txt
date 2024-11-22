@@ -56,6 +56,7 @@ target_sources(MEngine PRIVATE
 	"src/common/log.c"
 	"src/common/cvar.c"
 	"src/common/memory.c"
+	"src/common/filesystem.c"
 	"src/renderer/renderer.h"
 	"src/renderer/rendererinit.c"
 	"src/renderer/renderer.c"
