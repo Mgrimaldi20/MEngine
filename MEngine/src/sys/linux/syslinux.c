@@ -241,21 +241,20 @@ thread_t *Sys_CreateThread(void *(*func)(void *), void *arg)
 	}
 
 	if (!handle)
-		return(false);
+		return(NULL);
 
 	handle->used = true;
 
 	if (pthread_create(&handle->thread, NULL, func, arg) != 0)
 	{
 		handle->used = false;
-		return(false);
+		return(NULL);
 	}
 
-	thread = handle;
-	return(true);
+	return(handle);
 }
 
-void Sys_JoinThread(thread_t **thread)
+void Sys_JoinThread(thread_t *thread)
 {
 	if (thread)
 	{
@@ -277,21 +276,20 @@ mutex_t *Sys_CreateMutex(void)
 	}
 
 	if (!handle)
-		return(false);
+		return(NULL);
 
 	handle->used = true;
 
 	if (pthread_mutex_init(&handle->mutex, NULL) != 0)
 	{
 		handle->used = false;
-		return(false);
+		return(NULL);
 	}
 
-	mutex = handle;
-	return(true);
+	return(handle);
 }
 
-void Sys_DestroyMutex(mutex_t **mutex)
+void Sys_DestroyMutex(mutex_t *mutex)
 {
 	if (mutex)
 	{
@@ -300,12 +298,12 @@ void Sys_DestroyMutex(mutex_t **mutex)
 	}
 }
 
-void Sys_LockMutex(mutex_t **mutex)
+void Sys_LockMutex(mutex_t *mutex)
 {
 	pthread_mutex_lock(&mutex->mutex);
 }
 
-void Sys_UnlockMutex(mutex_t **mutex)
+void Sys_UnlockMutex(mutex_t *mutex)
 {
 	pthread_mutex_unlock(&mutex->mutex);
 }
@@ -323,21 +321,20 @@ condvar_t *Sys_CreateCondVar(void)
 	}
 
 	if (!handle)
-		return(false);
+		return(NULL);
 
 	handle->used = true;
 
 	if (pthread_cond_init(&handle->cond, NULL) != 0)
 	{
 		handle->used = false;
-		return(false);
+		return(NULL);
 	}
 
-	condvar = handle;
-	return(true);
+	return(handle);
 }
 
-void Sys_DestroyCondVar(condvar_t **condvar)
+void Sys_DestroyCondVar(condvar_t *condvar)
 {
 	if (condvar)
 	{
@@ -346,12 +343,12 @@ void Sys_DestroyCondVar(condvar_t **condvar)
 	}
 }
 
-void Sys_WaitCondVar(condvar_t **condvar, mutex_t **mutex)
+void Sys_WaitCondVar(condvar_t *condvar, mutex_t *mutex)
 {
 	pthread_cond_wait(&condvar->cond, &mutex->mutex);
 }
 
-void Sys_SignalCondVar(condvar_t **condvar)
+void Sys_SignalCondVar(condvar_t *condvar)
 {
 	pthread_cond_signal(&condvar->cond);
 }
