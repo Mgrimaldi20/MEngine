@@ -29,7 +29,7 @@ struct condvar
 
 static thread_t threads[SYS_MAX_THREADS];
 static mutex_t mutexes[SYS_MAX_MUTEXES];
-static condvar_t condvars[SYS_MAX_COND_VARS];
+static condvar_t condvars[SYS_MAX_CONDVARS];
 
 bool Sys_Init(void)
 {
