@@ -122,7 +122,7 @@ static void *ProcessLogQueue(void *args)
 		Sys_LockMutex(loglock);
 
 		while (logcount == 0 && !stopthreads)
-			Sys_WaitCondVar(logcond, loglock);
+			Sys_WaitCondVar(&logcond, loglock);
 
 		if (stopthreads)
 		{
