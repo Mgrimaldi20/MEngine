@@ -228,7 +228,7 @@ unsigned long Sys_GetMaxThreads(void)
 	return(sysconf(_SC_NPROCESSORS_ONLN));
 }
 
-bool Sys_CreateThread(thread_t *thread, void *(*func)(void *), void *arg)
+thread_t *Sys_CreateThread(void *(*func)(void *), void *arg)
 {
 	thread_t *handle = NULL;
 	for (int i=0; !handle && i<SYS_MAX_THREADS; i++)
@@ -255,7 +255,7 @@ bool Sys_CreateThread(thread_t *thread, void *(*func)(void *), void *arg)
 	return(true);
 }
 
-void Sys_JoinThread(thread_t *thread)
+void Sys_JoinThread(thread_t **thread)
 {
 	if (thread)
 	{
@@ -264,7 +264,7 @@ void Sys_JoinThread(thread_t *thread)
 	}
 }
 
-bool Sys_CreateMutex(mutex_t *mutex)
+mutex_t *Sys_CreateMutex(void)
 {
 	mutex_t *handle = NULL;
 	for (int i=0; !handle && i<SYS_MAX_MUTEXES; i++)
@@ -291,7 +291,7 @@ bool Sys_CreateMutex(mutex_t *mutex)
 	return(true);
 }
 
-void Sys_DestroyMutex(mutex_t *mutex)
+void Sys_DestroyMutex(mutex_t **mutex)
 {
 	if (mutex)
 	{
@@ -300,17 +300,17 @@ void Sys_DestroyMutex(mutex_t *mutex)
 	}
 }
 
-void Sys_LockMutex(mutex_t *mutex)
+void Sys_LockMutex(mutex_t **mutex)
 {
 	pthread_mutex_lock(&mutex->mutex);
 }
 
-void Sys_UnlockMutex(mutex_t *mutex)
+void Sys_UnlockMutex(mutex_t **mutex)
 {
 	pthread_mutex_unlock(&mutex->mutex);
 }
 
-bool Sys_CreateCondVar(condvar_t *condvar)
+condvar_t *Sys_CreateCondVar(void)
 {
 	condvar_t *handle = NULL;
 	for (int i=0; !handle && i<SYS_MAX_COND_VARS; i++)
@@ -337,7 +337,7 @@ bool Sys_CreateCondVar(condvar_t *condvar)
 	return(true);
 }
 
-void Sys_DestroyCondVar(condvar_t *condvar)
+void Sys_DestroyCondVar(condvar_t **condvar)
 {
 	if (condvar)
 	{
@@ -346,12 +346,12 @@ void Sys_DestroyCondVar(condvar_t *condvar)
 	}
 }
 
-void Sys_WaitCondVar(condvar_t *condvar, mutex_t *mutex)
+void Sys_WaitCondVar(condvar_t **condvar, mutex_t **mutex)
 {
 	pthread_cond_wait(&condvar->cond, &mutex->mutex);
 }
 
-void Sys_SignalCondVar(condvar_t *condvar)
+void Sys_SignalCondVar(condvar_t **condvar)
 {
 	pthread_cond_signal(&condvar->cond);
 }

@@ -72,18 +72,18 @@ typedef struct		// system services
 	void (*Sleep)(unsigned long milliseconds);
 	void (*Localtime)(struct tm *buf, const time_t *timer);
 
-	bool (*CreateThread)(thread_t *thread, void *(*func)(void *), void *arg);
-	void (*JoinThread)(thread_t *thread);
+	thread_t *(*CreateThread)(void *(*func)(void *), void *arg);
+	void (*JoinThread)(thread_t **thread);
 
-	bool (*InitMutex)(mutex_t *mutex);
-	void (*DestroyMutex)(mutex_t *mutex);
-	void (*LockMutex)(mutex_t *mutex);
-	void (*UnlockMutex)(mutex_t *mutex);
+	mutex_t *(*InitMutex)(void);
+	void (*DestroyMutex)(mutex_t **mutex);
+	void (*LockMutex)(mutex_t **mutex);
+	void (*UnlockMutex)(mutex_t **mutex);
 
-	bool (*CreateCondVar)(condvar_t *condvar);
-	void (*DestroyCondVar)(condvar_t *condvar);
-	void (*WaitCondVar)(condvar_t *condvar, mutex_t *mutex);
-	void (*SignalCondVar)(condvar_t *condvar);
+	condvar_t *(*CreateCondVar)(void);
+	void (*DestroyCondVar)(condvar_t **condvar);
+	void (*WaitCondVar)(condvar_t **condvar, mutex_t **mutex);
+	void (*SignalCondVar)(condvar_t **condvar);
 
 	void *(*LoadDLL)(const char *dllname);			// returns the DLL handle
 	void (*UnloadDLL)(void *handle);
