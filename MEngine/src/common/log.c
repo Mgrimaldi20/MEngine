@@ -122,7 +122,7 @@ static void *ProcessLogQueue(void *args)
 		Sys_LockMutex(loglock);
 
 		while (logcount == 0 && !stopthreads)
-			Sys_WaitCondVar(&logcond, loglock);
+			Sys_WaitCondVar(logcond, loglock);
 
 		if (stopthreads)
 		{
@@ -195,9 +195,11 @@ bool Log_Init(void)
 
 	stopthreads = false;
 
-	if (!Sys_CreateMutex(loglock) ||
-		!Sys_CreateCondVar(logcond) ||
-		!Sys_CreateThread(logthread, ProcessLogQueue, NULL))
+	loglock = Sys_CreateMutex();
+	logcond = Sys_CreateCondVar();
+	logthread = Sys_CreateThread(ProcessLogQueue, NULL);
+
+	if (!loglock || !logcond || !logthread)
 	{
 		Sys_JoinThread(logthread);
 		Sys_DestroyCondVar(logcond);
