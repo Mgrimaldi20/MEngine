@@ -32,6 +32,9 @@ typedef struct
 	char filename[SYS_MAX_PATH];
 } sysfiledata_t;
 
+typedef struct sysdir sysdir_t;
+typedef struct sysdirent sysdirent_t;
+
 bool Sys_ListFiles(const char *directory, const char *filter, sysfiledata_t *filelist, unsigned int numfiles);
 unsigned int Sys_CountFiles(const char *directory, const char *filter);
 time_t Sys_FileTimeStamp(const char *fname);

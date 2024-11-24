@@ -96,6 +96,25 @@ if (UNIX AND APPLE)		# Only add GLFW to the project on a Unix system, Windows wi
 	include_directories(libs/glfw/include)											# Just add the include path for ease of use
 endif()
 
+# Add the LibZip library to the project and link to target
+#set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build shared library")
+#set(LIBZIP_DO_INSTALL OFF CACHE BOOL "Install libzip and the related files")
+#set(BUILD_DOC OFF CACHE BOOL "Build documentation")
+#set(BUILD_EXAMPLES OFF CACHE BOOL "Build examples")
+#set(BUILD_OSSFUZZ OFF CACHE BOOL "Build fuzzers for ossfuzz")
+#set(BUILD_REGRESS OFF CACHE BOOL "Build regression tests")
+#set(BUILD_TOOLS OFF CACHE BOOL "Build tools in the src directory (zipcmp, zipmerge, ziptool)")
+#set(ENABLE_FDOPEN OFF CACHE BOOL "Enable zip_fdopen, which is not allowed in Microsoft CRT secure libraries")
+#add_subdirectory("libs/libzip" EXCLUDE_FROM_ALL)
+#target_link_libraries(MEngine PRIVATE libzip)
+#include_directories(libs/libzip/lib)
+
+# Add the Zlib library to the project and link to target
+#set(ZLIB_BUILD_EXAMPLES OFF CACHE BOOL "Enable Zlib Examples")
+#add_subdirectory("libs/zlib" EXCLUDE_FROM_ALL)
+#target_link_libraries(MEngine PRIVATE zlib)
+#include_directories(libs/zlib)
+
 # Set up all the compiler options here
 if(MSVC)
 	target_compile_options(MEngine PRIVATE "/W4" "/WX" "/permissive-" "/analyze" "/fp:fast")				# Common options for all build types
