@@ -1,6 +1,11 @@
 # MEngine
 Still a big WIP... It is very basic at the moment. Hoping that making it public will boost my motivation to work on it more.
 
+## Submodules
+This project uses submodules, so when cloning the project, use the `--recurse-submodules` flag to clone the submodules as well.
+Alternatively, you can run `git submodule update --init --recursive` after cloning the project.
+Or just `git submodule init`
+
 ## Developing A Game
 To develop a game you need to define a .def file that contains the following, it must export the `GetMServices` function:
 ```
