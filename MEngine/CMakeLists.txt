@@ -97,6 +97,7 @@ if(LINUX OR APPLE)		# Only add GLFW to the project on a Unix system, Windows wil
 endif()
 
 # Add Zlib to the project
+set(ZLIB_BUILD_EXAMPLES OFF CACHE BOOL "Build examples")
 add_subdirectory("libs/zlib" EXCLUDE_FROM_ALL)
 target_link_libraries(MEngine PRIVATE zlibstatic)
 
