@@ -216,6 +216,7 @@ static void ShutdownGame(void)
 
 static void UpdateConfigs(void)
 {
+	// TODO: update any config changes, key binds, etc.
 }
 
 bool Common_Init(void)
@@ -254,11 +255,10 @@ bool Common_Init(void)
 
 void Common_Shutdown(void)
 {
-	if (Common_DebugMode())
-	{
-		CVar_ListAllCVars();
-		MemCache_Dump();
-	}
+#if defined(MENGINE_DEBUG)
+	CVar_ListAllCVars();
+	MemCache_Dump();
+#endif
 
 	ShutdownGame();
 	Sys_Shutdown();

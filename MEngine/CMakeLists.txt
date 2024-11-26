@@ -79,12 +79,12 @@ endif()
 
 # Add the OpenGL GLU library to the project and link to target
 if(WIN32)
-	target_link_libraries(MEngine opengl32 glu32)
-elseif(UNIX AND APPLE)
-	target_link_libraries(MEngine GL GLU)
+	target_link_libraries(MEngine PRIVATE opengl32 glu32)
+elseif(LINUX OR APPLE)
+	target_link_libraries(MEngine PRIVATE GL GLU)
 endif()
 
-if (UNIX AND APPLE)		# Only add GLFW to the project on a Unix system, Windows will use Win32 API
+if(LINUX OR APPLE)		# Only add GLFW to the project on a Unix system, Windows will use Win32 API
 	# Add the GLFW library to the project and link to target
 	set(GLFW_LIBRARY_TYPE STATIC CACHE STRING "Build as static lib")
 	set(GLFW_INSTALL OFF CACHE BOOL "Generate installation target")					# Don't care about this, just turn it off'
@@ -95,6 +95,40 @@ if (UNIX AND APPLE)		# Only add GLFW to the project on a Unix system, Windows wi
 	target_link_libraries(MEngine PRIVATE glfw)
 	include_directories(libs/glfw/include)											# Just add the include path for ease of use
 endif()
+
+# Add Zlib to the project
+add_subdirectory("libs/zlib" EXCLUDE_FROM_ALL)
+target_link_libraries(MEngine PRIVATE zlibstatic)
+
+# Add LibZip to the project
+message(STATUS "Setting up LibZip for the project")
+message(STATUS "MEngine binary directory = ${CMAKE_CURRENT_BINARY_DIR}")
+
+# This is a hack to get the Zlib library path, I don't know how to get it from the Zlib target
+if(WIN32)
+	if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+		set(ZLIB_LIBRARY "${CMAKE_CURRENT_BINARY_DIR}/libs/zlib/zlibstaticd.lib")
+	elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
+		set(ZLIB_LIBRARY "${CMAKE_CURRENT_BINARY_DIR}/libs/zlib/zlibstatic.lib")
+	endif()
+elseif(LINUX OR APPLE)
+	if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+		set(ZLIB_LIBRARY "${CMAKE_CURRENT_BINARY_DIR}/libs/zlib/zlibstaticd.a")
+	elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
+		set(ZLIB_LIBRARY "${CMAKE_CURRENT_BINARY_DIR}/libs/zlib/zlibstatic.a")
+	endif()
+endif()
+
+set(ZLIB_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/libs/zlib")
+
+# Include Zlib directories
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/libs/zlib" "${CMAKE_CURRENT_BINARY_DIR}/libs/zlib")
+
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build shared libraries")
+set(LIBZIP_DO_INSTALL OFF CACHE BOOL "Generate installation target")
+add_subdirectory("libs/libzip" EXCLUDE_FROM_ALL)
+target_link_libraries(MEngine PRIVATE libzip::zip)
+include_directories(libs/libzip/lib)												# Just add the include path for ease of use
 
 # Set up all the compiler options here
 if(MSVC)
