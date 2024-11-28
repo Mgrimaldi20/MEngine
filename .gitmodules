@@ -1,3 +1,9 @@
 [submodule "MEngine/libs/glfw"]
 	path = MEngine/libs/glfw
 	url = https://github.com/glfw/glfw.git
+[submodule "MEngine/libs/minizip-ng"]
+	path = MEngine/libs/minizip-ng
+	url = https://github.com/zlib-ng/minizip-ng.git
+[submodule "MEngine/libs/zlib-ng"]
+	path = MEngine/libs/zlib-ng
+	url = https://github.com/zlib-ng/zlib-ng.git
