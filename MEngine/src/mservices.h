@@ -58,8 +58,8 @@ typedef struct		// cvar system
 	int *(*GetInt)(cvar_t *cvar);
 	float *(*GetFloat)(cvar_t *cvar);
 	bool *(*GetBool)(cvar_t *cvar);
-	void (*SetString)(cvar_t *cvar, const char *value);
 
+	void (*SetString)(cvar_t *cvar, const char *value);
 	void (*SetInt)(cvar_t *cvar, const int value);
 	void (*SetFloat)(cvar_t *cvar, const float value);
 	void (*SetBool)(cvar_t *cvar, const bool value);

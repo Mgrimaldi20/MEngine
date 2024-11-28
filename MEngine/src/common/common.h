@@ -81,3 +81,8 @@ void CVar_SetString(cvar_t *cvar, const char *value);
 void CVar_SetInt(cvar_t *cvar, const int value);
 void CVar_SetFloat(cvar_t *cvar, const float value);
 void CVar_SetBool(cvar_t *cvar, const bool value);
+
+bool FileSys_Init(void);
+void FileSys_Shutdown(void);
+bool FileSys_FileIsInPak(const char *filename);
+void FileSys_ListPakFiles(void);
