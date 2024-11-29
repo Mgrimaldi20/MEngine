@@ -18,7 +18,7 @@ typedef enum
 gameservices_t gameservices;
 
 static mservices_t mservices;
-static log_t log;
+static log_t logsystem;
 static memcache_t memcache;
 static cvarsystem_t cvarsystem;
 static sys_t sys;
@@ -77,7 +77,7 @@ static void PrintHelpMsg(void)
 
 static void CreateMServices(void)
 {
-	log = (log_t)
+	logsystem = (log_t)
 	{
 		.Write = Log_Write,
 		.WriteSeq = Log_WriteSeq,
@@ -135,7 +135,7 @@ static void CreateMServices(void)
 	mservices = (mservices_t)
 	{
 		.version = MENGINE_VERSION,
-		.log = &log,
+		.log = &logsystem,
 		.memcache = &memcache,
 		.cvarsystem = &cvarsystem,
 		.sys = &sys

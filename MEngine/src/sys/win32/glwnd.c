@@ -405,10 +405,7 @@ static bool GLCreateWindow(glwndparams_t params)
 
 	wchar_t wwndname[MAX_WIN_NAME];
 	if (!MultiByteToWideChar(CP_UTF8, 0, params.wndname, MAX_WIN_NAME, wwndname, MAX_WIN_NAME))
-	{
 		WindowsError();
-		return(false);
-	}
 
 	wwndname[MAX_WIN_NAME - 1] = L'\0';
 
@@ -425,19 +422,13 @@ static bool GLCreateWindow(glwndparams_t params)
 	);
 
 	if (!win32state.hwnd)
-	{
 		WindowsError();
-		return(false);
-	}
 
 	ShowWindow(win32state.hwnd, SW_SHOW);
 	UpdateWindow(win32state.hwnd);
 
 	if (!InitOpenGL(params))
-	{
 		Sys_Error("%s: Could not initialise OpenGL", __func__);
-		return(false);
-	}
 
 	SetForegroundWindow(win32state.hwnd);
 	SetFocus(win32state.hwnd);
@@ -521,10 +512,7 @@ bool GLWnd_Init(glwndparams_t params)
 {
 	HDC hdc = GetDC(GetDesktopWindow());
 	if (!hdc)
-	{
 		WindowsError();
-		return(false);
-	}
 
 	win32state.desktopwidth = GetDeviceCaps(hdc, HORZRES);
 	win32state.desktopheight = GetDeviceCaps(hdc, VERTRES);
@@ -557,10 +545,7 @@ bool GLWnd_Init(glwndparams_t params)
 
 	CreateWndClasses();
 	if (!win32state.wndclassregistered)
-	{
 		WindowsError();
-		return(false);
-	}
 
 	// create fake window to get WGL extensions, very weird but its how DOOM 3 does it so it must work
 	if (!CreateFakeWindowExt())
