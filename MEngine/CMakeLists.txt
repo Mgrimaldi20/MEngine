@@ -97,12 +97,32 @@ if(LINUX OR APPLE)		# Only add GLFW to the project on a Unix system, Windows wil
 endif()
 
 # Add Zlib-ng to the project
+set(WITH_NATIVE_INSTRUCTIONS ON CACHE BOOL "Compiles with full instruction set supported on this host (gcc/clang -march=native)")
+set(ZLIBNG_ENABLE_TESTS OFF CACHE BOOL "Test zlib-ng specific API")
+set(ZLIB_ENABLE_TESTS OFF CACHE BOOL "Build test binaries")
+set(WITH_GTEST OFF CACHE BOOL "Build gtest_zlib")
 add_subdirectory("libs/zlib-ng" EXCLUDE_FROM_ALL)
-target_link_libraries(MEngine PRIVATE zlib-ng)
+target_link_libraries(MEngine PRIVATE zlib)
+
+# Add the Zlib-ng include and lib directory to the project
+target_include_directories(MEngine PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/libs/zlib-ng")
+target_include_directories(MEngine PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/libs/zlib-ng")
+target_link_directories(MEngine PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/libs/zlib-ng")
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/libs/zlib-ng" "${CMAKE_CURRENT_BINARY_DIR}/libs/zlib-ng")
 
 # Add Minizip-ng to the project
+set(MZ_FETCH_LIBS OFF CACHE BOOL "Fetch external dependencies")
+set(MZ_BZIP2 OFF CACHE BOOL "Enable bzip2 support")
+set(MZ_LZMA OFF CACHE BOOL "Enable lzma support")
+set(MZ_ZSTD OFF CACHE BOOL "Enable zstd support")
+set(MZ_OPENSSL OFF CACHE BOOL "Enable openssl support")
+set(MZ_WZAES OFF CACHE BOOL "Enable wzaes support")
+set(MZ_PKCRYPT OFF CACHE BOOL "Enable pkcrypt support")
+set(MZ_LIBCOMP OFF CACHE BOOL "Enable libcomp support")
+set(MZ_LIBBSD OFF CACHE BOOL "Enable libbsd support")
+set(MZ_ICONV OFF CACHE BOOL "Enable iconv support")
 add_subdirectory("libs/minizip-ng" EXCLUDE_FROM_ALL)
-target_link_libraries(MEngine PRIVATE minizip::minizip)
+target_link_libraries(MEngine PRIVATE MINIZIP::minizip)
 
 # Set up all the compiler options here
 if(MSVC)
