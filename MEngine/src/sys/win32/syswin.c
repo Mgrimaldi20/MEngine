@@ -50,10 +50,7 @@ bool Sys_Init(void)
 		VER_MINORVERSION |
 		VER_SERVICEPACKMAJOR |
 		VER_SERVICEPACKMINOR, dwlcondmask))
-	{
 		WindowsError();
-		return(false);
-	}
 
 	Log_WriteSeq(LOG_INFO, "Windows version: %d.%d.%d.%d",
 		win32state.osver.dwMajorVersion,
@@ -389,14 +386,11 @@ void *Sys_LoadDLL(const char *dllname)
 {
 	wchar_t wdllname[MAX_PATH] = { 0 };
 	if (!MultiByteToWideChar(CP_UTF8, 0, dllname, -1, wdllname, MAX_PATH))
-		return(0);
+		return(NULL);
 
 	HMODULE libhandle = LoadLibrary(wdllname);
 	if (!libhandle)
-	{
 		WindowsError();
-		return(0);
-	}
 
 	return(libhandle);
 }

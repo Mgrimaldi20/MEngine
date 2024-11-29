@@ -1,4 +1,5 @@
 #include "common.h"
+#include "unzip.h"
 
 bool FileSys_Init(void)
 {
