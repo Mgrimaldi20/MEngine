@@ -405,7 +405,7 @@ static bool GLCreateWindow(glwndparams_t params)
 
 	wchar_t wwndname[MAX_WIN_NAME];
 	if (!MultiByteToWideChar(CP_UTF8, 0, params.wndname, MAX_WIN_NAME, wwndname, MAX_WIN_NAME))
-		WindowsError();
+		return(false);
 
 	wwndname[MAX_WIN_NAME - 1] = L'\0';
 
@@ -422,7 +422,7 @@ static bool GLCreateWindow(glwndparams_t params)
 	);
 
 	if (!win32state.hwnd)
-		WindowsError();
+		return(false);
 
 	ShowWindow(win32state.hwnd, SW_SHOW);
 	UpdateWindow(win32state.hwnd);
@@ -560,7 +560,7 @@ bool GLWnd_Init(glwndparams_t params)
 	}
 
 	if (!GLCreateWindow(params))
-		return(false);
+		WindowsError();
 
 	GetWGLExtensions(win32state.hdc);	// get WGL extensions for real window
 
