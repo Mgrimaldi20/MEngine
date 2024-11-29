@@ -123,6 +123,7 @@ set(MZ_LIBBSD OFF CACHE BOOL "Enable libbsd support")
 set(MZ_ICONV OFF CACHE BOOL "Enable iconv support")
 add_subdirectory("libs/minizip-ng" EXCLUDE_FROM_ALL)
 target_link_libraries(MEngine PRIVATE MINIZIP::minizip)
+include_directories("libs/minizip-ng")
 
 # Set up all the compiler options here
 if(MSVC)
