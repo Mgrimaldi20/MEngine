@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "sys/sys.h"
 #include "common.h"
 #include "unzip.h"
 
@@ -24,21 +25,28 @@ bool FileSys_FileExists(const char *filename)
 
 size_t FileSys_FileSize(const char *filename)
 {
+	(const char *)filename;
 	return(0);
 }
 
-time_t FileSys_FileTimeStamp(const char *filename)
+time_t FileSys_FileTimeLastWrite(const char *filename)
 {
+	(const char *)filename;
 	return(0);
 }
 
 unsigned int FileSys_CountFiles(const char *directory, const char *filter)
 {
+	(const char *)directory;
+	(const char *)filter;
 	return(0);
 }
 
 filedata_t *FileSys_ListFiles(const char *directory, const char *filter, unsigned int numfiles)		// if numfiles is 0, all files will be listed
 {
+	(const char *)directory;
+	(const char *)filter;
+	(const unsigned int)numfiles;
 	return(NULL);
 }
 

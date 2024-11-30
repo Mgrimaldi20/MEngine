@@ -2,8 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include "sys/sys.h"
 #include "common.h"
-#include "../renderer/renderer.h"
+#include "renderer/renderer.h"
 
 typedef enum
 {

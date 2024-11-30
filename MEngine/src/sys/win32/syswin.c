@@ -5,7 +5,8 @@
 #include <direct.h>
 #include <process.h>
 #include <sys/stat.h>
-#include "../../common/common.h"
+#include "sys/sys.h"
+#include "common/common.h"
 #include "winlocal.h"
 
 struct thread
@@ -130,6 +131,24 @@ bool Sys_Mkdir(const char *path)
 	}
 
 	return(true);
+}
+
+filedata_t Sys_Stat(const char *filepath)
+{
+	struct _stat st;
+	if (_stat(filepath, &st) == -1)
+	{
+		Log_Write(LOG_ERROR, "%s, Failed to make a call to stat(): %s", __func__, filepath);
+		return((filedata_t){ 0 });
+	}
+
+	filedata_t data;
+	snprintf(data.filename, SYS_MAX_PATH, "%s", filepath);
+	data.filesize = st.st_size;
+	data.lastwritetime = st.st_mtime;
+
+	// TODO: add more file data here
+	return(data);
 }
 
 char *Sys_Strtok(char *string, const char *delimiter, char **context)
