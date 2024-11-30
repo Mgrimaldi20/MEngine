@@ -3,7 +3,6 @@
 #include <stddef.h>
 #include <stdbool.h>
 #include "../mservices.h"
-#include "../sys/sys.h"
 
 typedef gameservices_t *(*getmservices_t)(mservices_t *services);
 
@@ -93,7 +92,7 @@ bool FileSys_Init(void);
 void FileSys_Shutdown(void);
 bool FileSys_FileExists(const char *filename);
 size_t FileSys_FileSize(const char *filename);
-time_t FileSys_FileTimeStamp(const char *filename);
+time_t FileSys_FileTimeLastWrite(const char *filename);
 unsigned int FileSys_CountFiles(const char *directory, const char *filter);
 filedata_t *FileSys_ListFiles(const char *directory, const char *filter, unsigned int numfiles);
 void FileSys_FreeFileList(filedata_t *filelist);

@@ -12,6 +12,8 @@
 #error Unknown GL libraries.
 #endif
 
+#include "common/common.h"
+
 #define SYS_MAX_CMDLINE_ARGS 32
 
 bool Sys_Init(void);
@@ -20,6 +22,7 @@ void Sys_Error(const char *error, ...);
 void Sys_ProcessCommandLine(char cmdout[SYS_MAX_CMDLINE_ARGS][SYS_MAX_CMDLINE_ARGS]);
 
 bool Sys_Mkdir(const char *path);
+filedata_t Sys_Stat(const char *filepath);
 char *Sys_Strtok(char *string, const char *delimiter, char **context);
 void Sys_Sleep(unsigned long milliseconds);
 void Sys_Localtime(struct tm *buf, const time_t *timer);

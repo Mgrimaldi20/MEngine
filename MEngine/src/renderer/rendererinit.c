@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <time.h>
-#include "../common/common.h"
+#include "sys/sys.h"
+#include "common/common.h"
 #include "renderer.h"
 
 typedef struct

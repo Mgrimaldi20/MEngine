@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include <time.h>
-#include "../../common/common.h"
+#include "sys/sys.h"
+#include "common/common.h"
 #include "winlocal.h"
-#include "../../renderer/renderer.h"
+#include "renderer/renderer.h"
 #include "wglext.h"		// for OpenGL Windows extensions
 
 #define WINDOW_STYLE (WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_VISIBLE | WS_SIZEBOX)
