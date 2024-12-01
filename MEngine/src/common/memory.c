@@ -2,6 +2,7 @@
 #include <string.h>
 #include <assert.h>
 #include <time.h>
+#include "sys/sys.h"
 #include "common.h"
 
 #define MEM_CACHE_SIZE 500 * 1024 * 1024	// 500MB
