@@ -25,7 +25,7 @@ static FILE *cvarfile;
 
 static const char *cvardir = "configs";
 static const char *cvarfilename = "MEngine.cfg";
-static const char *overridefile = "overrides.cfg";
+static const char *override_filename = "overrides.cfg";
 
 static size_t HashFunction(const char *name)	// this function is actually okay for resizing, a new hash is generated for the new map size
 {
@@ -145,6 +145,53 @@ bool CVar_Init(void)
 
 	fclose(cvarfile);
 	cvarfile = NULL;
+
+	// read the overrides file and populate the cvar list if cvars exist and if the file exists
+	FILE* overrides_file = fopen(override_filename, "r");
+	if (overrides_file)
+	{
+		Log_WriteSeq(LOG_INFO, "Overrides file exists. Overriding the cvars. Hi Marco");
+
+		memset(line, 0, 1024);
+		while (fgets(line, sizeof(line), overrides_file))
+		{
+			if (line[0] == '\n' || line[0] == '\r' || line[0] == ' ' || line[0] == '#')
+				continue;
+
+			char* name = NULL;
+			char* value = NULL;
+
+			name = Sys_Strtok(line, " ", &value);
+			value = Sys_Strtok(NULL, "\n", &value);
+
+			if (!name || !value)
+			{
+				Log_WriteSeq(LOG_ERROR, "Invalid override CVar parsed, line: %s", line);
+				continue;
+			}
+
+			size_t slen = strnlen(value, CVAR_MAX_STR_LEN);
+			if (slen > CVAR_MAX_STR_LEN)
+			{
+				Log_WriteSeq(LOG_ERROR, "Override CVar value too long: %s", value);
+				continue;
+			}
+
+			cvar_t* cvar = CVar_RegisterString(name, value, CVAR_NONE, "");
+			if (!cvar)
+			{
+				Log_WriteSeq(LOG_ERROR, "Failed to register override CVar: %s", name);
+				continue;
+			}
+		}
+
+		fclose(overrides_file);
+		overrides_file = NULL;
+	} 
+	else 
+	{
+		Log_WriteSeq(LOG_INFO, "Overrides file does not exist.");
+	}
 
 	return(true);
 }
