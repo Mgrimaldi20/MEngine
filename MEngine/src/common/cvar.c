@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include "sys/sys.h"
 #include "common.h"
 
 #define DEF_CVAR_MAP_CAPACITY 256

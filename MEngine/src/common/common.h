@@ -3,7 +3,6 @@
 #include <stddef.h>
 #include <stdbool.h>
 #include "../mservices.h"
-#include "../sys/sys.h"
 
 typedef gameservices_t *(*getmservices_t)(mservices_t *services);
 
@@ -81,3 +80,19 @@ void CVar_SetString(cvar_t *cvar, const char *value);
 void CVar_SetInt(cvar_t *cvar, const int value);
 void CVar_SetFloat(cvar_t *cvar, const float value);
 void CVar_SetBool(cvar_t *cvar, const bool value);
+
+typedef struct
+{
+	time_t lastwritetime;
+	size_t filesize;
+	char filename[SYS_MAX_PATH];
+} filedata_t;
+
+bool FileSys_Init(void);
+void FileSys_Shutdown(void);
+bool FileSys_FileExists(const char *filename);
+size_t FileSys_FileSize(const char *filename);
+time_t FileSys_FileTimeLastWrite(const char *filename);
+unsigned int FileSys_CountFiles(const char *directory, const char *filter);
+filedata_t *FileSys_ListFiles(const char *directory, const char *filter, unsigned int numfiles);
+void FileSys_FreeFileList(filedata_t *filelist);

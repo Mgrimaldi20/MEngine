@@ -1,6 +1,6 @@
-#include "../../common/common.h"
+#include "common/common.h"
 #include "linuxlocal.h"
-#include "../../renderer/renderer.h"
+#include "renderer/renderer.h"
 
 bool GLWnd_Init(glwndparams_t params)
 {

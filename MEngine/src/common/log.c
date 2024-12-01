@@ -4,6 +4,7 @@
 #include <time.h>
 #include <string.h>
 #include <limits.h>
+#include "sys/sys.h"
 #include "common.h"
 
 #define LOG_TIMESTR_LEN 100

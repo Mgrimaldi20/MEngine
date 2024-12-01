@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <time.h>
-#include "../../common/common.h"
+#include "common/common.h"
 #include "winlocal.h"
-#include "../../renderer/renderer.h"
+#include "renderer/renderer.h"
 
 static void ResizeWindow(HWND hwnd)
 {
