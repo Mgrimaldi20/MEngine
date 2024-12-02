@@ -4,10 +4,8 @@
 #define WIN32_LEAN_AND_MEAN		// stupidly needed for GLU on Windows
 #include <Windows.h>
 #include <gl/GLU.h>
-#include <threads.h>
 #elif defined(MENGINE_PLATFORM_UNIX)
 #include <GL/glu.h>
-#include <pthread.h>
 #else
 #error Unknown GL libraries.
 #endif

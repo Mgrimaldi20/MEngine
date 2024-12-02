@@ -16,6 +16,12 @@ typedef enum
 	CMD_USE_DEF_ALLOC = 1 << 4
 } cmdlineflags_t;
 
+typedef union
+{
+	void *obj;
+	getmservices_t func;
+} funcptrobj_t;
+
 gameservices_t gameservices;
 
 static mservices_t mservices;
@@ -70,7 +76,7 @@ static void PrintHelpMsg(void)
 		"\t-nocache\tDo not use the memory cache allocator\n"
 		"Press any key to exit...\n";
 
-	printf(helpmsg);
+	printf("%s", helpmsg);
 	Log_WriteSeq(LOG_INFO, helpmsg);
 
 	fflush(stdout);
@@ -175,7 +181,14 @@ static bool InitGame(void)
 
 	CreateMServices();		// populate the mservices struct with the function pointers
 
-	getmservices_t GetMServices = (getmservices_t)Sys_GetProcAddress(gamedllhandle, "GetMServices");
+	void *procaddr = Sys_GetProcAddress(gamedllhandle, "GetMServices");
+	funcptrobj_t conv =
+	{
+		.obj = procaddr
+	};
+
+	getmservices_t GetMServices = conv.func;
+
 	if (!GetMServices)
 	{
 		Sys_Error("Failed to get GetMServices function, handshake failed, could not load function pointers");
