@@ -54,9 +54,11 @@ set_target_properties(DemoGame PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINAR
 ############################################## Install Targets #############################################
 ############################################################################################################
 # Install the executable and DLLs to the bin directory
-install(TARGETS MEngine DemoGame
-	RUNTIME DESTINATION MEngine/bin
-)
+if(WIN32)
+	install(TARGETS MEngine DemoGame
+		RUNTIME DESTINATION MEngine/bin
+	)
+endif()
 
 # Install the shared library to the bin directory, Linux doesnt do this by default
 if(UNIX)
