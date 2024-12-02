@@ -67,6 +67,42 @@ static bool HandleConversionErrors(const char *value, const char *end)
 	return(true);
 }
 
+/*
+* Function: strip_comments
+* Removes any # comments in a line. Also strips leading ' '.
+*
+*   line: The line to remove comments from
+*   stripped_line: The destination line
+*   length: The length of line
+*/
+void strip_comments(char* line, char *stripped_line, int length) 
+{
+	bool seen_char = false;
+
+	int si = 0;
+	for (int i = 0; i < length; i++) 
+	{
+		if (line[i] != ' ') {
+			seen_char = true;
+		}
+
+		if (line[i] == '#') {
+			// We can stop reading the line from here
+			stripped_line[si] = '\0';			
+			break;
+		}
+		else if (line[i] != ' ' || (line[i] == ' ' && seen_char))
+		{
+			// Only write spaces if they aren't at the beginning of the line
+			seen_char = true;
+			stripped_line[si] = line[i];
+			si += 1;
+		}
+	}
+
+	Log_WriteSeq(LOG_INFO, "Stripped line: [ %s ] became [ %s ]", line, stripped_line);
+}
+
 /* 
 * Function: read_CVars_from_file
 * Inserts the CVars into the hashmap from the file given.
@@ -74,23 +110,27 @@ static bool HandleConversionErrors(const char *value, const char *end)
 *   cVar_file: The file with the cVars in it
 *   log_message: A string to insert into the log messages so you can tell what file it came from
 */
-void read_CVars_from_file(FILE *cVar_file, char *log_message) {
+void read_CVars_from_file(FILE *cVar_file, char *log_message) 
+{
 	char line[1024] = { 0 };
 	while (fgets(line, sizeof(line), cVar_file))
 	{
-		if (line[0] == '\n' || line[0] == '\r' || line[0] == ' ' || line[0] == '#')
-			continue;
+		char stripped_line[1024] = { 0 };
+		strip_comments(line, stripped_line, sizeof(line));
+
+		if (stripped_line[0] == '\n' || stripped_line[0] == '\r' || stripped_line[0] == ' ')
+			continue;		
 
 		char* name = NULL;
 		char* value = NULL;
 
 		// pointers returned by Sys_Strtok should be null terminated
-		name = Sys_Strtok(line, " ", &value);
+		name = Sys_Strtok(stripped_line, " ", &value);
 		value = Sys_Strtok(NULL, "\n", &value);
 
 		if (!name || !value)
 		{
-			Log_WriteSeq(LOG_ERROR, "Invalid %s parsed, line: %s", log_message, line);
+			Log_WriteSeq(LOG_ERROR, "Invalid %s parsed, line: %s", log_message, stripped_line);
 			continue;
 		}
 
