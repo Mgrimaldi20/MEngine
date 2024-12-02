@@ -62,6 +62,7 @@ install(TARGETS MEngine DemoGame
 if(UNIX)
 	install(TARGETS MEngine DemoGame
 		LIBRARY DESTINATION MEngine/bin
+		RUNTIME DESTINATION MEngine/bin
 	)
 endif()
 
