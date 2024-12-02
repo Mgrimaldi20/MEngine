@@ -1,11 +1,13 @@
 #include <stddef.h>
 #include "../../MEngine/src/mservices.h"
 
+#include <stdio.h>
+
 mservices_t mservices;
 gameservices_t gameservices;
 
 static bool Init(void)
-{
+{	
 	return(true);
 }
 
@@ -14,7 +16,7 @@ static void Shutdown(void)
 }
 
 static void RunFrame(void)
-{
+{	
 }
 
 gameservices_t *GetMServices(mservices_t *services)
