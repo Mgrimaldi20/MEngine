@@ -58,6 +58,13 @@ install(TARGETS MEngine DemoGame
 	RUNTIME DESTINATION MEngine/bin
 )
 
+# Install the shared library to the bin directory, Linux doesnt do this by default
+if(UNIX)
+	install(TARGETS MEngine
+		LIBRARY DESTINATION MEngine/bin
+	)
+endif()
+
 # Install header files to the sdk directory, preserving the directory structure
 install(FILES
 	"${CMAKE_SOURCE_DIR}/MEngine/src/mservices.h"
