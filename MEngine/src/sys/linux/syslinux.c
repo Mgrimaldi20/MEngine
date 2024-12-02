@@ -6,7 +6,11 @@
 #include <errno.h>
 #include <unistd.h>
 #include <sys/stat.h>
+#include <dlfcn.h>
+#include <pthread.h>
+#include <dirent.h>
 #include "common/common.h"
+#include "sys/sys.h"
 #include "linuxlocal.h"
 
 struct thread
@@ -120,7 +124,7 @@ bool Sys_Mkdir(const char *path)
 filedata_t Sys_Stat(const char *filepath)
 {
 	struct stat st;
-	if (stat(fname, &st) == -1)
+	if (stat(filepath, &st) == -1)
 	{
 		Log_Write(LOG_ERROR, "%s, Failed to make a call to stat(): %s", __func__, filepath);
 		return((filedata_t){ 0 });
@@ -329,7 +333,7 @@ void Sys_UnlockMutex(mutex_t *mutex)
 condvar_t *Sys_CreateCondVar(void)
 {
 	condvar_t *handle = NULL;
-	for (int i=0; !handle && i<SYS_MAX_COND_VARS; i++)
+	for (int i=0; !handle && i<SYS_MAX_CONDVARS; i++)
 	{
 		if (!condvars[i].used)
 		{
@@ -373,7 +377,18 @@ void Sys_SignalCondVar(condvar_t *condvar)
 
 void *Sys_LoadDLL(const char *dllname)
 {
-	void *handle = dlopen(dllname, RTLD_NOW);
+	void *handle = NULL;
+
+	char *path = realpath(dllname, NULL);	// need to get the local OS path
+	if (path)
+	{
+		handle = dlopen(dllname, RTLD_NOW);
+		free(path);
+	}
+
+	if (!handle)
+		handle = dlopen(dllname, RTLD_NOW);	// get from LD path if not found in bin dir
+
 	if (!handle)
 	{
 		Log_WriteSeq(LOG_ERROR, "Failed to load DLL: %s", dlerror());
@@ -386,7 +401,8 @@ void *Sys_LoadDLL(const char *dllname)
 
 void Sys_UnloadDLL(void *handle)
 {
-	dlclose(handle);
+	if (handle)
+		dlclose(handle);
 }
 
 void *Sys_GetProcAddress(void *handle, const char *procname)

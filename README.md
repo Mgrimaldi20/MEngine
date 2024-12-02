@@ -6,6 +6,20 @@ This project uses submodules, so when cloning the project, use the `--recurse-su
 Alternatively, you can run `git submodule update --init --recursive` after cloning the project.
 Or `git submodule init` and `git submodule update`
 
+## Building On Linux
+To build on Linux, simply run the `build_linux.sh` file, it can be built in Debug or Release mode with a switch, eg:
+`./build_linux.sh debug`
+`./build_linux.sh release`
+
+The following packages may need to be installed:
+```
+sudo apt-get install libxkbcommon-dev
+sudo apt-get install libxrandr-dev
+sudo apt install xorg-dev
+sudo apt install libglu1-mesa-dev
+sudo apt install libasan6
+```
+
 ## Developing A Game
 To develop a game you need to define a .def file that contains the following, it must export the `GetMServices` function:
 ```

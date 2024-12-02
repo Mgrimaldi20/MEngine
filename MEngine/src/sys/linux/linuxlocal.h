@@ -1,10 +1,12 @@
 #pragma once
 
-#if !defined(__linux__) || !defined(__APPLE__)
+#if !defined(__linux__) && !defined(__APPLE__)
 #error Include is for Linux and Apple only
 #endif
 
-#include "glfw/glfw3.h"
+#include <stdbool.h>
+#include <sys/utsname.h>
+#include "GLFW/glfw3.h"
 
 typedef struct
 {

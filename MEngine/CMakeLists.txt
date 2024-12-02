@@ -23,7 +23,7 @@ endif()
 
 if(WIN32)
 	target_compile_definitions(MEngine PRIVATE MENGINE_PLATFORM_WINDOWS)
-elseif(LINUX AND APPLE)
+elseif(UNIX)
 	target_compile_definitions(MEngine PRIVATE MENGINE_PLATFORM_UNIX)
 endif()
 
@@ -134,18 +134,20 @@ if(MSVC)
 		target_compile_options(MEngine PRIVATE "/O2" "/MD" "/GL" "/Gw" "/Ot" "/FAs")
 	endif()
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-	target_compile_options(MEngine PRIVATE "-W4" "-Werror" "-Wpedantic" "-ffast-math")						# Common options for all build types
+	target_compile_options(MEngine PRIVATE "-Wall" "-Werror" "-Wpedantic" "-ffast-math")						# Common options for all build types
 	if(CMAKE_BUILD_TYPE STREQUAL "Debug")																	# Debug build compiler options
-		target_compile_options(MEngine PRIVATE "-g" "-fsanitize=address" "-O0" "-S")
+		target_compile_options(MEngine PRIVATE "-g" "-fsanitize=address" "-O0")
+		target_link_libraries(MEngine PRIVATE "-fsanitize=address")
 	elseif(CMAKE_BUILD_TYPE STREQUAL "Release")																# Release build compiler options
-		target_compile_options(MEngine PRIVATE "-O3" "-flto" "-S")
+		target_compile_options(MEngine PRIVATE "-O3" "-flto")
 	endif()
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-	target_compile_options(MEngine PRIVATE "-W4" "-Werror" "-Wpedantic" "-ffast-math")						# Common options for all build types
+	target_compile_options(MEngine PRIVATE "-Wall" "-Werror" "-Wpedantic" "-ffast-math")						# Common options for all build types
 	if(CMAKE_BUILD_TYPE STREQUAL "Debug")																	# Debug build compiler options
-		target_compile_options(MEngine PRIVATE "-g" "-fsanitize=address" "-O0" "-S")
+		target_compile_options(MEngine PRIVATE "-g" "-fsanitize=address" "-O0")
+		target_link_libraries(MEngine PRIVATE "-fsanitize=address")
 	elseif(CMAKE_BUILD_TYPE STREQUAL "Release")																# Release build compiler options
-		target_compile_options(MEngine PRIVATE "-O3" "-flto" "-S")
+		target_compile_options(MEngine PRIVATE "-O3" "-flto")
 	endif()
 endif()
 
