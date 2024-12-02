@@ -60,7 +60,7 @@ install(TARGETS MEngine DemoGame
 
 # Install the shared library to the bin directory, Linux doesnt do this by default
 if(UNIX)
-	install(TARGETS MEngine
+	install(TARGETS MEngine DemoGame
 		LIBRARY DESTINATION MEngine/bin
 	)
 endif()
