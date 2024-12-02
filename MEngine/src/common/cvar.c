@@ -67,6 +67,49 @@ static bool HandleConversionErrors(const char *value, const char *end)
 	return(true);
 }
 
+/* 
+* Function: read_CVars_from_file
+* Inserts the CVars into the hashmap from the file given.
+* 
+*   cVar_file: The file with the cVars in it
+*   log_message: A string to insert into the log messages so you can tell what file it came from
+*/
+void read_CVars_from_file(FILE *cVar_file, char *log_message) {
+	char line[1024] = { 0 };
+	while (fgets(line, sizeof(line), cVar_file))
+	{
+		if (line[0] == '\n' || line[0] == '\r' || line[0] == ' ' || line[0] == '#')
+			continue;
+
+		char* name = NULL;
+		char* value = NULL;
+
+		// pointers returned by Sys_Strtok should be null terminated
+		name = Sys_Strtok(line, " ", &value);
+		value = Sys_Strtok(NULL, "\n", &value);
+
+		if (!name || !value)
+		{
+			Log_WriteSeq(LOG_ERROR, "Invalid %s parsed, line: %s", log_message, line);
+			continue;
+		}
+
+		size_t slen = strnlen(value, CVAR_MAX_STR_LEN);
+		if (slen > CVAR_MAX_STR_LEN)
+		{
+			Log_WriteSeq(LOG_ERROR, "%s value too long: %s", log_message, value);
+			continue;
+		}
+
+		cvar_t* cvar = CVar_RegisterString(name, value, CVAR_NONE, "");
+		if (!cvar)
+		{
+			Log_WriteSeq(LOG_ERROR, "Failed to register %s: %s", log_message, name);
+			continue;
+		}
+	}
+}
+
 bool CVar_Init(void)
 {
 	if (!Sys_Mkdir(cvardir))
@@ -109,88 +152,28 @@ bool CVar_Init(void)
 	for (size_t i=0; i<cvarmap->capacity; i++)
 		cvarmap->cvars[i] = NULL;
 
-	// read the cvar file and populate the cvar list if cvars exist and if the file exists
-	char line[1024] = { 0 };
-	while (fgets(line, sizeof(line), cvarfile))
-	{
-		if (line[0] == '\n' || line[0] == '\r' || line[0] == ' ' || line[0] == '#')
-			continue;
-
-		char *name = NULL;
-		char *value = NULL;
-
-		name = Sys_Strtok(line, " ", &value);		// pointers returned by Sys_Strtok should be null terminated
-		value = Sys_Strtok(NULL, "\n", &value);
-
-		if (!name || !value)
-		{
-			Log_WriteSeq(LOG_ERROR, "Invalid cvar parsed, line: %s", line);
-			continue;
-		}
-
-		size_t slen = strnlen(value, CVAR_MAX_STR_LEN);
-		if (slen > CVAR_MAX_STR_LEN)
-		{
-			Log_WriteSeq(LOG_ERROR, "CVar value too long: %s", value);
-			continue;
-		}
-
-		cvar_t *cvar = CVar_RegisterString(name, value, CVAR_NONE, "");
-		if (!cvar)
-		{
-			Log_WriteSeq(LOG_ERROR, "Failed to register cvar: %s", name);
-			continue;
-		}
-	}
+	// Read the cvar file and populate the cvar list if cvars exist and if the file exists
+	read_CVars_from_file(cvarfile, "cvar");
 
 	fclose(cvarfile);
 	cvarfile = NULL;
 
-	// read the overrides file and populate the cvar list if cvars exist and if the file exists
-	FILE* overrides_file = fopen(override_filename, "r");
+	// Read the overrides file and populate the cvar list if cvars exist and if the file exists
+	char override_fullname[SYS_MAX_PATH] = { 0 };
+	snprintf(override_fullname, sizeof(override_fullname), "%s/%s", cvardir, override_filename);
+	FILE* overrides_file = fopen(override_fullname, "r");
 	if (overrides_file)
 	{
-		Log_WriteSeq(LOG_INFO, "Overrides file exists. Overriding the cvars. Hi Marco");
+		Log_WriteSeq(LOG_INFO, "Overrides file exists: %s", override_fullname);
 
-		memset(line, 0, 1024);
-		while (fgets(line, sizeof(line), overrides_file))
-		{
-			if (line[0] == '\n' || line[0] == '\r' || line[0] == ' ' || line[0] == '#')
-				continue;
-
-			char* name = NULL;
-			char* value = NULL;
-
-			name = Sys_Strtok(line, " ", &value);
-			value = Sys_Strtok(NULL, "\n", &value);
-
-			if (!name || !value)
-			{
-				Log_WriteSeq(LOG_ERROR, "Invalid override CVar parsed, line: %s", line);
-				continue;
-			}
-
-			size_t slen = strnlen(value, CVAR_MAX_STR_LEN);
-			if (slen > CVAR_MAX_STR_LEN)
-			{
-				Log_WriteSeq(LOG_ERROR, "Override CVar value too long: %s", value);
-				continue;
-			}
-
-			cvar_t* cvar = CVar_RegisterString(name, value, CVAR_NONE, "");
-			if (!cvar)
-			{
-				Log_WriteSeq(LOG_ERROR, "Failed to register override CVar: %s", name);
-				continue;
-			}
-		}
+		read_CVars_from_file(overrides_file, "overrides cVar");
 
 		fclose(overrides_file);
 		overrides_file = NULL;
 	} 
 	else 
 	{
-		Log_WriteSeq(LOG_INFO, "Overrides file does not exist.");
+		Log_WriteSeq(LOG_INFO, "Overrides file does not exist: %s", override_fullname);
 	}
 
 	return(true);
