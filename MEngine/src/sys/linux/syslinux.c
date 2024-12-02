@@ -378,12 +378,26 @@ void Sys_SignalCondVar(condvar_t *condvar)
 void *Sys_LoadDLL(const char *dllname)
 {
 	void *handle = NULL;
+	char path[SYS_MAX_PATH] = { 0 };
+	char outpath[SYS_MAX_PATH] = { 0 };
 
-	char *path = realpath(dllname, NULL);	// need to get the local OS path
-	if (path)
+	if (getcwd(path, SYS_MAX_PATH))
 	{
-		handle = dlopen(dllname, RTLD_NOW);
-		free(path);
+		int ret = snprintf(outpath, SYS_MAX_PATH, "%s/%s", path, dllname);
+		if (ret >= SYS_MAX_PATH)
+		{
+			Log_WriteSeq(LOG_ERROR, "Path truncated when trying to resolve DLL path");
+			return(NULL);
+		}
+
+		handle = dlopen(outpath, RTLD_NOW);
+	}
+
+	else
+	{
+		Log_WriteSeq(LOG_ERROR, "Failed to get the current working directory: %s", strerror(errno));
+		errno = 0;
+		return(NULL);
 	}
 
 	if (!handle)
