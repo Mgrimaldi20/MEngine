@@ -68,106 +68,6 @@ static bool HandleConversionErrors(const char *value, const char *end)
 	return(true);
 }
 
-/*
-* Function: get_name_value
-* Gets a name and value pair from the config file. Ignores comments and leading whitespace.
-*
-*   line: The line to parse
-*   length: The length of the line
-*   name: The first word in the name-value pair
-*   value: The second term in the name-value pair, enclosed in double quotes
-* 
-* Returns: A boolean if it's acceptable or not
-* 
-*/
-bool get_name_value(char* line, int length, char* name, char* value) 
-{
-	bool acceptable = true;
-
-	// This changes to true when we are inside quotes
-	bool reading_value = false;
-
-	int i = 0, ni = 0, vi = 0;
-	while (i < length && line[i] != '\0')
-	{
-		if (line[i] == '"') 
-		{
-			if (reading_value) 
-			{
-				// End quote reached, save the value
-				break;
-			}
-			else
-			{
-				// Start quote reached, save the name
-				reading_value = true;
-			}
-		}
-		else if (line[i] == ' ')
-		{
-			if (reading_value)
-			{
-				// Names are not allowed to have whitespace, only add to values
-				value[vi] += line[i];
-				vi += 1;
-			}
-			else
-			{
-				// The next char must be a quote to be acceptable
-				if (i == length-1 || line[i + 1] != '"')
-				{
-					acceptable = false;
-					break;
-				}
-			}
-		}		
-		else if (line[i] == '#')
-		{
-			if (!reading_value)
-			{
-				// This is a comment, ignore anything after this
-				acceptable = false;
-				break;
-			}	
-			else
-			{
-				value[vi] = line[i];
-				vi += 1;
-			}
-		}
-		else if (line[i] == '\n' || line[i] == '\r')
-		{
-			// We do not allow these characters
-			if (i != 0)
-			{
-				acceptable = false;
-			}
-			break;
-		}
-		else
-		{
-			if (reading_value)
-			{
-				value[vi] = line[i];
-				vi += 1;
-			}
-			else
-			{
-				name[ni] = line[i];
-				ni += 1;
-			}
-		}
-
-		i++;
-	}
-
-	name[ni] = '\0';
-	value[vi] = '\0';
-
-	return acceptable;
-}
-
-/* 
 static void ListAllCVars(void)
 {
 	Log_WriteSeq(LOG_INFO, "\t\tCVar Dump [number of cvars: %zu, cvar map capacity: %zu]", cvarmap->numcvars, cvarmap->capacity);
@@ -204,6 +104,104 @@ static void ListAllCVars(void)
 	}
 
 	Log_WriteSeq(LOG_INFO, "\t\tEnd of CVar Dump");
+}
+
+/*
+* Function: get_name_value
+* Gets a name and value pair from the config file. Ignores comments and leading whitespace.
+*
+*   line: The line to parse
+*   length: The length of the line
+*   name: The first word in the name-value pair
+*   value: The second term in the name-value pair, enclosed in double quotes
+*
+* Returns: A boolean if it's acceptable or not
+*/
+bool get_name_value(char* line, int length, char* name, char* value)
+{
+	bool acceptable = true;
+
+	// This changes to true when we are inside quotes
+	bool reading_value = false;
+
+	int i = 0, ni = 0, vi = 0;
+	while (i < length && line[i] != '\0')
+	{
+		if (line[i] == '"')
+		{
+			if (reading_value)
+			{
+				// End quote reached, save the value
+				break;
+			}
+			else
+			{
+				// Start quote reached, save the name
+				reading_value = true;
+			}
+		}
+		else if (line[i] == ' ')
+		{
+			if (reading_value)
+			{
+				// Names are not allowed to have whitespace, only add to values
+				value[vi] += line[i];
+				vi += 1;
+			}
+			else
+			{
+				// The next char must be a quote to be acceptable
+				if (i == length - 1 || line[i + 1] != '"')
+				{
+					acceptable = false;
+					break;
+				}
+			}
+		}
+		else if (line[i] == '#')
+		{
+			if (!reading_value)
+			{
+				// This is a comment, ignore anything after this
+				acceptable = false;
+				break;
+			}
+			else
+			{
+				value[vi] = line[i];
+				vi += 1;
+			}
+		}
+		else if (line[i] == '\n' || line[i] == '\r')
+		{
+			// We do not allow these characters
+			if (i != 0)
+			{
+				acceptable = false;
+			}
+			break;
+		}
+		else
+		{
+			if (reading_value)
+			{
+				value[vi] = line[i];
+				vi += 1;
+			}
+			else
+			{
+				name[ni] = line[i];
+				ni += 1;
+			}
+		}
+
+		i++;
+	}
+
+	name[ni] = '\0';
+	value[vi] = '\0';
+
+	return acceptable;
 }
 
 /* 
