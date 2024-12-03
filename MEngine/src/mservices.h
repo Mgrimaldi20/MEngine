@@ -14,12 +14,12 @@ typedef enum
 
 typedef enum
 {
-	CVAR_NONE = 0,
-	CVAR_ARCHIVE = 1 << 0,
-	CVAR_READONLY = 1 << 1,
-	CVAR_RENDERER = 1 << 2,
-	CVAR_SYSTEM = 1 << 3,
-	CVAR_GAME = 1 << 4
+	CVAR_NONE = 1 << 0,
+	CVAR_ARCHIVE = 1 << 1,
+	CVAR_READONLY = 1 << 2,
+	CVAR_RENDERER = 1 << 3,
+	CVAR_SYSTEM = 1 << 4,
+	CVAR_GAME = 1 << 5
 } cvarflags_t;
 
 typedef struct cvar cvar_t;			// opaque type to cvar struct, only access through CVar_ functions
