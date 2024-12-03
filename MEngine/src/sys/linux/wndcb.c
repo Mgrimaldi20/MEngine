@@ -35,7 +35,8 @@ static void FramebufferSizeCallback(GLFWwindow *window, int width, int height)
 
 static void WindowCloseCallback(GLFWwindow *window)
 {
-	glfwSetWindowShouldClose(window, GLFW_TRUE);
+	//glfwSetWindowShouldClose(window, GLFW_TRUE);
+	linuxstate.windowtoclose = true;
 }
 
 static void WindowFocusCallback(GLFWwindow *window, int focused)
