@@ -32,7 +32,6 @@ void *MemCache_Alloc(size_t size);
 void MemCache_Free(void *ptr);
 void MemCache_Reset(void);
 size_t MemCahce_GetMemUsed(void);
-void MemCache_Dump(void);
 size_t MemCache_GetTotalMemory(void);
 bool MemCache_UseCache(void);
 
@@ -65,7 +64,6 @@ struct cvar
 
 bool CVar_Init(void);
 void CVar_Shutdown(void);
-void CVar_ListAllCVars(void);			// mostly for debugging purposes
 cvar_t *CVar_Find(const char *name);
 cvar_t *CVar_Register(const char *name, const cvarvalue_t value, const cvartype_t type, const unsigned long long flags, const char *description);
 cvar_t *CVar_RegisterString(const char *name, const char *value, const unsigned long long flags, const char *description);

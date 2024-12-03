@@ -21,7 +21,7 @@ typedef struct
 	void *(*Allocate)(size_t size);
 	void (*Deallocate)(void *ptr);
 	void (*Reset)(void);
-	void (*CacheDump)(void);
+	void (*Dump)(void);
 	size_t (*CacheGetTotalMemory)(void);
 } allocator_t;
 
@@ -354,6 +354,11 @@ static size_t CacheTotalMemory(void)
 	return(freeblocks->size);
 }
 
+void DumpAllocData(void)
+{
+	allocator.Dump();
+}
+
 bool MemCache_Init(void)
 {
 	// if system memory is less than 4GB or the default allocator cmd arg is parsed use malloc/free, else use the cache allocator
@@ -365,7 +370,7 @@ bool MemCache_Init(void)
 			.Allocate = DefaultAlloc,
 			.Deallocate = DefaultFree,
 			.Reset = DefaultReset,
-			.CacheDump = DefaultDump,
+			.Dump = DefaultDump,
 			.CacheGetTotalMemory = DefaultTotalMemory
 		};
 
@@ -378,7 +383,7 @@ bool MemCache_Init(void)
 		.Allocate = CacheAlloc,
 		.Deallocate = CacheFree,
 		.Reset = CacheReset,
-		.CacheDump = CacheDump,
+		.Dump = CacheDump,
 		.CacheGetTotalMemory = CacheTotalMemory
 	};
 
@@ -429,6 +434,10 @@ bool MemCache_Init(void)
 
 void MemCache_Shutdown(void)
 {
+#if defined(MENGINE_DEBUG)
+	DumpAllocData();
+#endif
+
 	Log_WriteSeq(LOG_INFO, "Shutting down memory cache");
 
 	if (memcache)
@@ -476,11 +485,6 @@ void MemCache_Reset(void)
 size_t MemCahce_GetMemUsed(void)
 {
 	return(memcacheused);
-}
-
-void MemCache_Dump(void)
-{
-	allocator.CacheDump();
 }
 
 size_t MemCache_GetTotalMemory(void)

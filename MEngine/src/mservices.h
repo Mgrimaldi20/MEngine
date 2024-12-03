@@ -40,13 +40,10 @@ typedef struct		// memory cache allocator and manager
 	void (*Free)(void *ptr);
 	void (*Reset)(void);			// reset memory cache, will free all allocated memory and NULL all pointers
 	size_t(*GetMemUsed)(void);
-	void (*Dump)(void);				// dump memory cache stats to log, mostly for debugging purposes
 } memcache_t;
 
 typedef struct		// cvar system
 {
-	void (*ListAllCVars)(void);		// will write all cvars to the log, mostly for debugging purposes
-
 	cvar_t *(*Find)(const char *name);
 
 	cvar_t *(*RegisterString)(const char *name, const char *value, const unsigned long long flags, const char *description);
