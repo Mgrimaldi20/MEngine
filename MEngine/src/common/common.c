@@ -276,8 +276,6 @@ void Common_Shutdown(void)
 	CVar_Shutdown();
 	MemCache_Shutdown();
 	Log_Shutdown();
-
-	Log_WriteSeq(LOG_INFO, "Engine shutdown successfully...");
 }
 
 void Common_Frame(void)		// happens every frame
@@ -293,30 +291,30 @@ void Common_Frame(void)		// happens every frame
 
 bool Common_HelpMode(void)
 {
-	return((cmdlineflags & CMD_MODE_HELP) != 0);
+	return((cmdlineflags & CMD_MODE_HELP));
 }
 
 bool Common_EditorMode(void)
 {
-	return((cmdlineflags & CMD_MODE_EDITOR) != 0);
+	return((cmdlineflags & CMD_MODE_EDITOR));
 }
 
 bool Common_DebugMode(void)
 {
-	return((cmdlineflags & CMD_MODE_DEBUG) != 0);
+	return((cmdlineflags & CMD_MODE_DEBUG));
 }
 
 bool Common_IgnoreOSVer(void)
 {
-	return((cmdlineflags & CMD_IGNORE_OSVER) != 0);
+	return((cmdlineflags & CMD_IGNORE_OSVER));
 }
 
 bool Common_RunDemoGame(void)
 {
-	return((cmdlineflags & CMD_RUN_DEMO_GAME) != 0);
+	return((cmdlineflags & CMD_RUN_DEMO_GAME));
 }
 
 bool Common_UseDefaultAlloc(void)
 {
-	return((cmdlineflags & CMD_USE_DEF_ALLOC) != 0);
+	return((cmdlineflags & CMD_USE_DEF_ALLOC));
 }
