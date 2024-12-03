@@ -175,10 +175,7 @@ bool get_name_value(char* line, int length, char* name, char* value)
 		else if (line[i] == '\n' || line[i] == '\r')
 		{
 			// We do not allow these characters
-			if (i != 0)
-			{
-				acceptable = false;
-			}
+			acceptable = false;
 			break;
 		}
 		else
