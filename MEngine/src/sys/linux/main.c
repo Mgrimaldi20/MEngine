@@ -18,7 +18,7 @@ int main(int argc, char **argv)
 		return(1);
 	}
 
-	while (!glfwWindowShouldClose(linuxstate.window))
+	while (!linuxstate.windowtoclose)
 	{
 		Common_Frame();
 		glfwPollEvents();

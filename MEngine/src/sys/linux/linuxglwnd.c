@@ -4,6 +4,8 @@
 
 bool GLWnd_Init(glwndparams_t params)
 {
+	linuxstate.windowtoclose = false;
+
 	if (!glfwInit())
 	{
 		Log_WriteSeq(LOG_ERROR, "Failed to initialise GLFW");
