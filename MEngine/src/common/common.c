@@ -259,24 +259,19 @@ bool Common_Init(void)
 	if (!Sys_Init())
 		return(false);
 
-	Log_WriteSeq(LOG_INFO, "Engine initialized successfully...");
-
 	if (!InitGame())
 		return(false);
 
-	Log_WriteSeq(LOG_INFO, "Game DLL initialized successfully...");
+	Log_WriteSeq(LOG_INFO, "Engine initialized successfully...");
 
 	return(true);
 }
 
 void Common_Shutdown(void)
 {
-	Log_WriteSeq(LOG_INFO, "Game shutting down...");
-
-	ShutdownGame();
-
 	Log_WriteSeq(LOG_INFO, "Engine shutting down...");
 
+	ShutdownGame();
 	Sys_Shutdown();
 	CVar_Shutdown();
 	MemCache_Shutdown();
