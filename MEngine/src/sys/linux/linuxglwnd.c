@@ -121,7 +121,8 @@ bool GLWnd_ChangeScreenParams(glwndparams_t params)
 
 void GLWnd_SwapBuffers(void)
 {
-	glfwSwapBuffers(linuxstate.window);
+	if (!glfwWindowShouldClose(linuxstate.window))
+		glfwSwapBuffers(linuxstate.window);
 }
 
 void GLWnd_SetVSync(int vsync)
