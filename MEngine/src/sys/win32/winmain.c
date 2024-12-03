@@ -44,8 +44,6 @@ int WINAPI wWinMain(HINSTANCE hinst, HINSTANCE hprevinst, PWSTR pcmdline, int nc
 		return(1);
 	}
 
-	Log_WriteSeq(LOG_INFO, "Engine Initialized successfully...");
-
 	MSG msg;
 	while (1)
 	{
@@ -53,7 +51,6 @@ int WINAPI wWinMain(HINSTANCE hinst, HINSTANCE hprevinst, PWSTR pcmdline, int nc
 		{
 			if (!GetMessage(&msg, NULL, 0, 0))
 			{
-				Log_WriteSeq(LOG_INFO, "Engine shutting down...");
 				Common_Shutdown();
 				ShutdownConsole();
 

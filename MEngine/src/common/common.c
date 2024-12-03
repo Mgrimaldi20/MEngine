@@ -97,12 +97,10 @@ static void CreateMServices(void)
 		.Free = MemCache_Free,
 		.Reset = MemCache_Reset,
 		.GetMemUsed = MemCache_GetTotalMemory,
-		.Dump = MemCache_Dump
 	};
 
 	cvarsystem = (cvarsystem_t)
 	{
-		.ListAllCVars = CVar_ListAllCVars,
 		.Find = CVar_Find,
 		.RegisterString = CVar_RegisterString,
 		.RegisterInt = CVar_RegisterInt,
@@ -261,24 +259,30 @@ bool Common_Init(void)
 	if (!Sys_Init())
 		return(false);
 
+	Log_WriteSeq(LOG_INFO, "Engine initialized successfully...");
+
 	if (!InitGame())
 		return(false);
+
+	Log_WriteSeq(LOG_INFO, "Game DLL initialized successfully...");
 
 	return(true);
 }
 
 void Common_Shutdown(void)
 {
-#if defined(MENGINE_DEBUG)
-	CVar_ListAllCVars();
-	MemCache_Dump();
-#endif
+	Log_WriteSeq(LOG_INFO, "Game shutting down...");
 
 	ShutdownGame();
+
+	Log_WriteSeq(LOG_INFO, "Engine shutting down...");
+
 	Sys_Shutdown();
 	CVar_Shutdown();
 	MemCache_Shutdown();
 	Log_Shutdown();
+
+	Log_WriteSeq(LOG_INFO, "Engine shutdown successfully...");
 }
 
 void Common_Frame(void)		// happens every frame
