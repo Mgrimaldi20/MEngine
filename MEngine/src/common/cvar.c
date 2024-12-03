@@ -320,6 +320,7 @@ void CVar_Shutdown(void)
 #if defined(MENGINE_DEBUG)
 	ListAllCVars();
 #endif
+
 	(void)ListAllCVars;		// unused runction error fix
 
 	char cvarfullname[SYS_MAX_PATH] = { 0 };
