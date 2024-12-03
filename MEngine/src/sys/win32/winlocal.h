@@ -1,6 +1,6 @@
 #pragma once
 
-#if !defined(_WIN32)
+#if !defined(MENGINE_PLATFORM_WINDOWS)
 #error Include is for Windows only
 #endif
 

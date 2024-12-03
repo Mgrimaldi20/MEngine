@@ -6,7 +6,11 @@
 #include <errno.h>
 #include <unistd.h>
 #include <sys/stat.h>
+#include <dlfcn.h>
+#include <pthread.h>
+#include <dirent.h>
 #include "common/common.h"
+#include "sys/sys.h"
 #include "linuxlocal.h"
 
 struct thread
@@ -120,7 +124,7 @@ bool Sys_Mkdir(const char *path)
 filedata_t Sys_Stat(const char *filepath)
 {
 	struct stat st;
-	if (stat(fname, &st) == -1)
+	if (stat(filepath, &st) == -1)
 	{
 		Log_Write(LOG_ERROR, "%s, Failed to make a call to stat(): %s", __func__, filepath);
 		return((filedata_t){ 0 });
@@ -329,7 +333,7 @@ void Sys_UnlockMutex(mutex_t *mutex)
 condvar_t *Sys_CreateCondVar(void)
 {
 	condvar_t *handle = NULL;
-	for (int i=0; !handle && i<SYS_MAX_COND_VARS; i++)
+	for (int i=0; !handle && i<SYS_MAX_CONDVARS; i++)
 	{
 		if (!condvars[i].used)
 		{
@@ -373,7 +377,32 @@ void Sys_SignalCondVar(condvar_t *condvar)
 
 void *Sys_LoadDLL(const char *dllname)
 {
-	void *handle = dlopen(dllname, RTLD_NOW);
+	void *handle = NULL;
+	char path[SYS_MAX_PATH] = { 0 };
+	char outpath[SYS_MAX_PATH] = { 0 };
+
+	if (getcwd(path, SYS_MAX_PATH))
+	{
+		int ret = snprintf(outpath, SYS_MAX_PATH, "%s/%s", path, dllname);
+		if (ret >= SYS_MAX_PATH)
+		{
+			Log_WriteSeq(LOG_ERROR, "Path truncated when trying to resolve DLL path");
+			return(NULL);
+		}
+
+		handle = dlopen(outpath, RTLD_NOW);
+	}
+
+	else
+	{
+		Log_WriteSeq(LOG_ERROR, "Failed to get the current working directory: %s", strerror(errno));
+		errno = 0;
+		return(NULL);
+	}
+
+	if (!handle)
+		handle = dlopen(dllname, RTLD_NOW);	// get from LD path if not found in bin dir
+
 	if (!handle)
 	{
 		Log_WriteSeq(LOG_ERROR, "Failed to load DLL: %s", dlerror());
@@ -386,7 +415,8 @@ void *Sys_LoadDLL(const char *dllname)
 
 void Sys_UnloadDLL(void *handle)
 {
-	dlclose(handle);
+	if (handle)
+		dlclose(handle);
 }
 
 void *Sys_GetProcAddress(void *handle, const char *procname)

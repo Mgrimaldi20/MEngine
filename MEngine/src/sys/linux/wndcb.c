@@ -1,3 +1,4 @@
+#include "renderer/renderer.h"
 #include "linuxlocal.h"
 
 static void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)

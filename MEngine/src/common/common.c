@@ -8,13 +8,19 @@
 
 typedef enum
 {
-	CMD_MODE_HELP = 0,
-	CMD_MODE_EDITOR = 1 << 0,
-	CMD_MODE_DEBUG = 1 << 1,
-	CMD_IGNORE_OSVER = 1 << 2,
-	CMD_RUN_DEMO_GAME = 1 << 3,
-	CMD_USE_DEF_ALLOC = 1 << 4
+	CMD_MODE_HELP = 1 << 0,
+	CMD_MODE_EDITOR = 1 << 1,
+	CMD_MODE_DEBUG = 1 << 2,
+	CMD_IGNORE_OSVER = 1 << 3,
+	CMD_RUN_DEMO_GAME = 1 << 4,
+	CMD_USE_DEF_ALLOC = 1 << 5
 } cmdlineflags_t;
+
+typedef union
+{
+	void *obj;
+	getmservices_t func;
+} funcptrobj_t;
 
 gameservices_t gameservices;
 
@@ -29,7 +35,7 @@ static void *gamedllhandle;
 
 static void ParseCommandLine(void)
 {
-	char cmdline[SYS_MAX_CMDLINE_ARGS][SYS_MAX_CMDLINE_ARGS];
+	char cmdline[SYS_MAX_CMDLINE_ARGS][SYS_MAX_CMDLINE_ARGS] = { 0 };
 	Sys_ProcessCommandLine(cmdline);
 
 	for (int i=0; i<SYS_MAX_CMDLINE_ARGS; i++)
@@ -70,7 +76,7 @@ static void PrintHelpMsg(void)
 		"\t-nocache\tDo not use the memory cache allocator\n"
 		"Press any key to exit...\n";
 
-	printf(helpmsg);
+	printf("%s", helpmsg);
 	Log_WriteSeq(LOG_INFO, helpmsg);
 
 	fflush(stdout);
@@ -91,12 +97,10 @@ static void CreateMServices(void)
 		.Free = MemCache_Free,
 		.Reset = MemCache_Reset,
 		.GetMemUsed = MemCache_GetTotalMemory,
-		.Dump = MemCache_Dump
 	};
 
 	cvarsystem = (cvarsystem_t)
 	{
-		.ListAllCVars = CVar_ListAllCVars,
 		.Find = CVar_Find,
 		.RegisterString = CVar_RegisterString,
 		.RegisterInt = CVar_RegisterInt,
@@ -175,7 +179,14 @@ static bool InitGame(void)
 
 	CreateMServices();		// populate the mservices struct with the function pointers
 
-	getmservices_t GetMServices = (getmservices_t)Sys_GetProcAddress(gamedllhandle, "GetMServices");
+	void *procaddr = Sys_GetProcAddress(gamedllhandle, "GetMServices");
+	funcptrobj_t conv =
+	{
+		.obj = procaddr
+	};
+
+	getmservices_t GetMServices = conv.func;
+
 	if (!GetMServices)
 	{
 		Sys_Error("Failed to get GetMServices function, handshake failed, could not load function pointers");
@@ -251,15 +262,14 @@ bool Common_Init(void)
 	if (!InitGame())
 		return(false);
 
+	Log_WriteSeq(LOG_INFO, "Engine initialized successfully...");
+
 	return(true);
 }
 
 void Common_Shutdown(void)
 {
-#if defined(MENGINE_DEBUG)
-	CVar_ListAllCVars();
-	MemCache_Dump();
-#endif
+	Log_WriteSeq(LOG_INFO, "Engine shutting down...");
 
 	ShutdownGame();
 	Sys_Shutdown();
@@ -281,30 +291,30 @@ void Common_Frame(void)		// happens every frame
 
 bool Common_HelpMode(void)
 {
-	return((cmdlineflags & CMD_MODE_HELP) != 0);
+	return((cmdlineflags & CMD_MODE_HELP));
 }
 
 bool Common_EditorMode(void)
 {
-	return((cmdlineflags & CMD_MODE_EDITOR) != 0);
+	return((cmdlineflags & CMD_MODE_EDITOR));
 }
 
 bool Common_DebugMode(void)
 {
-	return((cmdlineflags & CMD_MODE_DEBUG) != 0);
+	return((cmdlineflags & CMD_MODE_DEBUG));
 }
 
 bool Common_IgnoreOSVer(void)
 {
-	return((cmdlineflags & CMD_IGNORE_OSVER) != 0);
+	return((cmdlineflags & CMD_IGNORE_OSVER));
 }
 
 bool Common_RunDemoGame(void)
 {
-	return((cmdlineflags & CMD_RUN_DEMO_GAME) != 0);
+	return((cmdlineflags & CMD_RUN_DEMO_GAME));
 }
 
 bool Common_UseDefaultAlloc(void)
 {
-	return((cmdlineflags & CMD_USE_DEF_ALLOC) != 0);
+	return((cmdlineflags & CMD_USE_DEF_ALLOC));
 }

@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <errno.h>
 #include "sys/sys.h"
 #include "common.h"
 
@@ -167,6 +168,45 @@ bool get_name_value(char* line, int length, char* name, char* value)
 }
 
 /* 
+static void ListAllCVars(void)
+{
+	Log_WriteSeq(LOG_INFO, "\t\tCVar Dump [number of cvars: %zu, cvar map capacity: %zu]", cvarmap->numcvars, cvarmap->capacity);
+
+	size_t numcvars = 0;
+	for (size_t i=0; i<cvarmap->capacity; i++)
+	{
+		cvarentry_t *current = cvarmap->cvars[i];
+		while (current)
+		{
+			cvar_t *cvar = current->value;
+			switch (cvar->type)
+			{
+				case CVAR_BOOL:
+					Log_WriteSeq(LOG_INFO, "\t\t\tCVar: %s, Value: %d, Type: %d, Flags: %llu Description: %s", cvar->name, cvar->value.b, cvar->type, cvar->flags, cvar->description);
+					break;
+
+				case CVAR_INT:
+					Log_WriteSeq(LOG_INFO, "\t\t\tCVar: %s, Value: %d, Type: %d, Flags: %llu, Description: %s", cvar->name, cvar->value.i, cvar->type, cvar->flags, cvar->description);
+					break;
+
+				case CVAR_FLOAT:
+					Log_WriteSeq(LOG_INFO, "\t\t\tCVar: %s, Value: %f, Type: %d, Flags: %llu, Description: %s", cvar->name, cvar->value.f, cvar->type, cvar->flags, cvar->description);
+					break;
+
+				case CVAR_STRING:
+					Log_WriteSeq(LOG_INFO, "\t\t\tCVar: %s, Value: %s, Type: %d, Flags: %llu, Description: %s", cvar->name, cvar->value.s, cvar->type, cvar->flags, cvar->description);
+					break;
+			}
+
+			numcvars++;
+			current = current->next;
+		}
+	}
+
+	Log_WriteSeq(LOG_INFO, "\t\tEnd of CVar Dump");
+}
+
+/* 
 * Function: read_CVars_from_file
 * Inserts the CVars into the hashmap from the file given.
 * 
@@ -282,6 +322,11 @@ bool CVar_Init(void)
 
 void CVar_Shutdown(void)
 {
+#if defined(MENGINE_DEBUG)
+	ListAllCVars();
+#endif
+	(void)ListAllCVars;		// unused runction error fix
+
 	char cvarfullname[SYS_MAX_PATH] = { 0 };
 	snprintf(cvarfullname, sizeof(cvarfullname), "%s/%s", cvardir, cvarfilename);
 
@@ -335,44 +380,6 @@ void CVar_Shutdown(void)
 		fclose(cvarfile);
 		cvarfile = NULL;
 	}
-}
-
-void CVar_ListAllCVars(void)
-{
-	Log_WriteSeq(LOG_INFO, "\t\tCVar Dump [number of cvars: %zu, cvar map capacity: %zu]", cvarmap->numcvars, cvarmap->capacity);
-
-	size_t numcvars = 0;
-	for (size_t i=0; i<cvarmap->capacity; i++)
-	{
-		cvarentry_t *current = cvarmap->cvars[i];
-		while (current)
-		{
-			cvar_t *cvar = current->value;
-			switch (cvar->type)
-			{
-				case CVAR_BOOL:
-					Log_WriteSeq(LOG_INFO, "\t\t\tCVar: %s, Value: %d, Type: %d, Flags: %llu Description: %s", cvar->name, cvar->value.b, cvar->type, cvar->flags, cvar->description);
-					break;
-
-				case CVAR_INT:
-					Log_WriteSeq(LOG_INFO, "\t\t\tCVar: %s, Value: %d, Type: %d, Flags: %llu, Description: %s", cvar->name, cvar->value.i, cvar->type, cvar->flags, cvar->description);
-					break;
-
-				case CVAR_FLOAT:
-					Log_WriteSeq(LOG_INFO, "\t\t\tCVar: %s, Value: %f, Type: %d, Flags: %llu, Description: %s", cvar->name, cvar->value.f, cvar->type, cvar->flags, cvar->description);
-					break;
-
-				case CVAR_STRING:
-					Log_WriteSeq(LOG_INFO, "\t\t\tCVar: %s, Value: %s, Type: %d, Flags: %llu, Description: %s", cvar->name, cvar->value.s, cvar->type, cvar->flags, cvar->description);
-					break;
-			}
-
-			numcvars++;
-			current = current->next;
-		}
-	}
-
-	Log_WriteSeq(LOG_INFO, "\t\tEnd of CVar Dump");
 }
 
 cvar_t *CVar_Find(const char *name)
