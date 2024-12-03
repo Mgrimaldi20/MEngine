@@ -17,6 +17,9 @@ add_subdirectory("MEngine")
 # Include the demo game project.
 add_subdirectory("DemoGame")
 
+# Set the shared library prefix to an empty string for DemoGame
+set_target_properties(DemoGame PROPERTIES PREFIX "")
+
 # Add options for selecting the compiler
 option(USE_CLANG "Use Clang compiler" OFF)
 option(USE_GCC "Use GCC compiler" OFF)
@@ -41,17 +44,29 @@ endif()
 
 # Create a main output directory under the build directory where all exe and dll files will be placed.
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 message(STATUS "Binary output directory set: ${CMAKE_BINARY_DIR}")
 set_target_properties(MEngine PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set_target_properties(DemoGame PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set_target_properties(DemoGame PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 ############################################################################################################
 ############################################## Install Targets #############################################
 ############################################################################################################
 # Install the executable and DLLs to the bin directory
-install(TARGETS MEngine DemoGame
-	RUNTIME DESTINATION MEngine/bin
-)
+if(WIN32)
+	install(TARGETS MEngine DemoGame
+		RUNTIME DESTINATION MEngine/bin
+	)
+endif()
+
+# Install the shared library to the bin directory, Linux doesnt do this by default
+if(UNIX)
+	install(TARGETS MEngine DemoGame
+		LIBRARY DESTINATION MEngine/bin
+		RUNTIME DESTINATION MEngine/bin
+	)
+endif()
 
 # Install header files to the sdk directory, preserving the directory structure
 install(FILES

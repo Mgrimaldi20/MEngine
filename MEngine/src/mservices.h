@@ -14,12 +14,12 @@ typedef enum
 
 typedef enum
 {
-	CVAR_NONE = 0,
-	CVAR_ARCHIVE = 1 << 0,
-	CVAR_READONLY = 1 << 1,
-	CVAR_RENDERER = 1 << 2,
-	CVAR_SYSTEM = 1 << 3,
-	CVAR_GAME = 1 << 4
+	CVAR_NONE = 1 << 0,
+	CVAR_ARCHIVE = 1 << 1,
+	CVAR_READONLY = 1 << 2,
+	CVAR_RENDERER = 1 << 3,
+	CVAR_SYSTEM = 1 << 4,
+	CVAR_GAME = 1 << 5
 } cvarflags_t;
 
 typedef struct cvar cvar_t;			// opaque type to cvar struct, only access through CVar_ functions
@@ -40,13 +40,10 @@ typedef struct		// memory cache allocator and manager
 	void (*Free)(void *ptr);
 	void (*Reset)(void);			// reset memory cache, will free all allocated memory and NULL all pointers
 	size_t(*GetMemUsed)(void);
-	void (*Dump)(void);				// dump memory cache stats to log, mostly for debugging purposes
 } memcache_t;
 
 typedef struct		// cvar system
 {
-	void (*ListAllCVars)(void);		// will write all cvars to the log, mostly for debugging purposes
-
 	cvar_t *(*Find)(const char *name);
 
 	cvar_t *(*RegisterString)(const char *name, const char *value, const unsigned long long flags, const char *description);
