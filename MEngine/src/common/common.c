@@ -8,12 +8,12 @@
 
 typedef enum
 {
-	CMD_MODE_HELP = 0,
-	CMD_MODE_EDITOR = 1 << 0,
-	CMD_MODE_DEBUG = 1 << 1,
-	CMD_IGNORE_OSVER = 1 << 2,
-	CMD_RUN_DEMO_GAME = 1 << 3,
-	CMD_USE_DEF_ALLOC = 1 << 4
+	CMD_MODE_HELP = 1 << 0,
+	CMD_MODE_EDITOR = 1 << 1,
+	CMD_MODE_DEBUG = 1 << 2,
+	CMD_IGNORE_OSVER = 1 << 3,
+	CMD_RUN_DEMO_GAME = 1 << 4,
+	CMD_USE_DEF_ALLOC = 1 << 5
 } cmdlineflags_t;
 
 typedef union
@@ -35,7 +35,7 @@ static void *gamedllhandle;
 
 static void ParseCommandLine(void)
 {
-	char cmdline[SYS_MAX_CMDLINE_ARGS][SYS_MAX_CMDLINE_ARGS];
+	char cmdline[SYS_MAX_CMDLINE_ARGS][SYS_MAX_CMDLINE_ARGS] = { 0 };
 	Sys_ProcessCommandLine(cmdline);
 
 	for (int i=0; i<SYS_MAX_CMDLINE_ARGS; i++)

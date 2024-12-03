@@ -35,16 +35,16 @@ time_t FileSys_FileTimeLastWrite(const char *filename)
 
 unsigned int FileSys_CountFiles(const char *directory, const char *filter)
 {
-	//(const char *)directory;
-	//(const char *)filter;
+	(const char *)directory;
+	(const char *)filter;
 	return(0);
 }
 
 filedata_t *FileSys_ListFiles(const char *directory, const char *filter, unsigned int numfiles)		// if numfiles is 0, all files will be listed
 {
-	//(const char *)directory;
-	//(const char *)filter;
-	//(const unsigned int)numfiles;
+	(const char *)directory;
+	(const char *)filter;
+	(const unsigned int)numfiles;
 	return(NULL);
 }
 
