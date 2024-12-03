@@ -1,6 +1,6 @@
 #pragma once
 
-#if !defined(__linux__) && !defined(__APPLE__)
+#if !defined(MENGINE_PLATFORM_UNIX)
 #error Include is for Linux and Apple only
 #endif
 

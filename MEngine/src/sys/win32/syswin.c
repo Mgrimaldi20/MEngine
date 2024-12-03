@@ -5,6 +5,7 @@
 #include <direct.h>
 #include <process.h>
 #include <sys/stat.h>
+#include <threads.h>
 #include "sys/sys.h"
 #include "common/common.h"
 #include "winlocal.h"
