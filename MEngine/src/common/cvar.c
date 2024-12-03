@@ -305,19 +305,19 @@ void CVar_Shutdown(void)
 				switch (cvar->type)
 				{
 					case CVAR_BOOL:
-						fprintf(cvarfile, "%s %d\n", cvar->name, cvar->value.b);
+						fprintf(cvarfile, "%s \"%d\"\n", cvar->name, cvar->value.b);
 						break;
 
 					case CVAR_INT:
-						fprintf(cvarfile, "%s %d\n", cvar->name, cvar->value.i);
+						fprintf(cvarfile, "%s \"%d\"\n", cvar->name, cvar->value.i);
 						break;
 
 					case CVAR_FLOAT:
-						fprintf(cvarfile, "%s %f\n", cvar->name, cvar->value.f);
+						fprintf(cvarfile, "%s \"%f\"\n", cvar->name, cvar->value.f);
 						break;
 
 					case CVAR_STRING:
-						fprintf(cvarfile, "%s %s\n", cvar->name, cvar->value.s);
+						fprintf(cvarfile, "%s \"%s\"\n", cvar->name, cvar->value.s);
 						break;
 				}
 			}
