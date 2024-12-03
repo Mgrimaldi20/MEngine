@@ -68,39 +68,102 @@ static bool HandleConversionErrors(const char *value, const char *end)
 }
 
 /*
-* Function: strip_comments
-* Removes any # comments in a line. Also strips leading ' '.
+* Function: get_name_value
+* Gets a name and value pair from the config file. Ignores comments and leading whitespace.
 *
-*   line: The line to remove comments from
-*   stripped_line: The destination line
-*   length: The length of line
+*   line: The line to parse
+*   length: The length of the line
+*   name: The first word in the name-value pair
+*   value: The second term in the name-value pair, enclosed in double quotes
+* 
+* Returns: A boolean if it's acceptable or not
+* 
 */
-void strip_comments(char* line, char *stripped_line, int length) 
+bool get_name_value(char* line, int length, char* name, char* value) 
 {
-	bool seen_char = false;
+	bool acceptable = true;
 
-	int si = 0;
-	for (int i = 0; i < length; i++) 
+	// This changes to true when we are inside quotes
+	bool reading_value = false;
+
+	int i = 0, ni = 0, vi = 0;
+	while (i < length && line[i] != '\0')
 	{
-		if (line[i] != ' ') {
-			seen_char = true;
+		if (line[i] == '"') 
+		{
+			if (reading_value) 
+			{
+				// End quote reached, save the value
+				break;
+			}
+			else
+			{
+				// Start quote reached, save the name
+				reading_value = true;
+			}
 		}
-
-		if (line[i] == '#') {
-			// We can stop reading the line from here
-			stripped_line[si] = '\0';			
+		else if (line[i] == ' ')
+		{
+			if (reading_value)
+			{
+				// Names are not allowed to have whitespace, only add to values
+				value[vi] += line[i];
+				vi += 1;
+			}
+			else
+			{
+				// The next char must be a quote to be acceptable
+				if (i == length-1 || line[i + 1] != '"')
+				{
+					acceptable = false;
+					break;
+				}
+			}
+		}		
+		else if (line[i] == '#')
+		{
+			if (!reading_value)
+			{
+				// This is a comment, ignore anything after this
+				acceptable = false;
+				break;
+			}	
+			else
+			{
+				value[vi] = line[i];
+				vi += 1;
+			}
+		}
+		else if (line[i] == '\n' || line[i] == '\r')
+		{
+			// We do not allow these characters
+			if (i != 0)
+			{
+				acceptable = false;
+			}
 			break;
 		}
-		else if (line[i] != ' ' || (line[i] == ' ' && seen_char))
+		else
 		{
-			// Only write spaces if they aren't at the beginning of the line
-			seen_char = true;
-			stripped_line[si] = line[i];
-			si += 1;
+			if (reading_value)
+			{
+				value[vi] = line[i];
+				vi += 1;
+			}
+			else
+			{
+				name[ni] = line[i];
+				ni += 1;
+			}
 		}
+
+		i++;
 	}
 
-	Log_WriteSeq(LOG_INFO, "Stripped line: [ %s ] became [ %s ]", line, stripped_line);
+	name[ni] = '\0';
+	value[vi] = '\0';
+
+	return acceptable;
 }
 
 /* 
@@ -115,22 +178,20 @@ void read_CVars_from_file(FILE *cVar_file, char *log_message)
 	char line[1024] = { 0 };
 	while (fgets(line, sizeof(line), cVar_file))
 	{
-		char stripped_line[1024] = { 0 };
-		strip_comments(line, stripped_line, sizeof(line));
+		char name[1024] = { 0 };
+		char value[1024] = { 0 };
 
-		if (stripped_line[0] == '\n' || stripped_line[0] == '\r' || stripped_line[0] == ' ')
-			continue;		
+		bool acceptable = get_name_value(line, sizeof(line), name, value);
 
-		char* name = NULL;
-		char* value = NULL;
-
-		// pointers returned by Sys_Strtok should be null terminated
-		name = Sys_Strtok(stripped_line, " ", &value);
-		value = Sys_Strtok(NULL, "\n", &value);
+		if (!acceptable)
+		{
+			Log_WriteSeq(LOG_ERROR, "Line is not a %s pair, line: %s", log_message, line);
+			continue;
+		}
 
 		if (!name || !value)
 		{
-			Log_WriteSeq(LOG_ERROR, "Invalid %s parsed, line: %s", log_message, stripped_line);
+			Log_WriteSeq(LOG_ERROR, "Invalid %s parsed, line: %s", log_message, line);
 			continue;
 		}
 
