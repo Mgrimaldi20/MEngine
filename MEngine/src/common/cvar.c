@@ -224,7 +224,7 @@ void read_CVars_from_file(FILE *cVar_file, char *log_message)
 			continue;
 		}
 
-		if (!name || !value)
+		if ((strnlen(name, 1024) == 0) || (strnlen(value, 1024) == 0))
 		{
 			Log_WriteSeq(LOG_ERROR, "Invalid %s parsed, line: %s", log_message, line);
 			continue;
