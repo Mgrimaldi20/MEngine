@@ -100,10 +100,12 @@ void Sys_ProcessCommandLine(char cmdout[SYS_MAX_CMDLINE_ARGS][SYS_MAX_CMDLINE_AR
 
 	for (int j=1; j<linuxstate.argc&&i<SYS_MAX_CMDLINE_ARGS; j++)
 	{
+		printf("Arg %d: %s\n", j, linuxstate.argv[j]);
 		char *token = Sys_Strtok(linuxstate.argv[j], " -", &saveptr);
 		while (token != NULL)
 		{
 			snprintf(cmdout[i], SYS_MAX_CMDLINE_ARGS, "%s", token);
+			printf("Token %d: %s\n", i, cmdout[i]);
 			token = Sys_Strtok(NULL, " -", &saveptr);
 			i++;
 		}
