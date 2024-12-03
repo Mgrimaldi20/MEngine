@@ -10,7 +10,6 @@
 
 typedef struct
 {
-	bool windowtoclose;
 	bool fullscreen;
 	int swapinterval;
 	int desktopwidth;		// get all the desktop params
