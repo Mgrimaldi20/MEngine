@@ -106,6 +106,101 @@ static void ListAllCVars(void)
 	Log_WriteSeq(LOG_INFO, "\t\tEnd of CVar Dump");
 }
 
+/*
+* Function: get_name_value
+* Gets a name and value pair from the config file. Ignores comments and leading whitespace.
+*
+*   line: The line to parse
+*   length: The length of the line
+*   name: The first word in the name-value pair
+*   value: The second term in the name-value pair, enclosed in double quotes
+*
+* Returns: A boolean if it's acceptable or not
+*/
+bool get_name_value(char* line, int length, char* name, char* value)
+{
+	bool acceptable = true;
+
+	// This changes to true when we are inside quotes
+	bool reading_value = false;
+
+	int i = 0, ni = 0, vi = 0;
+	while (i < length && line[i] != '\0')
+	{
+		if (line[i] == '"')
+		{
+			if (reading_value)
+			{
+				// End quote reached, save the value
+				break;
+			}
+			else
+			{
+				// Start quote reached, save the name
+				reading_value = true;
+			}
+		}
+		else if (line[i] == ' ')
+		{
+			if (reading_value)
+			{
+				// Names are not allowed to have whitespace, only add to values
+				value[vi] += line[i];
+				vi += 1;
+			}
+			else
+			{
+				// The next char must be a quote to be acceptable
+				if (i == length - 1 || line[i + 1] != '"')
+				{
+					acceptable = false;
+					break;
+				}
+			}
+		}
+		else if (line[i] == '#')
+		{
+			if (!reading_value)
+			{
+				// This is a comment, ignore anything after this
+				acceptable = false;
+				break;
+			}
+			else
+			{
+				value[vi] = line[i];
+				vi += 1;
+			}
+		}
+		else if (line[i] == '\n' || line[i] == '\r')
+		{
+			// We do not allow these characters
+			acceptable = false;
+			break;
+		}
+		else
+		{
+			if (reading_value)
+			{
+				value[vi] = line[i];
+				vi += 1;
+			}
+			else
+			{
+				name[ni] = line[i];
+				ni += 1;
+			}
+		}
+
+		i++;
+	}
+
+	name[ni] = '\0';
+	value[vi] = '\0';
+
+	return acceptable;
+}
+
 /* 
 * Function: read_CVars_from_file
 * Inserts the CVars into the hashmap from the file given.
@@ -113,19 +208,21 @@ static void ListAllCVars(void)
 *   cVar_file: The file with the cVars in it
 *   log_message: A string to insert into the log messages so you can tell what file it came from
 */
-void read_CVars_from_file(FILE *cVar_file, char *log_message) {
+void read_CVars_from_file(FILE *cVar_file, char *log_message) 
+{
 	char line[1024] = { 0 };
 	while (fgets(line, sizeof(line), cVar_file))
 	{
-		if (line[0] == '\n' || line[0] == '\r' || line[0] == ' ' || line[0] == '#')
+		char name[1024] = { 0 };
+		char value[1024] = { 0 };
+
+		bool acceptable = get_name_value(line, sizeof(line), name, value);
+
+		if (!acceptable)
+		{
+			Log_WriteSeq(LOG_ERROR, "Line is not a %s pair, line: %s", log_message, line);
 			continue;
-
-		char* name = NULL;
-		char* value = NULL;
-
-		// pointers returned by Sys_Strtok should be null terminated
-		name = Sys_Strtok(line, " ", &value);
-		value = Sys_Strtok(NULL, "\n", &value);
+		}
 
 		if (!name || !value)
 		{
@@ -248,19 +345,19 @@ void CVar_Shutdown(void)
 				switch (cvar->type)
 				{
 					case CVAR_BOOL:
-						fprintf(cvarfile, "%s %d\n", cvar->name, cvar->value.b);
+						fprintf(cvarfile, "%s \"%d\"\n", cvar->name, cvar->value.b);
 						break;
 
 					case CVAR_INT:
-						fprintf(cvarfile, "%s %d\n", cvar->name, cvar->value.i);
+						fprintf(cvarfile, "%s \"%d\"\n", cvar->name, cvar->value.i);
 						break;
 
 					case CVAR_FLOAT:
-						fprintf(cvarfile, "%s %f\n", cvar->name, cvar->value.f);
+						fprintf(cvarfile, "%s \"%f\"\n", cvar->name, cvar->value.f);
 						break;
 
 					case CVAR_STRING:
-						fprintf(cvarfile, "%s %s\n", cvar->name, cvar->value.s);
+						fprintf(cvarfile, "%s \"%s\"\n", cvar->name, cvar->value.s);
 						break;
 				}
 			}
