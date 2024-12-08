@@ -28,6 +28,8 @@ static const char *cvardir = "configs";
 static const char *cvarfilename = "MEngine.cfg";
 static const char *override_filename = "overrides.cfg";
 
+static bool initialized;
+
 static size_t HashFunction(const char *name)	// this function is actually okay for resizing, a new hash is generated for the new map size
 {
 	size_t hash = 0;
@@ -254,15 +256,21 @@ bool CVar_Init(void)
 	char cvarfullname[SYS_MAX_PATH] = { 0 };
 	snprintf(cvarfullname, sizeof(cvarfullname), "%s/%s", cvardir, cvarfilename);
 
-	cvarfile = fopen(cvarfullname, "r");
-	if (!cvarfile)
+	if (!FileSys_FileExists(cvarfullname))
 	{
 		cvarfile = fopen(cvarfullname, "w+");	// try to just recreate file, will lose cvars if file cant be read properly
 		if (!cvarfile)
 		{
-			Log_WriteSeq(LOG_ERROR, "Failed to open cvar file: %s", cvarfullname);
+			Log_WriteSeq(LOG_ERROR, "CVar file does not exist and cannot be recreated: %s", cvarfullname);
 			return(false);
 		}
+	}
+
+	cvarfile = fopen(cvarfullname, "r");
+	if (!cvarfile)
+	{
+		Log_WriteSeq(LOG_ERROR, "Failed to open cvar file: %s", cvarfullname);
+		return(false);
 	}
 
 	cvarmap = MemCache_Alloc(sizeof(*cvarmap));
@@ -312,11 +320,16 @@ bool CVar_Init(void)
 		Log_WriteSeq(LOG_INFO, "Overrides file does not exist: %s", override_fullname);
 	}
 
+	initialized = true;
+
 	return(true);
 }
 
 void CVar_Shutdown(void)
 {
+	if (!initialized)
+		return;
+
 #if defined(MENGINE_DEBUG)
 	ListAllCVars();
 #endif
@@ -376,6 +389,11 @@ void CVar_Shutdown(void)
 		fclose(cvarfile);
 		cvarfile = NULL;
 	}
+
+	MemCache_Free(cvarmap->cvars);
+	MemCache_Free(cvarmap);
+
+	initialized = false;
 }
 
 cvar_t *CVar_Find(const char *name)
@@ -613,7 +631,7 @@ bool *CVar_GetBool(cvar_t *cvar)
 
 void CVar_SetString(cvar_t *cvar, const char *value)
 {
-	if ((!cvar) || (cvar->type != CVAR_STRING))
+	if ((!cvar) || (cvar->type != CVAR_STRING) || (cvar->flags & CVAR_READONLY))
 		return;
 
 	snprintf(cvar->value.s, sizeof(cvar->value.s), "%s", value);
@@ -621,7 +639,7 @@ void CVar_SetString(cvar_t *cvar, const char *value)
 
 void CVar_SetInt(cvar_t *cvar, const int value)
 {
-	if ((!cvar) || (cvar->type != CVAR_INT))
+	if ((!cvar) || (cvar->type != CVAR_INT) || (cvar->flags & CVAR_READONLY))
 		return;
 
 	cvar->value.i = value;
@@ -629,7 +647,7 @@ void CVar_SetInt(cvar_t *cvar, const int value)
 
 void CVar_SetFloat(cvar_t *cvar, const float value)
 {
-	if ((!cvar) || (cvar->type != CVAR_FLOAT))
+	if ((!cvar) || (cvar->type != CVAR_FLOAT) || (cvar->flags & CVAR_READONLY))
 		return;
 
 	cvar->value.f = value;
@@ -637,7 +655,7 @@ void CVar_SetFloat(cvar_t *cvar, const float value)
 
 void CVar_SetBool(cvar_t *cvar, const bool value)
 {
-	if ((!cvar) || (cvar->type != CVAR_BOOL))
+	if ((!cvar) || (cvar->type != CVAR_BOOL) || (cvar->flags & CVAR_READONLY))
 		return;
 
 	cvar->value.b = value;

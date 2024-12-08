@@ -18,6 +18,8 @@ static cvar_t *rmultisamples;
 static cvar_t *rrefresh;
 static cvar_t *rvsync;
 
+static bool initialized;
+
 static const videomode_t videomodes[] =
 {
 	// all modes are to be 16:9 aspect ratio
@@ -175,10 +177,17 @@ bool Render_Init(void)
 
 	Log_WriteSeq(LOG_INFO, "OpenGL version: %s", (const char *)glGetString(GL_VERSION));
 
+	initialized = true;
+
 	return(true);
 }
 
 void Render_Shutdown(void)
 {
+	if (!initialized)
+		return;
+
 	GLWnd_Shutdown();
+
+	initialized = false;
 }

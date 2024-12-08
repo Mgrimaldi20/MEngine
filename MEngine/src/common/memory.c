@@ -42,6 +42,8 @@ static taglist_t *taglist;			// this is used by the default allocator only
 
 static allocator_t allocator;		// if system memory is less than 4GB, use malloc/free, else use the cache allocator
 
+static bool initialized;
+
 static freeblock_t *GetFreeBlock(void)
 {
 	freeblock_t *block;
@@ -361,8 +363,7 @@ void DumpAllocData(void)
 
 bool MemCache_Init(void)
 {
-	// if system memory is less than 4GB or the default allocator cmd arg is parsed use malloc/free, else use the cache allocator
-	if ((Sys_GetSystemMemory() < (4 * 1024)) || Common_UseDefaultAlloc())
+	if ((Sys_GetSystemMemory() < (4 * 1024)) || Common_UseDefaultAlloc())	// only use cache if system memory is greater than 4GB or the command line flag is set
 	{
 		allocator = (allocator_t)
 		{
@@ -429,11 +430,19 @@ bool MemCache_Init(void)
 		pool = block;
 	}
 
+	lastreported = 0;
+	memcacheused = 0;
+
+	initialized = true;
+
 	return(true);
 }
 
 void MemCache_Shutdown(void)
 {
+	if (!initialized)
+		return;
+
 #if defined(MENGINE_DEBUG)
 	DumpAllocData();
 #endif
@@ -465,6 +474,8 @@ void MemCache_Shutdown(void)
 	}
 
 	pool = NULL;
+
+	initialized = false;
 }
 
 void *MemCache_Alloc(size_t size)

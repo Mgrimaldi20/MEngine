@@ -77,6 +77,11 @@ if(WIN32)
 	endif()
 endif()
 
+# TODO: Remove this dependency later: Add the Shlwapi library to the project and link to target
+if(WIN32)
+	target_link_libraries(MEngine PRIVATE shlwapi)
+endif()
+
 # Add the OpenGL GLU library to the project and link to target
 if(WIN32)
 	target_link_libraries(MEngine PRIVATE opengl32 glu32)
@@ -127,34 +132,60 @@ include_directories("libs/minizip-ng")
 
 # Set up all the compiler options here
 if(MSVC)
-	target_compile_options(MEngine PRIVATE "/W4" "/WX" "/permissive-" "/analyze" "/fp:fast")				# Common options for all build types
-	if(CMAKE_BUILD_TYPE STREQUAL "Debug")																	# Debug build compiler options
+	target_compile_options(MEngine PRIVATE "/W4" "/WX" "/permissive-" "/analyze" "/fp:fast")					# Common options for all build types
+	if(CMAKE_BUILD_TYPE STREQUAL "Debug")																		# Debug build compiler options
 		target_compile_options(MEngine PRIVATE "/Zi" "/fsanitize=address" "/Od" "/MDd" "/JMC" "/FAs")
-	elseif(CMAKE_BUILD_TYPE STREQUAL "Release")																# Release build compiler options
+	elseif(CMAKE_BUILD_TYPE STREQUAL "Release")																	# Release build compiler options
 		target_compile_options(MEngine PRIVATE "/O2" "/MD" "/GL" "/Gw" "/Ot" "/FAs")
 	endif()
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 	target_compile_options(MEngine PRIVATE "-Wall" "-Werror" "-Wpedantic" "-ffast-math")						# Common options for all build types
-	if(CMAKE_BUILD_TYPE STREQUAL "Debug")																	# Debug build compiler options
-		target_compile_options(MEngine PRIVATE "-g" "-fsanitize=address" "-O0")
-		target_link_libraries(MEngine PRIVATE "-fsanitize=address")
-	elseif(CMAKE_BUILD_TYPE STREQUAL "Release")																# Release build compiler options
+	if(CMAKE_BUILD_TYPE STREQUAL "Debug")																		# Debug build compiler options
+		target_compile_options(MEngine PRIVATE
+			"-g"
+			"-fanalyzer"
+			"-fsanitize=leak"
+			"-fsanitize=undefined"
+			"-fsanitize=address"
+			"-fsanitize=thread"
+			"-O0"
+		)
+		target_link_libraries(MEngine PRIVATE
+			"-fsanitize=leak"
+			"-fsanitize=undefined"
+			"-fsanitize=address"
+			"-fsanitize=thread"
+		)
+	elseif(CMAKE_BUILD_TYPE STREQUAL "Release")																	# Release build compiler options
 		target_compile_options(MEngine PRIVATE "-O3" "-flto")
 	endif()
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 	target_compile_options(MEngine PRIVATE "-Wall" "-Werror" "-Wpedantic" "-ffast-math")						# Common options for all build types
-	if(CMAKE_BUILD_TYPE STREQUAL "Debug")																	# Debug build compiler options
-		target_compile_options(MEngine PRIVATE "-g" "-fsanitize=address" "-O0")
-		target_link_libraries(MEngine PRIVATE "-fsanitize=address")
-	elseif(CMAKE_BUILD_TYPE STREQUAL "Release")																# Release build compiler options
+	if(CMAKE_BUILD_TYPE STREQUAL "Debug")																		# Debug build compiler options
+		target_compile_options(MEngine PRIVATE
+			"-g"
+			"-fanalyzer"
+			"-fsanitize=leak"
+			"-fsanitize=undefined"
+			"-fsanitize=address"
+			"-fsanitize=thread"
+			"-O0"
+		)
+		target_link_libraries(MEngine PRIVATE
+			"-fsanitize=leak"
+			"-fsanitize=undefined"
+			"-fsanitize=address"
+			"-fsanitize=thread"
+		)
+	elseif(CMAKE_BUILD_TYPE STREQUAL "Release")																	# Release build compiler options
 		target_compile_options(MEngine PRIVATE "-O3" "-flto")
 	endif()
 endif()
 
 # Add options for doing a memory check with ASAN
-option(CHECK_MEMORY "Uses ASAN to check if there are any memory leaks" OFF)
+option(MENGINE_CHECK_MEMORY "Uses ASAN to check if there are any memory leaks" OFF)
 
-if(CHECK_MEMORY)
+if(MENGINE_CHECK_MEMORY)
 target_compile_definitions(MEngine PRIVATE MemCache_Alloc=malloc)
 target_compile_definitions(MEngine PRIVATE MemCache_Free=free)
 endif()

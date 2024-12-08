@@ -14,6 +14,8 @@ typedef long long (*glwndproc_t)(void);
 static const wchar_t *wndclassname = L"MEngine";
 static const wchar_t *fakewndclassname = L"Fake_MEngine";
 
+static bool initialized;	// TODO: might need to be more fine grained for InitOpenGL
+
 PFNWGLGETEXTENSIONSSTRINGARBPROC wglGetExtensionsStringARB;
 
 PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT;
@@ -566,11 +568,17 @@ bool GLWnd_Init(glwndparams_t params)
 	GetWGLExtensions(win32state.hdc);	// get WGL extensions for real window
 
 	Log_WriteSeq(LOG_INFO, "OpenGL initalised and created window");
+
+	initialized = true;
+
 	return(true);
 }
 
 void GLWnd_Shutdown(void)
 {
+	if (!initialized)
+		return;
+
 	Log_WriteSeq(LOG_INFO, "Shutting down OpenGL system");
 
 	wglMakeCurrent(NULL, NULL);
@@ -596,6 +604,8 @@ void GLWnd_Shutdown(void)
 
 	UnregisterClass(fakewndclassname, win32state.hinst);
 	UnregisterClass(wndclassname, win32state.hinst);
+
+	initialized = false;
 }
 
 bool GLWnd_ChangeScreenParams(glwndparams_t params)

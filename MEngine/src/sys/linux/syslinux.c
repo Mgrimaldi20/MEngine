@@ -9,6 +9,7 @@
 #include <dlfcn.h>
 #include <pthread.h>
 #include <dirent.h>
+#include <fnmatch.h>
 #include "common/common.h"
 #include "sys/sys.h"
 #include "linuxlocal.h"
@@ -34,6 +35,8 @@ struct condvar
 static thread_t threads[SYS_MAX_THREADS];
 static mutex_t mutexes[SYS_MAX_MUTEXES];
 static condvar_t condvars[SYS_MAX_CONDVARS];
+
+static bool initialized;
 
 bool Sys_Init(void)
 {
@@ -68,12 +71,19 @@ bool Sys_Init(void)
 	CVar_RegisterString("g_gamedll", "DemoGame.so", CVAR_GAME, "The name of the game DLL for Linux systems");
 	CVar_RegisterString("g_demogamedll", "DemoGame.so", CVAR_GAME, "The name of the demo game DLL for Linux systems");
 
+	initialized = true;
+
 	return(true);
 }
 
 void Sys_Shutdown(void)
 {
+	if (!initialized)
+		return;
+
 	Log_WriteSeq(LOG_INFO, "Shutting down system");
+
+	initialized = false;
 }
 
 void Sys_Error(const char *error, ...)
@@ -121,22 +131,23 @@ bool Sys_Mkdir(const char *path)
 	return(true);
 }
 
-filedata_t Sys_Stat(const char *filepath)
+void Sys_Stat(const char *filepath, filedata_t *filedata)
 {
+	if (!filedata)
+		return;
+
 	struct stat st;
 	if (stat(filepath, &st) == -1)
 	{
 		Log_Write(LOG_ERROR, "%s, Failed to make a call to stat(): %s", __func__, filepath);
-		return((filedata_t){ 0 });
+		return;
 	}
 
-	filedata_t data;
-	snprintf(data.filename, SYS_MAX_PATH, "%s", filepath);
-	data.filesize = st.st_size;
-	data.lastwritetime = st.st_mtime;
-
-	// TODO: add more file data here
-	return(data);
+	snprintf(filedata->filename, SYS_MAX_PATH, "%s", filepath);
+	filedata->filesize = st.st_size;
+	filedata->atime = st.st_atime;
+	filedata->mtime = st.st_mtime;
+	filedata->ctime = st.st_ctime;
 }
 
 char *Sys_Strtok(char *string, const char *delimiter, char **context)
@@ -154,95 +165,42 @@ void Sys_Localtime(struct tm *buf, const time_t *timer)
 	localtime_r(timer, buf);
 }
 
-unsigned long long Sys_GetSystemMemory(void)
+bool Sys_PathMatchSpec(const char *path, const char *filter)
+{
+	return(fnmatch(filter, path, FNM_PATHNAME) == 0);
+}
+
+void *Sys_OpenDir(const char *directory)
+{
+	DIR *dir = opendir(directory);
+	if (!dir)
+		return(NULL);
+
+	return(dir);
+}
+
+bool Sys_ReadDir(void *directory, char *filename, size_t filenamelen)
+{
+	struct dirent *entry = readdir((DIR *)directory);
+	if (!entry)
+		return(false);
+
+	snprintf(filename, filenamelen, "%s", entry->d_name);
+
+	return(true);
+}
+
+void Sys_CloseDir(void *directory)
+{
+	closedir((DIR *)directory);
+}
+
+size_t Sys_GetSystemMemory(void)
 {
 	long pages = sysconf(_SC_PHYS_PAGES);
 	long page_size = sysconf(_SC_PAGE_SIZE);
 
-	return((unsigned long long)pages * (unsigned long long)page_size / (1024 * 1024));
-}
-
-bool Sys_ListFiles(const char *directory, const char *filter, sysfiledata_t *filelist, unsigned int numfiles)
-{
-	DIR *dir = opendir(directory);
-	if (!dir)
-	{
-		Log_WriteSeq(LOG_ERROR, "Failed to open directory: %s", directory);
-		return(false);
-	}
-
-	struct dirent *entry = NULL;
-	unsigned int count = 0;
-	while ((entry = readdir(dir)) != NULL)
-	{
-		if (entry->d_type == DT_REG)
-		{
-			if (filter)
-			{
-				if (strstr(entry->d_name, filter))
-				{
-					snprintf(filelist[count].filename, sizeof(filelist[count].filename), "%s/%s", directory, entry->d_name);
-					filelist[count].lastwritetime = Sys_FileTimeStamp(filelist[count].filename);
-					count++;
-				}
-			}
-
-			else
-			{
-				snprintf(filelist[count].filename, sizeof(filelist[count].filename), "%s/%s", directory, entry->d_name);
-				filelist[count].lastwritetime = Sys_FileTimeStamp(filelist[count].filename);
-				count++;
-			}
-		}
-
-		if (count >= numfiles)
-			break;
-	}
-
-	closedir(dir);
-	return(true);
-}
-
-unsigned int Sys_CountFiles(const char *directory, const char *filter)
-{
-	DIR *dir = opendir(directory);
-	if (!dir)
-	{
-		Log_WriteSeq(LOG_ERROR, "Failed to open directory: %s", directory);
-		return(0);
-	}
-
-	struct dirent *entry = NULL;
-	unsigned int count = 0;
-	while ((entry = readdir(dir)) != NULL)
-	{
-		if (entry->d_type == DT_REG)
-		{
-			if (filter)
-			{
-				if (strstr(entry->d_name, filter))
-					count++;
-			}
-
-			else
-				count++;
-		}
-	}
-
-	closedir(dir);
-	return(count);
-}
-
-time_t Sys_FileTimeStamp(const char *fname)
-{
-	struct stat filestat;
-	if (stat(fname, &filestat) == -1)
-	{
-		Log_WriteSeq(LOG_ERROR, "Failed to get file timestamp: %s", fname);
-		return(0);
-	}
-
-	return(filestat.st_mtime);
+	return((size_t)pages * (size_t)page_size / (1024 * 1024));
 }
 
 unsigned long Sys_GetMaxThreads(void)

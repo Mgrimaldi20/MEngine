@@ -7,7 +7,7 @@
 #include "sys/sys.h"
 #include "common.h"
 
-#define LOG_TIMESTR_LEN 100
+#define LOG_TIMESTR_LEN 256
 #define LOG_TIME_FMT "%Y-%m-%d %H:%M:%S"
 #define MAX_LOG_ENTRIES 256
 #define MAX_LOG_FILES 5
@@ -34,28 +34,22 @@ static volatile bool stopthreads;
 static unsigned int logcount;
 static logentry_t logqueue[MAX_LOG_ENTRIES];
 
+static bool initialized;
+
 static int CompareFileData(const void *a, const void *b)
 {
-	return((int)difftime(((sysfiledata_t *)b)->lastwritetime, ((sysfiledata_t *)a)->lastwritetime));
+	return((int)difftime(((filedata_t *)b)->mtime, ((filedata_t *)a)->mtime));
 }
 
-static bool RemoveOldLogFiles(const char *dir)	// why does this code exist? why did I create it? its horrible :)
+static bool RemoveOldLogFiles(const char *dir)	// ahhh its alright
 {
 	const char *logfilter = "logs.*.log";
 
-	unsigned int filecount = Sys_CountFiles(dir, logfilter);
-	if (filecount <= 0)
-		return(true);	// just return true here too, the next func will create logs
+	unsigned int filecount = 0;
 
-	sysfiledata_t *filelist = MemCache_Alloc(sizeof(*filelist) * filecount);
+	filedata_t *filelist = FileSys_ListFiles(&filecount, dir, logfilter);
 	if (!filelist)
 		return(false);
-
-	if (!Sys_ListFiles(dir, logfilter, filelist, filecount))
-	{
-		MemCache_Free(filelist);
-		return(false);
-	}
 
 	qsort(filelist, filecount, sizeof(*filelist), CompareFileData);
 
@@ -70,7 +64,7 @@ static bool RemoveOldLogFiles(const char *dir)	// why does this code exist? why 
 			remove(oldfile);
 	}
 
-	MemCache_Free(filelist);
+	FileSys_FreeFileList(filelist);
 	return(true);
 }
 
@@ -206,6 +200,10 @@ bool Log_Init(void)
 		Sys_DestroyCondVar(logcond);
 		Sys_DestroyMutex(loglock);
 
+		logthread = NULL;
+		logcond = NULL;
+		loglock = NULL;
+
 		fclose(logfile);
 		logfile = NULL;
 
@@ -213,11 +211,17 @@ bool Log_Init(void)
 	}
 
 	Log_WriteSeq(LOG_INFO, "Logs opened, logging started...");
+
+	initialized = true;
+
 	return(true);
 }
 
 void Log_Shutdown(void)
 {
+	if (!initialized)
+		return;
+
 	Log_WriteSeq(LOG_INFO, "Shutting down logging service...");
 
 	Sys_Sleep(1000);	// wait for log thread to finish, make sure all logs are written, not really required
@@ -226,9 +230,16 @@ void Log_Shutdown(void)
 
 	Sys_SignalCondVar(logcond);
 
-	Sys_JoinThread(logthread);
-	Sys_DestroyCondVar(logcond);
-	Sys_DestroyMutex(loglock);
+	if (loglock || logcond || logthread)
+	{
+		Sys_JoinThread(logthread);
+		Sys_DestroyCondVar(logcond);
+		Sys_DestroyMutex(loglock);
+
+		logthread = NULL;
+		logcond = NULL;
+		loglock = NULL;
+	}
 
 	if (logfile)
 	{
@@ -236,11 +247,13 @@ void Log_Shutdown(void)
 		fclose(logfile);
 		logfile = NULL;
 	}
+
+	initialized = false;
 }
 
 void Log_Write(const logtype_t type, const char *msg, ...)
 {
-	if (logcount >= MAX_LOG_ENTRIES)
+	if ((logcount >= MAX_LOG_ENTRIES) || (!initialized))
 		return;
 
 	Sys_LockMutex(loglock);
@@ -264,6 +277,9 @@ void Log_Write(const logtype_t type, const char *msg, ...)
 
 void Log_WriteSeq(const logtype_t type, const char *msg, ...)
 {
+	if (!initialized)
+		return;
+
 	Sys_LockMutex(loglock);
 
 	struct tm timeinfo;
@@ -289,6 +305,9 @@ void Log_WriteSeq(const logtype_t type, const char *msg, ...)
 
 void Log_WriteLargeSeq(const logtype_t type, const char *msg, ...)
 {
+	if (!initialized)
+		return;
+
 	Sys_LockMutex(loglock);
 
 	va_list arg;

@@ -79,18 +79,19 @@ void CVar_SetInt(cvar_t *cvar, const int value);
 void CVar_SetFloat(cvar_t *cvar, const float value);
 void CVar_SetBool(cvar_t *cvar, const bool value);
 
-typedef struct
+struct filedata
 {
-	time_t lastwritetime;
+	time_t atime;
+	time_t mtime;
+	time_t ctime;
 	size_t filesize;
 	char filename[SYS_MAX_PATH];
-} filedata_t;
+};
 
 bool FileSys_Init(void);
 void FileSys_Shutdown(void);
+bool FileSys_FileExistsInPAK(const char *filename);
+filedata_t *FileSys_ListFilesInPAK(unsigned int *numfiles, const char *directory, const char *filter);
 bool FileSys_FileExists(const char *filename);
-size_t FileSys_FileSize(const char *filename);
-time_t FileSys_FileTimeLastWrite(const char *filename);
-unsigned int FileSys_CountFiles(const char *directory, const char *filter);
-filedata_t *FileSys_ListFiles(const char *directory, const char *filter, unsigned int numfiles);
+filedata_t *FileSys_ListFiles(unsigned int *numfiles, const char *directory, const char *filter);
 void FileSys_FreeFileList(filedata_t *filelist);
