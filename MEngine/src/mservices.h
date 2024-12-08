@@ -26,6 +26,7 @@ typedef struct cvar cvar_t;			// opaque type to cvar struct, only access through
 typedef struct thread thread_t;		// opaque type to thread struct, only access through Sys_ thread functions
 typedef struct mutex mutex_t;		// opaque type to mutex struct, only access through Sys_ mutex functions
 typedef struct condvar condvar_t;	// opaque type to condvar struct, only access through Sys_ condvar functions
+typedef struct filedata filedata_t;	// opaque type to filedata struct, only access through Sys_ file functions
 
 typedef struct		// logging service
 {
@@ -65,6 +66,7 @@ typedef struct		// cvar system
 typedef struct		// system services
 {
 	bool (*Mkdir)(const char *path);
+	void (*Sys_Stat)(const char *filepath, filedata_t *filedata);
 	char *(*Strtok)(char *string, const char *delimiter, char **context);
 	void (*Sleep)(unsigned long milliseconds);
 	void (*Localtime)(struct tm *buf, const time_t *timer);

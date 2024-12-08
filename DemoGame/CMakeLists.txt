@@ -34,16 +34,42 @@ if(MSVC)
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 	target_compile_options(DemoGame PRIVATE "-Wall" "-Werror" "-Wpedantic" "-ffast-math")						# Common options for all build types
 	if(CMAKE_BUILD_TYPE STREQUAL "Debug")																	# Debug build compiler options
-		target_compile_options(DemoGame PRIVATE "-g" "-fsanitize=address" "-O0")
-		target_link_libraries(MEngine PRIVATE "-fsanitize=address")
+		target_compile_options(DemoGame PRIVATE
+			"-g"
+			"-fanalyzer"
+			"-fsanitize=leak"
+			"-fsanitize=undefined"
+			"-fsanitize=address"
+			"-fsanitize=thread"
+			"-O0"
+		)
+		target_link_libraries(DemoGame PRIVATE
+			"-fsanitize=leak"
+			"-fsanitize=undefined"
+			"-fsanitize=address"
+			"-fsanitize=thread"
+		)
 	elseif(CMAKE_BUILD_TYPE STREQUAL "Release")																# Release build compiler options
 		target_compile_options(DemoGame PRIVATE "-O3" "-flto")
 	endif()
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 	target_compile_options(DemoGame PRIVATE "-Wall" "-Werror" "-Wpedantic" "-ffast-math")						# Common options for all build types
 	if(CMAKE_BUILD_TYPE STREQUAL "Debug")																	# Debug build compiler options
-		target_compile_options(DemoGame PRIVATE "-g" "-fsanitize=address" "-O0")
-		target_link_libraries(MEngine PRIVATE "-fsanitize=address")
+		target_compile_options(DemoGame PRIVATE
+			"-g"
+			"-fanalyzer"
+			"-fsanitize=leak"
+			"-fsanitize=undefined"
+			"-fsanitize=address"
+			"-fsanitize=thread"
+			"-O0"
+		)
+		target_link_libraries(DemoGame PRIVATE
+			"-fsanitize=leak"
+			"-fsanitize=undefined"
+			"-fsanitize=address"
+			"-fsanitize=thread"
+		)
 	elseif(CMAKE_BUILD_TYPE STREQUAL "Release")																# Release build compiler options
 		target_compile_options(DemoGame PRIVATE "-O3" "-flto")
 	endif()

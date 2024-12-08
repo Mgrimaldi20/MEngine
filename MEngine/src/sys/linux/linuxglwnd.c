@@ -2,6 +2,8 @@
 #include "linuxlocal.h"
 #include "renderer/renderer.h"
 
+static bool initialized;
+
 bool GLWnd_Init(glwndparams_t params)
 {
 	if (!glfwInit())
@@ -72,20 +74,29 @@ bool GLWnd_Init(glwndparams_t params)
 	RegisterCallbacks(linuxstate.window);
 
 	Log_WriteSeq(LOG_INFO, "OpenGL initalised and created window");
+
+	initialized = true;
+
 	return(true);
 }
 
 void GLWnd_Shutdown(void)
 {
+	if (!initialized)
+		return;
+
 	Log_WriteSeq(LOG_INFO, "Shutting down OpenGL system");
 
 	if (linuxstate.window)
 	{
+		glfwMakeContextCurrent(NULL);
 		glfwDestroyWindow(linuxstate.window);
 		linuxstate.window = NULL;
 	}
 
 	glfwTerminate();
+
+	initialized = false;
 }
 
 bool GLWnd_ChangeScreenParams(glwndparams_t params)

@@ -33,6 +33,8 @@ static sys_t sys;
 static unsigned long long cmdlineflags;
 static void *gamedllhandle;
 
+static bool gameinitialized;
+
 static void ParseCommandLine(void)
 {
 	char cmdline[SYS_MAX_CMDLINE_ARGS][SYS_MAX_CMDLINE_ARGS] = { 0 };
@@ -213,17 +215,27 @@ static bool InitGame(void)
 		return(false);
 	}
 
+	gameinitialized = true;
+
 	return(true);
 }
 
 static void ShutdownGame(void)
 {
+	if (!gameinitialized)
+		return;
+
 	gameservices.Shutdown();	// run the games shutdown code
 
 	Render_Shutdown();
 
-	Sys_UnloadDLL(gamedllhandle);
-	gamedllhandle = 0;
+	if (gamedllhandle)
+	{
+		Sys_UnloadDLL(gamedllhandle);
+		gamedllhandle = NULL;
+	}
+
+	gameinitialized = false;
 }
 
 static void UpdateConfigs(void)
