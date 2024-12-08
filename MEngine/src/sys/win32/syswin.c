@@ -215,7 +215,7 @@ void *Sys_OpenDir(const char *directory)
 		return(NULL);
 	}
 
-	MemCache_Free(findfiledata);
+	MemCache_Free(findfiledata);	// TODO: see below
 
 	return(handle);
 }
@@ -237,7 +237,7 @@ bool Sys_ReadDir(void *directory, char *filename, size_t filenamelen)
 		return(false);
 	}
 
-	MemCache_Free(findfiledata);
+	MemCache_Free(findfiledata);	// TODO: this is bad, we should only free after were done with everything
 
 	return(true);
 }
