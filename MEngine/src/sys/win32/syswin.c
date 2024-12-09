@@ -6,7 +6,6 @@
 #include <process.h>
 #include <sys/stat.h>
 #include <threads.h>
-#include <shlwapi.h>
 #include "sys/sys.h"
 #include "common/common.h"
 #include "winlocal.h"
@@ -176,20 +175,6 @@ void Sys_Sleep(unsigned long milliseconds)
 void Sys_Localtime(struct tm *buf, const time_t *timer)
 {
 	localtime_s(buf, timer);
-}
-
-bool Sys_PathMatchSpec(const char *path, const char *filter)
-{
-	wchar_t wpath[SYS_MAX_PATH] = { 0 };
-	wchar_t wfilter[SYS_MAX_PATH] = { 0 };
-
-	if (!MultiByteToWideChar(CP_UTF8, 0, path, -1, wpath, SYS_MAX_PATH))
-		return(false);
-
-	if (!MultiByteToWideChar(CP_UTF8, 0, filter, -1, wfilter, SYS_MAX_PATH))
-		return(false);
-
-	return(PathMatchSpec(wpath, wfilter));
 }
 
 void *Sys_OpenDir(const char *directory)
