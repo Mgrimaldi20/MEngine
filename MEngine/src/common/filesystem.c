@@ -234,9 +234,9 @@ filedata_t *FileSys_ListFiles(unsigned int *numfiles, const char *directory, con
 
 void FileSys_FreeFileList(filedata_t *filelist)
 {
-	if (!filelist)
-		return;
-
-	MemCache_Free(filelist);
-	filelist = NULL;
+	if (filelist)
+	{
+		MemCache_Free(filelist);
+		filelist = NULL;
+	}
 }
