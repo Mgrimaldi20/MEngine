@@ -48,7 +48,11 @@ static bool RemoveOldLogFiles(const char *dir)	// ahhh its alright
 	unsigned int filecount = 0;
 
 	filedata_t *filelist = FileSys_ListFiles(&filecount, dir, logfilter);
-	if (!filelist)
+
+	if (filecount <= 0)
+		return(true);		// return true if filecount is 0, next function will create log	files
+
+	else if (!filelist)
 		return(false);
 
 	qsort(filelist, filecount, sizeof(*filelist), CompareFileData);
@@ -210,9 +214,9 @@ bool Log_Init(void)
 		return(false);
 	}
 
-	Log_WriteSeq(LOG_INFO, "Logs opened, logging started...");
-
 	initialized = true;
+
+	Log_WriteSeq(LOG_INFO, "Logs opened, logging started...");
 
 	return(true);
 }
