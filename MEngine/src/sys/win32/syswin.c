@@ -194,28 +194,18 @@ bool Sys_PathMatchSpec(const char *path, const char *filter)
 
 void *Sys_OpenDir(const char *directory)
 {
-	WIN32_FIND_DATA *findfiledata = MemCache_Alloc(sizeof(*findfiledata));
-	if (!findfiledata)
-		return(NULL);
+	WIN32_FIND_DATA findfiledata = { 0 };
 
 	wchar_t wdirectory[SYS_MAX_PATH] = { 0 };
 	if (!MultiByteToWideChar(CP_UTF8, 0, directory, -1, wdirectory, SYS_MAX_PATH))
-	{
-		MemCache_Free(findfiledata);
 		return(NULL);
-	}
 
 	wchar_t wsearchpath[SYS_MAX_PATH] = { 0 };
 	swprintf(wsearchpath, SYS_MAX_PATH, L"%s\\*", wdirectory);
 
-	HANDLE handle = FindFirstFile(wsearchpath, findfiledata);
+	HANDLE handle = FindFirstFile(wsearchpath, &findfiledata);
 	if (handle == INVALID_HANDLE_VALUE)
-	{
-		MemCache_Free(findfiledata);
 		return(NULL);
-	}
-
-	MemCache_Free(findfiledata);	// TODO: see below
 
 	return(handle);
 }
@@ -223,21 +213,13 @@ void *Sys_OpenDir(const char *directory)
 bool Sys_ReadDir(void *directory, char *filename, size_t filenamelen)
 {
 	HANDLE handle = (HANDLE)directory;
-	WIN32_FIND_DATA *findfiledata = MemCache_Alloc(sizeof(*findfiledata));
+	WIN32_FIND_DATA findfiledata = { 0 };
 
-	if (!FindNextFile(handle, findfiledata))
-	{
-		MemCache_Free(findfiledata);
+	if (!FindNextFile(handle, &findfiledata))
 		return(false);
-	}
 
-	if (!WideCharToMultiByte(CP_UTF8, 0, findfiledata->cFileName, -1, filename, (int)filenamelen, NULL, NULL))	// saves the filename as a UTF-8 string
-	{
-		MemCache_Free(findfiledata);
+	if (!WideCharToMultiByte(CP_UTF8, 0, findfiledata.cFileName, -1, filename, (int)filenamelen, NULL, NULL))	// saves the filename as a UTF-8 string
 		return(false);
-	}
-
-	MemCache_Free(findfiledata);	// TODO: this is bad, we should only free after were done with everything
 
 	return(true);
 }
