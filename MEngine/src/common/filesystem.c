@@ -6,11 +6,43 @@
 
 static bool initialized;
 
+static bool PathMatchSpec(const char *path, const char *filter)
+{
+	while (*filter && *path)
+	{
+		if (*filter == '*')
+		{
+			filter++;
+			if (!*filter)
+				return(true);
+
+			while (*path)
+			{
+				if (PathMatchSpec(filter, path))
+					return(true);
+
+				path++;
+			}
+		}
+		
+		else if (*filter != *path)
+			return(false);
+
+		filter++;
+		path++;
+	}
+
+	return(!*filter && !*path);
+}
+
 bool FileSys_Init(void)
 {
 	initialized = true;
 
-	// TODO: add init code here
+	// TODO: add init code here, this will read all the .pk files in the directory and load them into memory
+	// .pk files will overwrite each other if the number is higher, so the last one loaded will overwrite the previous ones
+	// this also means the below functions dont have to open zip files, they can just read from memory
+	// non *PAK* functions will still read from disk and dont need to be initialized
 
 	return(false);
 }
@@ -20,7 +52,7 @@ void FileSys_Shutdown(void)
 	if (!initialized)
 		return;
 
-	// TODO: add shutdown code here
+	// TODO: add shutdown code here, this will free all the memory used by the .pk files
 
 	initialized = false;
 }
@@ -104,7 +136,7 @@ filedata_t *FileSys_ListFilesInPAK(unsigned int *numfiles, const char *directory
 		if (unzGetCurrentFileInfo64(pakfile, &info, filename, SYS_MAX_PATH, NULL, 0, NULL, 0) != UNZ_OK)
 			continue;
 
-		if (Sys_PathMatchSpec(filename, filter))
+		if (PathMatchSpec(filename, filter))
 		{
 			filedata_t *file = &filelist[index];
 
@@ -159,7 +191,7 @@ filedata_t *FileSys_ListFiles(unsigned int *numfiles, const char *directory, con
 
 	while (Sys_ReadDir(dir, filename, SYS_MAX_PATH))
 	{
-		if (Sys_PathMatchSpec(filename, filter))
+		if (PathMatchSpec(filename, filter))
 			filecount++;
 	}
 
@@ -184,7 +216,7 @@ filedata_t *FileSys_ListFiles(unsigned int *numfiles, const char *directory, con
 	unsigned int index = 0;
 	while (Sys_ReadDir(dir, filename, SYS_MAX_PATH))
 	{
-		if (Sys_PathMatchSpec(filename, filter))
+		if (PathMatchSpec(filename, filter))
 		{
 			char filepath[SYS_MAX_PATH] = { 0 };
 			snprintf(filepath, SYS_MAX_PATH, "%s/%s", directory, filename);

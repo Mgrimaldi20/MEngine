@@ -24,7 +24,6 @@ void Sys_Stat(const char *filepath, filedata_t *filedata);
 char *Sys_Strtok(char *string, const char *delimiter, char **context);
 void Sys_Sleep(unsigned long milliseconds);
 void Sys_Localtime(struct tm *buf, const time_t *timer);
-bool Sys_PathMatchSpec(const char *path, const char *filter);
 
 void *Sys_OpenDir(const char *directory);
 bool Sys_ReadDir(void *directory, char *filename, size_t filenamelen);

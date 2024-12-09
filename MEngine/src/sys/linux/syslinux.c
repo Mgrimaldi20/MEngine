@@ -165,11 +165,6 @@ void Sys_Localtime(struct tm *buf, const time_t *timer)
 	localtime_r(timer, buf);
 }
 
-bool Sys_PathMatchSpec(const char *path, const char *filter)
-{
-	return(fnmatch(filter, path, FNM_PATHNAME) == 0);
-}
-
 void *Sys_OpenDir(const char *directory)
 {
 	DIR *dir = opendir(directory);

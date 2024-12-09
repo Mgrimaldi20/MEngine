@@ -77,11 +77,6 @@ if(WIN32)
 	endif()
 endif()
 
-# TODO: Remove this dependency later: Add the Shlwapi library to the project and link to target
-if(WIN32)
-	target_link_libraries(MEngine PRIVATE shlwapi)
-endif()
-
 # Add the OpenGL GLU library to the project and link to target
 if(WIN32)
 	target_link_libraries(MEngine PRIVATE opengl32 glu32)
