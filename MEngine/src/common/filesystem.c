@@ -4,6 +4,10 @@
 #include "common.h"
 #include "unzip.h"
 
+static filedata_t *pakfilelist;
+static unzFile *pakfiles;
+static unsigned int pakfilecount;
+
 static bool initialized;
 
 static bool PathMatchSpec(const char *path, const char *filter)
@@ -37,19 +41,14 @@ static bool PathMatchSpec(const char *path, const char *filter)
 
 bool FileSys_Init(void)
 {
-	// TODO: add init code here, this will read all the .pk files in the directory and load them into memory
-	// .pk files will overwrite each other if the number is higher, so the last one loaded will overwrite the previous ones
-	// this also means the below functions dont have to open zip files, they can just read from memory
-	// non *PAK* functions will still read from disk and dont need to be initialized
-	// the .pk file format will look as follows: pak.0.pk, pak.1.pk, pak.2.pk, etc. and will be loaded in that order so pak.1.pk will overwrite pak.0.pk, etc.
-
-	unsigned int filecount = 0;
-	filedata_t *filelist = FileSys_ListFiles(&filecount, ".", "pak.*.pk");
-	if (!filelist)
+	pakfilelist = FileSys_ListFiles(&pakfilecount, ".", "pak.*.pk");
+	if (!pakfilelist)
 	{
 		Log_Write(LOG_ERROR, "Failed to find PAK files to load");
 		return(false);
 	}
+
+	pakfiles = MemCache_Alloc(pakfilecount * sizeof(*pakfiles));
 
 	initialized = true;
 
@@ -61,7 +60,23 @@ void FileSys_Shutdown(void)
 	if (!initialized)
 		return;
 
-	// TODO: add shutdown code here, this will free all the memory used by the .pk files
+	if (pakfiles)
+	{
+		for (unsigned int i=0; i<pakfilecount; i++)
+		{
+			if (pakfiles[i])
+				unzClose(pakfiles[i]);
+		}
+
+		MemCache_Free(pakfiles);
+		pakfiles = NULL;
+	}
+
+	if (pakfilelist)
+	{
+		FileSys_FreeFileList(pakfilelist);
+		pakfilelist = NULL;
+	}
 
 	initialized = false;
 }
