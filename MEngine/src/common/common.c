@@ -271,6 +271,9 @@ bool Common_Init(void)
 	if (!Sys_Init())
 		return(false);
 
+	if (!FileSys_Init())
+		return(false);
+
 	if (!InitGame())
 		return(false);
 
@@ -284,6 +287,7 @@ void Common_Shutdown(void)
 	Log_WriteSeq(LOG_INFO, "Engine shutting down...");
 
 	ShutdownGame();
+	FileSys_Shutdown();
 	Sys_Shutdown();
 	CVar_Shutdown();
 	MemCache_Shutdown();
