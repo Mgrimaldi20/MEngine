@@ -6,6 +6,7 @@
 
 static filedata_t *pakfilelist;
 static unzFile *pakfiles;
+static unzFile respakfile;
 static unsigned int pakfilecount;
 
 static bool initialized;
@@ -49,6 +50,40 @@ bool FileSys_Init(void)
 	}
 
 	pakfiles = MemCache_Alloc(pakfilecount * sizeof(*pakfiles));
+	if (!pakfiles)
+	{
+		Log_Write(LOG_ERROR, "Failed to allocate memory for PAK files");
+		FileSys_FreeFileList(pakfilelist);
+		return(false);
+	}
+
+	for (unsigned int i=0; i<pakfilecount; i++)
+	{
+		pakfiles[i] = unzOpen64(pakfilelist[i].filename);
+		if (!pakfiles[i])
+		{
+			Log_Write(LOG_ERROR, "Failed to open PAK file: %s", pakfilelist[i].filename);
+			MemCache_Free(pakfiles);
+			FileSys_FreeFileList(pakfilelist);
+			return(false);
+		}
+	}
+
+	respakfile = unzOpen64("final.pk");		// create this temp PAK file for writing the contents of all other PAK files to
+	if (!respakfile)
+	{
+		Log_Write(LOG_ERROR, "Failed to create the final PAK file");
+
+		for (unsigned int i=0; i<pakfilecount; i++)
+		{
+			if (pakfiles[i])
+				unzClose(pakfiles[i]);
+		}
+
+		MemCache_Free(pakfiles);
+		FileSys_FreeFileList(pakfilelist);
+		return(false);
+	}
 
 	initialized = true;
 
@@ -59,6 +94,9 @@ void FileSys_Shutdown(void)
 {
 	if (!initialized)
 		return;
+
+	if (respakfile)
+		unzClose(respakfile);
 
 	if (pakfiles)
 	{
