@@ -37,14 +37,23 @@ static bool PathMatchSpec(const char *path, const char *filter)
 
 bool FileSys_Init(void)
 {
-	initialized = true;
-
 	// TODO: add init code here, this will read all the .pk files in the directory and load them into memory
 	// .pk files will overwrite each other if the number is higher, so the last one loaded will overwrite the previous ones
 	// this also means the below functions dont have to open zip files, they can just read from memory
 	// non *PAK* functions will still read from disk and dont need to be initialized
+	// the .pk file format will look as follows: pak.0.pk, pak.1.pk, pak.2.pk, etc. and will be loaded in that order so pak.1.pk will overwrite pak.0.pk, etc.
 
-	return(false);
+	unsigned int filecount = 0;
+	filedata_t *filelist = FileSys_ListFiles(&filecount, ".", "pak.*.pk");
+	if (!filelist)
+	{
+		Log_Write(LOG_ERROR, "Failed to find PAK files to load");
+		return(false);
+	}
+
+	initialized = true;
+
+	return(true);
 }
 
 void FileSys_Shutdown(void)

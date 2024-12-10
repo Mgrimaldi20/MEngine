@@ -44,7 +44,6 @@ static int CompareFileData(const void *a, const void *b)
 static bool RemoveOldLogFiles(const char *dir)	// ahhh its alright
 {
 	const char *logfilter = "logs.*.log";
-
 	unsigned int filecount = 0;
 
 	filedata_t *filelist = FileSys_ListFiles(&filecount, dir, logfilter);
