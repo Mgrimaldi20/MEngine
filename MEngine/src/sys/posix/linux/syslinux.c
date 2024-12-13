@@ -1,3 +1,4 @@
+#include <string.h>
 #include "common/common.h"
 #include "sys/sys.h"
 #include "posixlocal.h"
