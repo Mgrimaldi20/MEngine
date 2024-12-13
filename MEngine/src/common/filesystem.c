@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "sys/sys.h"
 #include "common.h"
 #include "unzip.h"
@@ -42,17 +43,19 @@ static bool PathMatchSpec(const char *path, const char *filter)
 
 bool FileSys_Init(void)
 {
+	return(true);	// just do this for now
+
 	pakfilelist = FileSys_ListFiles(&pakfilecount, ".", "pak.*.pk");
 	if (!pakfilelist)
 	{
-		Log_Write(LOG_ERROR, "Failed to find PAK files to load");
+		Log_WriteSeq(LOG_ERROR, "Failed to find PAK files to load");
 		return(false);
 	}
 
 	pakfiles = MemCache_Alloc(pakfilecount * sizeof(*pakfiles));
 	if (!pakfiles)
 	{
-		Log_Write(LOG_ERROR, "Failed to allocate memory for PAK files");
+		Log_WriteSeq(LOG_ERROR, "Failed to allocate memory for PAK files");
 		FileSys_FreeFileList(pakfilelist);
 		return(false);
 	}
@@ -62,7 +65,7 @@ bool FileSys_Init(void)
 		pakfiles[i] = unzOpen64(pakfilelist[i].filename);
 		if (!pakfiles[i])
 		{
-			Log_Write(LOG_ERROR, "Failed to open PAK file: %s", pakfilelist[i].filename);
+			Log_WriteSeq(LOG_ERROR, "Failed to open PAK file: %s", pakfilelist[i].filename);
 			MemCache_Free(pakfiles);
 			FileSys_FreeFileList(pakfilelist);
 			return(false);
@@ -72,7 +75,7 @@ bool FileSys_Init(void)
 	respakfile = unzOpen64("final.pk");		// create this temp PAK file for writing the contents of all other PAK files to
 	if (!respakfile)
 	{
-		Log_Write(LOG_ERROR, "Failed to create the final PAK file");
+		Log_WriteSeq(LOG_ERROR, "Failed to create the final PAK file");
 
 		for (unsigned int i=0; i<pakfilecount; i++)
 		{

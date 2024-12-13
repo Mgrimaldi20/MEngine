@@ -1,16 +1,16 @@
 #include <stdio.h>
 #include "common/common.h"
 
-#include "linuxlocal.h"
+#include "posixlocal.h"
 
-linuxvars_t linuxstate;
+posixvars_t posixstate;
 
 int main(int argc, char **argv)
 {
-	linuxstate = (linuxvars_t){ 0 };
+	posixstate = (posixvars_t){ 0 };
 
-	linuxstate.argc = argc;
-	linuxstate.argv = argv;
+	posixstate.argc = argc;
+	posixstate.argv = argv;
 	
 	if (!Common_Init())
 	{
@@ -18,7 +18,7 @@ int main(int argc, char **argv)
 		return(1);
 	}
 
-	while (!glfwWindowShouldClose(linuxstate.window))
+	while (!glfwWindowShouldClose(posixstate.window))
 	{
 		Common_Frame();
 		glfwPollEvents();

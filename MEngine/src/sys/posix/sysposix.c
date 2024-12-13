@@ -12,7 +12,7 @@
 #include <fnmatch.h>
 #include "common/common.h"
 #include "sys/sys.h"
-#include "linuxlocal.h"
+#include "posixlocal.h"
 
 struct thread
 {
@@ -36,54 +36,14 @@ static thread_t threads[SYS_MAX_THREADS];
 static mutex_t mutexes[SYS_MAX_MUTEXES];
 static condvar_t condvars[SYS_MAX_CONDVARS];
 
-static bool initialized;
-
-bool Sys_Init(void)
-{
-	// get the OS version information, only run if the OS version is high enough
-	if (uname(&linuxstate.osinfo) == -1)
-	{
-		Log_WriteSeq(LOG_ERROR, "Failed to get OS version information");
-		return(false);
-	}
-
-	Log_WriteSeq(LOG_INFO, "OS: %s %s %s %s",
-		linuxstate.osinfo.sysname,
-		linuxstate.osinfo.nodename,
-		linuxstate.osinfo.release,
-		linuxstate.osinfo.version
-	);
-
-	if (Common_IgnoreOSVer())
-		Log_WriteSeq(LOG_WARN, "Ignoring OS version check... "
-			"This code has only been tested on Windows systems so far "
-			"but the common and shared code should work the same, use with caution, "
-			"some of the system frameworks might not work as expected");
-
-	else if (strcmp(linuxstate.osinfo.sysname, "Linux") != 0)
-	{
-		Sys_Error("Requires Linux OS");
-		return(false);
-	}
-
-	Log_WriteSeq(LOG_INFO, "System memory: %lluMB", Sys_GetSystemMemory());
-
-	CVar_RegisterString("g_gamedll", "DemoGame.so", CVAR_GAME, "The name of the game DLL for Linux systems");
-	CVar_RegisterString("g_demogamedll", "DemoGame.so", CVAR_GAME, "The name of the demo game DLL for Linux systems");
-
-	initialized = true;
-
-	return(true);
-}
-
 void Sys_Shutdown(void)
 {
-	if (!initialized)
+	if (!posixstate.initialized)
 		return;
 
 	Log_WriteSeq(LOG_INFO, "Shutting down system");
 
-	initialized = false;
+	posixstate.initialized = false;
 }
 
 void Sys_Error(const char *error, ...)
@@ -108,9 +68,9 @@ void Sys_ProcessCommandLine(char cmdout[SYS_MAX_CMDLINE_ARGS][SYS_MAX_CMDLINE_AR
 	char *saveptr = NULL;
 	int i = 0;
 
-	for (int j=1; j<linuxstate.argc&&i<SYS_MAX_CMDLINE_ARGS; j++)
+	for (int j=1; j<posixstate.argc&&i<SYS_MAX_CMDLINE_ARGS; j++)
 	{
-		char *token = Sys_Strtok(linuxstate.argv[j], " -", &saveptr);
+		char *token = Sys_Strtok(posixstate.argv[j], " -", &saveptr);
 		while (token != NULL)
 		{
 			snprintf(cmdout[i], SYS_MAX_CMDLINE_ARGS, "%s", token);

@@ -1,6 +1,6 @@
 #pragma once
 
-#if !defined(MENGINE_PLATFORM_UNIX)
+#if !defined(MENGINE_PLATFORM_LINUX) && !defined(MENGINE_PLATFORM_MACOS)
 #error Include is for Linux and Apple only
 #endif
 
@@ -10,6 +10,7 @@
 
 typedef struct
 {
+	bool initialized;
 	bool fullscreen;
 	int swapinterval;
 	int desktopwidth;		// get all the desktop params
@@ -19,8 +20,8 @@ typedef struct
 	char **argv;
 	struct utsname osinfo;
 	GLFWwindow *window;
-} linuxvars_t;
+} posixvars_t;
 
-extern linuxvars_t linuxstate;
+extern posixvars_t posixstate;
 
 void RegisterCallbacks(GLFWwindow *window);
