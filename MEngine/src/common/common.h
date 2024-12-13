@@ -2,7 +2,7 @@
 
 #include <stddef.h>
 #include <stdbool.h>
-#include "../mservices.h"
+#include "mservices.h"
 
 typedef gameservices_t *(*getmservices_t)(mservices_t *services);
 

@@ -75,12 +75,9 @@ static void PrintHelpMsg(void)
 		"\t-debug\t\tRun the game in debug mode\n"
 		"\t-demo\t\tRun the demo game\n"
 		"\t-ignoreosver\tIgnore OS version check\n"
-		"\t-nocache\tDo not use the memory cache allocator\n"
-		"Press any key to exit...\n";
+		"\t-nocache\tDo not use the memory cache allocator\n";
 
 	printf("%s", helpmsg);
-	Log_WriteSeq(LOG_INFO, helpmsg);
-
 	fflush(stdout);
 }
 
@@ -245,6 +242,14 @@ static void UpdateConfigs(void)
 
 bool Common_Init(void)
 {
+	ParseCommandLine();
+
+	if (Common_HelpMode())
+	{
+		PrintHelpMsg();
+		return(false);		// just print the help message and exit, return false even though the operation was successful to shut down the engine
+	}
+
 	if (!MemCache_Init())
 		return(false);
 
@@ -259,14 +264,6 @@ bool Common_Init(void)
 
 	if (!CVar_Init())
 		return(false);
-
-	ParseCommandLine();
-
-	if (Common_HelpMode())
-	{
-		PrintHelpMsg();
-		return(false);		// just print the help message and exit, return false even though the operation was successful to shut down the engine
-	}
 
 	if (!FileSys_Init())
 		return(false);
