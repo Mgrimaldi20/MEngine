@@ -23,6 +23,7 @@ case "$2" in
 				usage
 				;;
 		esac
+		;;
 	release)
 		case "$1" in
 			linux)
@@ -35,6 +36,7 @@ case "$2" in
 				usage
 				;;
 		esac
+		;;
 	*)
 		usage
 		;;

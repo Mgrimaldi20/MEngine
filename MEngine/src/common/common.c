@@ -268,10 +268,10 @@ bool Common_Init(void)
 		return(false);		// just print the help message and exit, return false even though the operation was successful to shut down the engine
 	}
 
-	if (!Sys_Init())
+	if (!FileSys_Init())
 		return(false);
 
-	if (!FileSys_Init())
+	if (!Sys_Init())
 		return(false);
 
 	if (!InitGame())

@@ -6,12 +6,23 @@ This project uses submodules, so when cloning the project, use the `--recurse-su
 Alternatively, you can run `git submodule update --init --recursive` after cloning the project.
 Or `git submodule init` and `git submodule update`
 
-## Building On Linux
-To build on Linux, simply run the `build_linux.sh` file, it can be built in Debug or Release mode with a switch, eg:
-`./build_linux.sh debug`
-`./build_linux.sh release`
+## Building on Windows
+To build on Windows, simply run the `build_win.bat` file, it can be built in Debug or Release mode with a switch, unlike for the Unix builds, an OS switch isnt needed
+`build_win.bat debug`
+`build_win.bat release`
 
-The following packages may need to be installed:
+The recommended way to build on Windows however, is to use Visual Studio, open the directory there, and build in Visual Studio
+
+## Building On Linux or MacOS
+To build on Linux or MacOS, simply run the `build.sh` file, it can be built in Debug or Release mode with a switch, and the OS must be specified, eg:
+`./build.sh macos debug`
+`./build.sh linux release`
+
+The semantic is as follows:
+`./build [macos|linux] [debug|release]`
+The script will pop up a usage message if you use it out incorrectly
+
+The following packages may need to be installed for Linux systems:
 ```
 sudo apt-get install libxkbcommon-dev
 sudo apt-get install libxrandr-dev
@@ -19,6 +30,11 @@ sudo apt install xorg-dev
 sudo apt install libglu1-mesa-dev
 sudo apt install libasan6
 ```
+
+## Installing the Engine
+Install scripts have been created, this is how the engine will be installed for end users and the given diretory structure used. The install scripts use the same semantics as the build scripts:
+`./install [macos|linux] [debug|release]`
+`install_win.bat [debug|release]`
 
 ## Developing A Game
 To develop a game you need to define a .def file that contains the following, it must export the `GetMServices` function:

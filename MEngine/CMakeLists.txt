@@ -23,8 +23,10 @@ endif()
 
 if(WIN32)
 	target_compile_definitions(MEngine PRIVATE MENGINE_PLATFORM_WINDOWS)
-elseif(UNIX)
-	target_compile_definitions(MEngine PRIVATE MENGINE_PLATFORM_UNIX)
+elseif(LINUX)
+	target_compile_definitions(MEngine PRIVATE MENGINE_PLATFORM_LINUX)
+elseif(APPLE)
+	target_compile_definitions(MEngine PRIVATE MENGINE_PLATFORM_MACOS)
 endif()
 
 # Check the Operating System and include the appropriate file for execution
@@ -39,12 +41,24 @@ if(WIN32)
 	)
 elseif(LINUX OR APPLE)
 	target_sources(MEngine PRIVATE
-		"src/sys/linux/linuxlocal.h"
-		"src/sys/linux/main.c"
-		"src/sys/linux/wndcb.c"
-		"src/sys/linux/syslinux.c"
-		"src/sys/linux/linuxglwnd.c"		# On Linux systems using GLFW for the windowing system instead of X11 or Wayland, should be POSIX portable
-	)	# Apple is not really Linux, but its same code anyway... mostly (looking at you C11 threads)
+		"src/sys/posix/posixlocal.h"
+		"src/sys/posix/main.c"
+		"src/sys/posix/wndcb.c"
+		"src/sys/posix/sysposix.c"
+		"src/sys/posix/posixglwnd.c"		# On POSIX systems using GLFW for the windowing system instead of X11 or Wayland directly
+	)
+
+	include_directories(src/sys/posix)
+endif()
+
+if(LINUX)
+	target_sources(MEngine PRIVATE
+		"src/sys/posix/linux/syslinux.c"
+	)
+elseif(APPLE)
+	target_sources(MEngine PRIVATE
+		"src/sys/posix/macos/sysmacos.c"
+	)
 endif()
 
 # Common source files, all this code is Operating System independent
@@ -80,8 +94,13 @@ endif()
 # Add the OpenGL GLU library to the project and link to target
 if(WIN32)
 	target_link_libraries(MEngine PRIVATE opengl32 glu32)
-elseif(LINUX OR APPLE)
+elseif(LINUX)
 	target_link_libraries(MEngine PRIVATE GL GLU)
+elseif(APPLE)
+	find_package(OpenGL REQUIRED)
+	include_directories(${OPENGL_INCLUDE_DIRS})
+	target_link_libraries(MEngine PRIVATE ${OPENGL_LIBRARIES})
+	message(STATUS "OpenGL libraries found: ${OPENGL_LIBRARIES}")
 endif()
 
 if(LINUX OR APPLE)		# Only add GLFW to the project on a Unix system, Windows will use Win32 API

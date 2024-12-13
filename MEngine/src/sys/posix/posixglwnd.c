@@ -1,5 +1,5 @@
 #include "common/common.h"
-#include "linuxlocal.h"
+#include "posixlocal.h"
 #include "renderer/renderer.h"
 
 static bool initialized;
@@ -16,7 +16,7 @@ bool GLWnd_Init(glwndparams_t params)
 	if (!monitor)
 	{
 		Log_WriteSeq(LOG_ERROR, "Failed to get primary monitor");
-		linuxstate.fullscreen = false;
+		posixstate.fullscreen = false;
 		return(false);
 	}
 
@@ -27,51 +27,51 @@ bool GLWnd_Init(glwndparams_t params)
 		return(false);
 	}
 
-	linuxstate.desktopwidth = mode->width;
-	linuxstate.desktopheight = mode->height;
-	linuxstate.desktoprefresh = mode->refreshRate;
+	posixstate.desktopwidth = mode->width;
+	posixstate.desktopheight = mode->height;
+	posixstate.desktoprefresh = mode->refreshRate;
 
-	linuxstate.fullscreen = true;
+	posixstate.fullscreen = true;
 
 	if (!params.fullscreen)
 	{
-		linuxstate.fullscreen = false;
+		posixstate.fullscreen = false;
 		monitor = NULL;
 	}
 
 	// if the user has refresh, width, and height set to 0, use the desktop settings
-	if (params.refreshrate == 0 || (params.refreshrate > linuxstate.desktoprefresh))
-		params.refreshrate = linuxstate.desktoprefresh;
+	if (params.refreshrate == 0 || (params.refreshrate > posixstate.desktoprefresh))
+		params.refreshrate = posixstate.desktoprefresh;
 
-	if (params.width == 0 || (params.width > linuxstate.desktopwidth))
+	if (params.width == 0 || (params.width > posixstate.desktopwidth))
 	{
-		params.width = linuxstate.desktopwidth;
-		glstate.width = linuxstate.desktopwidth;
+		params.width = posixstate.desktopwidth;
+		glstate.width = posixstate.desktopwidth;
 	}
 
-	if (params.height == 0 || (params.height > linuxstate.desktopheight))
+	if (params.height == 0 || (params.height > posixstate.desktopheight))
 	{
-		params.height = linuxstate.desktopheight;
-		glstate.height = linuxstate.desktopheight;
+		params.height = posixstate.desktopheight;
+		glstate.height = posixstate.desktopheight;
 	}
 
-	linuxstate.window = glfwCreateWindow(320, 240, params.wndname, monitor, NULL);	// create with a small resolution at first
-	if (!linuxstate.window)
+	posixstate.window = glfwCreateWindow(320, 240, params.wndname, monitor, NULL);	// create with a small resolution at first
+	if (!posixstate.window)
 	{
 		Log_WriteSeq(LOG_ERROR, "Failed to create window");
 		glfwTerminate();
 		return(false);
 	}
 
-	glfwSetWindowSize(linuxstate.window, params.width, params.height);
+	glfwSetWindowSize(posixstate.window, params.width, params.height);
 
 	// centre the window if not in fullscreen mode
 	if (!params.fullscreen)
-		glfwSetWindowPos(linuxstate.window, (linuxstate.desktopwidth - params.width) / 2, (linuxstate.desktopheight - params.height) / 2);
+		glfwSetWindowPos(posixstate.window, (posixstate.desktopwidth - params.width) / 2, (posixstate.desktopheight - params.height) / 2);
 
-	glfwMakeContextCurrent(linuxstate.window);		// create the OpenGL context
+	glfwMakeContextCurrent(posixstate.window);		// create the OpenGL context
 
-	RegisterCallbacks(linuxstate.window);
+	RegisterCallbacks(posixstate.window);
 
 	Log_WriteSeq(LOG_INFO, "OpenGL initalised and created window");
 
@@ -87,11 +87,11 @@ void GLWnd_Shutdown(void)
 
 	Log_WriteSeq(LOG_INFO, "Shutting down OpenGL system");
 
-	if (linuxstate.window)
+	if (posixstate.window)
 	{
 		glfwMakeContextCurrent(NULL);
-		glfwDestroyWindow(linuxstate.window);
-		linuxstate.window = NULL;
+		glfwDestroyWindow(posixstate.window);
+		posixstate.window = NULL;
 	}
 
 	glfwTerminate();
@@ -101,7 +101,7 @@ void GLWnd_Shutdown(void)
 
 bool GLWnd_ChangeScreenParams(glwndparams_t params)
 {
-	if (!linuxstate.window)
+	if (!posixstate.window)
 	{
 		Log_WriteSeq(LOG_ERROR, "Window not created, cannot change screen parameters");
 		return(false);
@@ -112,36 +112,36 @@ bool GLWnd_ChangeScreenParams(glwndparams_t params)
 	if (params.fullscreen)
 	{
 		monitor = glfwGetPrimaryMonitor();
-		linuxstate.fullscreen = true;
+		posixstate.fullscreen = true;
 
 		if (!monitor)
 		{
 			Log_WriteSeq(LOG_WARN, "Failed to get primary monitor, cannot make fullscreen window, starting in windowed mode instead");
-			linuxstate.fullscreen = false;
+			posixstate.fullscreen = false;
 			monitor = NULL;		// just in case
 		}
 	}
 
-	glfwSetWindowMonitor(linuxstate.window, monitor, 0, 0, params.width, params.height, params.refreshrate);
+	glfwSetWindowMonitor(posixstate.window, monitor, 0, 0, params.width, params.height, params.refreshrate);
 
 	if (!params.fullscreen)
-		glfwSetWindowPos(linuxstate.window, (linuxstate.desktopwidth - params.width) / 2, (linuxstate.desktopheight - params.height) / 2);
+		glfwSetWindowPos(posixstate.window, (posixstate.desktopwidth - params.width) / 2, (posixstate.desktopheight - params.height) / 2);
 
 	return(true);
 }
 
 void GLWnd_SwapBuffers(void)
 {
-	glfwSwapBuffers(linuxstate.window);
+	glfwSwapBuffers(posixstate.window);
 }
 
 void GLWnd_SetVSync(int vsync)
 {
 	glfwSwapInterval(vsync);
-	linuxstate.swapinterval = vsync;
+	posixstate.swapinterval = vsync;
 }
 
 int GLWnd_GetVSync(void)
 {
-	return(linuxstate.swapinterval);
+	return(posixstate.swapinterval);
 }
