@@ -33,6 +33,8 @@ bld/
 [Ll]ogs/
 [Ll]ib/
 [Ll]libs/
+[Cc]onfig/
+[Cc]onfigs/
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/
