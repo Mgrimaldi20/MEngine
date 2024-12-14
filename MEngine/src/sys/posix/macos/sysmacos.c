@@ -33,7 +33,7 @@ bool Sys_Init(void)
 	Log_WriteSeq(LOG_INFO, "System memory: %lluMB", Sys_GetSystemMemory());
 
 	CVar_RegisterString("g_gamedll", "DemoGame.dylib", CVAR_GAME, "The name of the game DLL for MacOS systems");
-	CVar_RegisterString("g_demogamedll", "DemoGame.dylib", CVAR_GAME, "The name of the demo game DLL for MacOS systems");
+	CVar_RegisterString("g_demogamedll", "DemoGame.dylib", CVAR_GAME | CVAR_READONLY, "The name of the demo game DLL for MacOS systems");
 
 	posixstate.initialized = true;
 

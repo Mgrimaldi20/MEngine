@@ -4,6 +4,7 @@
 #include "sys/sys.h"
 #include "common.h"
 #include "unzip.h"
+#include "zip.h"
 
 static filedata_t *pakfilelist;
 static unzFile *pakfiles;
@@ -72,10 +73,12 @@ bool FileSys_Init(void)
 		}
 	}
 
-	respakfile = unzOpen64("final.pk");		// create this temp PAK file for writing the contents of all other PAK files to
+	const char *finalpkname = "final.pk";
+
+	respakfile = unzOpen64(finalpkname);		// create this temp PAK file for writing the contents of all other PAK files to
 	if (!respakfile)
 	{
-		Log_WriteSeq(LOG_ERROR, "Failed to create the final PAK file");
+		Log_WriteSeq(LOG_ERROR, "Failed to open the final PAK file for reading");
 
 		for (unsigned int i=0; i<pakfilecount; i++)
 		{
@@ -87,6 +90,8 @@ bool FileSys_Init(void)
 		FileSys_FreeFileList(pakfilelist);
 		return(false);
 	}
+
+	// fill the final PAK file from pak.0.pk ... pak.*.pk overwriting the previous files if they are the same
 
 	initialized = true;
 
