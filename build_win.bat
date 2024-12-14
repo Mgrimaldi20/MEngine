@@ -9,9 +9,9 @@ if "%~1"=="" (
 set CONFIG=%~1
 
 if "%CONFIG%"=="debug" (
-    set PRESET=windows-x64-debug
+    set PRESET=windows-debug
 ) else if "%CONFIG%"=="release" (
-    set PRESET=windows-x64-release
+    set PRESET=windows-release
 ) else (
     echo Invalid configuration
     exit /b 1

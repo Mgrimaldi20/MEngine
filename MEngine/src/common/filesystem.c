@@ -8,8 +8,9 @@
 
 static filedata_t *pakfilelist;
 static unzFile *pakfiles;
-static unzFile respakfile;
 static unsigned int pakfilecount;
+static unzFile finalpakfile;
+static const char *finalpkname = "final.pk";
 
 static bool initialized;
 
@@ -69,14 +70,180 @@ bool FileSys_Init(void)
 			Log_WriteSeq(LOG_ERROR, "Failed to open PAK file: %s", pakfilelist[i].filename);
 			MemCache_Free(pakfiles);
 			FileSys_FreeFileList(pakfilelist);
+
+			for (unsigned int j=0; j<i; j++)
+			{
+				if (pakfiles[j])
+					unzClose(pakfiles[j]);
+			}
+
 			return(false);
 		}
 	}
 
-	const char *finalpkname = "final.pk";
+	// create the final.pk file and add the files from pak.0.pk ... pak.*.pk to it, overwriting the previous files if they are the same
+	zipFile outpakfile = zipOpen64(finalpkname, APPEND_STATUS_CREATE);
+	if (!outpakfile)
+	{
+		Log_WriteSeq(LOG_ERROR, "Failed to open the final PAK file for writing");
+		for (unsigned int i=0; i<pakfilecount; i++)
+		{
+			if (pakfiles[i])
+				unzClose(pakfiles[i]);
+		}
 
-	respakfile = unzOpen64(finalpkname);		// create this temp PAK file for writing the contents of all other PAK files to
-	if (!respakfile)
+		MemCache_Free(pakfiles);
+		FileSys_FreeFileList(pakfilelist);
+		return(false);
+	}
+
+	for (unsigned int i=0; i<pakfilecount; i++)
+	{
+		if (unzGoToFirstFile(pakfiles[i]) != UNZ_OK)
+		{
+			Log_WriteSeq(LOG_ERROR, "Failed to go to the first file in PAK file: %s", pakfilelist[i].filename);
+			zipClose(outpakfile, NULL);
+			for (unsigned int j=0; j<pakfilecount; j++)
+			{
+				if (pakfiles[j])
+					unzClose(pakfiles[j]);
+			}
+
+			MemCache_Free(pakfiles);
+			FileSys_FreeFileList(pakfilelist);
+			return(false);
+		}
+
+		do
+		{
+			char filename[SYS_MAX_PATH] = { 0 };
+			unz_file_info64 info;
+			zip_fileinfo zipinfo;
+
+			if (unzGetCurrentFileInfo64(pakfiles[i], &info, filename, SYS_MAX_PATH, NULL, 0, NULL, 0) != UNZ_OK)
+				continue;
+
+			if (unzOpenCurrentFile(pakfiles[i]) != UNZ_OK)
+			{
+				Log_WriteSeq(LOG_ERROR, "Failed to open the current file in PAK file: %s", pakfilelist[i].filename);
+				zipClose(outpakfile, NULL);
+				for (unsigned int j=0; j<pakfilecount; j++)
+				{
+					if (pakfiles[j])
+						unzClose(pakfiles[j]);
+				}
+
+				MemCache_Free(pakfiles);
+				FileSys_FreeFileList(pakfilelist);
+				return(false);
+			}
+
+			char *filedata = MemCache_Alloc(info.uncompressed_size);
+			if (!filedata)
+			{
+				Log_WriteSeq(LOG_ERROR, "Failed to allocate memory for file data in PAK file: %s", pakfilelist[i].filename);
+				unzCloseCurrentFile(pakfiles[i]);
+				zipClose(outpakfile, NULL);
+				for (unsigned int j=0; j<pakfilecount; j++)
+				{
+					if (pakfiles[j])
+						unzClose(pakfiles[j]);
+				}
+
+				MemCache_Free(pakfiles);
+				FileSys_FreeFileList(pakfilelist);
+				return(false);
+			}
+
+			if (unzReadCurrentFile(pakfiles[i], filedata, info.uncompressed_size) < 0)
+			{
+				Log_WriteSeq(LOG_ERROR, "Failed to read the current file in PAK file: %s", pakfilelist[i].filename);
+				MemCache_Free(filedata);
+				unzCloseCurrentFile(pakfiles[i]);
+				zipClose(outpakfile, NULL);
+				for (unsigned int j=0; j<pakfilecount; j++)
+				{
+					if (pakfiles[j])
+						unzClose(pakfiles[j]);
+				}
+
+				MemCache_Free(pakfiles);
+				FileSys_FreeFileList(pakfilelist);
+				return(false);
+			}
+
+			if (zipOpenNewFileInZip(outpakfile, filename, &zipinfo, NULL, 0, NULL, 0, NULL, 0, 0) != ZIP_OK)
+			{
+				Log_WriteSeq(LOG_ERROR, "Failed to open a new file in the final PAK file: %s", finalpkname);
+				MemCache_Free(filedata);
+				unzCloseCurrentFile(pakfiles[i]);
+				zipClose(outpakfile, NULL);
+				for (unsigned int j=0; j<pakfilecount; j++)
+				{
+					if (pakfiles[j])
+						unzClose(pakfiles[j]);
+				}
+
+				MemCache_Free(pakfiles);
+				FileSys_FreeFileList(pakfilelist);
+				return(false);
+			}
+
+			if (zipWriteInFileInZip(outpakfile, filedata, info.uncompressed_size) != ZIP_OK)
+			{
+				Log_WriteSeq(LOG_ERROR, "Failed to write a file in the final PAK file: %s", finalpkname);
+				MemCache_Free(filedata);
+				unzCloseCurrentFile(pakfiles[i]);
+				zipCloseFileInZip(outpakfile);
+				zipClose(outpakfile, NULL);
+				for (unsigned int j=0; j<pakfilecount; j++)
+				{
+					if (pakfiles[j])
+						unzClose(pakfiles[j]);
+				}
+
+				MemCache_Free(pakfiles);
+				FileSys_FreeFileList(pakfilelist);
+				return(false);
+			}
+
+			MemCache_Free(filedata);
+
+			if (unzCloseCurrentFile(pakfiles[i]) != UNZ_OK)
+			{
+				Log_WriteSeq(LOG_ERROR, "Failed to close the current file in PAK file: %s", pakfilelist[i].filename);
+				zipClose(outpakfile, NULL);
+				for (unsigned int j=0; j<pakfilecount; j++)
+				{
+					if (pakfiles[j])
+						unzClose(pakfiles[j]);
+				}
+
+				MemCache_Free(pakfiles);
+				FileSys_FreeFileList(pakfilelist);
+				return(false);
+			}
+		} while (unzGoToNextFile(pakfiles[i]) == UNZ_OK);
+
+		unzClose(pakfiles[i]);
+	}
+
+	if (zipClose(outpakfile, NULL) != ZIP_OK)		// must be closed before it can be read... its okay if unzClose fails as the program will exit anyway
+	{
+		Log_WriteSeq(LOG_ERROR, "Failed to close the final PAK file: %s", finalpkname);
+		for (unsigned int i=0; i<pakfilecount; i++)
+		{
+			if (pakfiles[i])
+				unzClose(pakfiles[i]);
+		}
+
+		MemCache_Free(pakfiles);
+		FileSys_FreeFileList(pakfilelist);
+		return(false);
+	}
+
+	finalpakfile = unzOpen64(finalpkname);	// open the final PAK file for reading now
+	if (!finalpakfile)
 	{
 		Log_WriteSeq(LOG_ERROR, "Failed to open the final PAK file for reading");
 
@@ -91,8 +258,6 @@ bool FileSys_Init(void)
 		return(false);
 	}
 
-	// fill the final PAK file from pak.0.pk ... pak.*.pk overwriting the previous files if they are the same
-
 	initialized = true;
 
 	return(true);
@@ -103,8 +268,10 @@ void FileSys_Shutdown(void)
 	if (!initialized)
 		return;
 
-	if (respakfile)
-		unzClose(respakfile);
+	if (finalpakfile)
+		unzClose(finalpakfile);
+
+	remove("final.pk");		// the final PAK file is only temporary, so remove it after the engine quits
 
 	if (pakfiles)
 	{

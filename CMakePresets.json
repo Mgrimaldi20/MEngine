@@ -50,73 +50,49 @@
             }
         },
         {
-            "name": "windows-x64-debug",
-            "displayName": "x64 Debug",
+            "name": "windows-debug",
+            "displayName": "Debug",
             "inherits": "windows-base",
-            "architecture": {
-                "value": "x64",
-                "strategy": "external"
-            },
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug"
             }
         },
         {
-            "name": "windows-x64-release",
-            "displayName": "x64 Release",
+            "name": "windows-release",
+            "displayName": "Release",
             "inherits": "windows-base",
-            "architecture": {
-                "value": "x64",
-                "strategy": "external"
-            },
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release"
             }
         },
         {
-            "name": "macos-x64-debug",
-            "displayName": "x64 Debug",
+            "name": "macos-debug",
+            "displayName": "Debug",
             "inherits": "macos-base",
-            "architecture": {
-                "value": "x64",
-                "strategy": "external"
-            },
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug"
             }
         },
         {
-            "name": "macos-x64-release",
-            "displayName": "x64 Release",
+            "name": "macos-release",
+            "displayName": "Release",
             "inherits": "macos-base",
-            "architecture": {
-                "value": "x64",
-                "strategy": "external"
-            },
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release"
             }
         },
         {
-            "name": "linux-x64-debug",
-            "displayName": "x64 Debug",
+            "name": "linux-debug",
+            "displayName": "Debug",
             "inherits": "linux-base",
-            "architecture": {
-                "value": "x64",
-                "strategy": "external"
-            },
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug"
             }
         },
         {
-            "name": "linux-x64-release",
-            "displayName": "x64 Release",
+            "name": "linux-release",
+            "displayName": "Release",
             "inherits": "linux-base",
-            "architecture": {
-                "value": "x64",
-                "strategy": "external"
-            },
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release"
             }
