@@ -14,10 +14,10 @@ case "$2" in
 	debug)
 		case "$1" in
 			linux)
-				PRESET="linux-x64-debug"
+				PRESET="linux-debug"
 				;;
 			macos)
-				PRESET="macos-x64-debug"
+				PRESET="macos-debug"
 				;;
 			*)
 				usage
@@ -27,10 +27,10 @@ case "$2" in
 	release)
 		case "$1" in
 			linux)
-				PRESET="linux-x64-release"
+				PRESET="linux-release"
 				;;
 			macos)
-				PRESET="macos-x64-release"
+				PRESET="macos-release"
 				;;
 			*)
 				usage
