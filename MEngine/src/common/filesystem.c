@@ -12,6 +12,7 @@ static filedata_t *pakfilelist;
 static unzFile *pakfiles;
 static unsigned int pakfilecount;
 static unzFile finalpakfile;
+
 static const char *finalpkname = "final.pk";
 
 static bool initialized;
@@ -85,7 +86,7 @@ static bool WriteFileInChunks(zipFile file, const char *buffer, ZPOS64_T size)
 	return(true);
 }
 
-bool FileSys_Init(void)
+bool FileSys_Init(void)		// TODO: rework this... maybe dont create a final pak file, just read from all the pak files in order of highest num to 0 and take whatever appears first in the higher num pak files
 {
 	return(true);	// just do this for now
 
