@@ -6,6 +6,8 @@
 #include "unzip.h"
 #include "zip.h"
 
+#define CHUNK_SIZE 0xFFFFFFFF	// default zip size is 4GB, so read in 4GB chunks
+
 static filedata_t *pakfilelist;
 static unzFile *pakfiles;
 static unsigned int pakfilecount;
@@ -43,11 +45,51 @@ static bool PathMatchSpec(const char *path, const char *filter)
 	return(!*filter && !*path);
 }
 
+static bool ReadFileInChunks(unzFile file, char *buffer, ZPOS64_T size)
+{
+	ZPOS64_T remaining = size;
+	char *current = buffer;
+
+	while (remaining > 0)
+	{
+		uint32_t toread = (remaining > CHUNK_SIZE) ? CHUNK_SIZE : (uint32_t)remaining;
+		int bytesread = unzReadCurrentFile(file, current, toread);
+
+		if (bytesread < 0)
+			return(false);
+
+		current += bytesread;
+		remaining -= bytesread;
+	}
+
+	return(true);
+}
+
+static bool WriteFileInChunks(zipFile file, const char *buffer, ZPOS64_T size)
+{
+	ZPOS64_T remaining = size;
+	const char *current = buffer;
+
+	while (remaining > 0)
+	{
+		uint32_t towrite = (remaining > CHUNK_SIZE) ? CHUNK_SIZE : (uint32_t)remaining;
+		int byteswritten = zipWriteInFileInZip(file, current, towrite);
+
+		if (byteswritten < 0)
+			return(false);
+
+		current += byteswritten;
+		remaining -= byteswritten;
+	}
+
+	return(true);
+}
+
 bool FileSys_Init(void)
 {
 	return(true);	// just do this for now
 
-	pakfilelist = FileSys_ListFiles(&pakfilecount, ".", "pak.*.pk");
+	/*pakfilelist = FileSys_ListFiles(&pakfilecount, ".", "pak.*.pk");
 	if (!pakfilelist)
 	{
 		Log_WriteSeq(LOG_ERROR, "Failed to find PAK files to load");
@@ -155,7 +197,7 @@ bool FileSys_Init(void)
 				return(false);
 			}
 
-			if (unzReadCurrentFile(pakfiles[i], filedata, info.uncompressed_size) < 0)
+			if (!ReadFileInChunks(pakfiles[i], filedata, info.uncompressed_size))
 			{
 				Log_WriteSeq(LOG_ERROR, "Failed to read the current file in PAK file: %s", pakfilelist[i].filename);
 				MemCache_Free(filedata);
@@ -189,7 +231,7 @@ bool FileSys_Init(void)
 				return(false);
 			}
 
-			if (zipWriteInFileInZip(outpakfile, filedata, info.uncompressed_size) != ZIP_OK)
+			if (!WriteFileInChunks(outpakfile, filedata, info.uncompressed_size))
 			{
 				Log_WriteSeq(LOG_ERROR, "Failed to write a file in the final PAK file: %s", finalpkname);
 				MemCache_Free(filedata);
@@ -260,7 +302,7 @@ bool FileSys_Init(void)
 
 	initialized = true;
 
-	return(true);
+	return(true);*/
 }
 
 void FileSys_Shutdown(void)
@@ -299,34 +341,19 @@ bool FileSys_FileExistsInPAK(const char *filename)
 	if (!filename)
 		return(false);
 
-	unzFile pakfile = unzOpen64(filename);
-	if (!pakfile)
+	if (unzLocateFile(finalpakfile, filename, 0) != UNZ_OK)
 		return(false);
 
-	if (unzLocateFile(pakfile, filename, 0) != UNZ_OK)
-	{
-		unzClose(pakfile);
-		return(false);
-	}
-
-	unzClose(pakfile);
 	return(true);
 }
 
-filedata_t *FileSys_ListFilesInPAK(unsigned int *numfiles, const char *directory, const char *filter)	// uses same free FileSys_FreeFileList function
+filedata_t *FileSys_ListFilesInPAK(unsigned int *numfiles, const char *filter)	// uses same free FileSys_FreeFileList function
 {
-	if (!numfiles || !directory || !filter)
+	if (!numfiles || !filter)
 		return(NULL);
 
-	unzFile pakfile = unzOpen64(directory);
-	if (!pakfile)
+	if (unzGoToFirstFile(finalpakfile) != UNZ_OK)
 		return(NULL);
-
-	if (unzGoToFirstFile(pakfile) != UNZ_OK)
-	{
-		unzClose(pakfile);
-		return(NULL);
-	}
 
 	unsigned int filecount = 0;
 
@@ -335,30 +362,23 @@ filedata_t *FileSys_ListFilesInPAK(unsigned int *numfiles, const char *directory
 		char filename[SYS_MAX_PATH] = { 0 };
 		unz_file_info info;
 
-		if (unzGetCurrentFileInfo(pakfile, &info, filename, SYS_MAX_PATH, NULL, 0, NULL, 0) != UNZ_OK)
+		if (unzGetCurrentFileInfo(finalpakfile, &info, filename, SYS_MAX_PATH, NULL, 0, NULL, 0) != UNZ_OK)
 			continue;
 
 		if (strstr(filename, filter))
 			filecount++;
 
-	} while (unzGoToNextFile(pakfile) == UNZ_OK);
+	} while (unzGoToNextFile(finalpakfile) == UNZ_OK);
 
 	if (filecount == 0)
-	{
-		unzClose(pakfile);
 		return(NULL);
-	}
 
 	filedata_t *filelist = MemCache_Alloc(filecount * sizeof(*filelist));
 	if (!filelist)
-	{
-		unzClose(pakfile);
 		return(NULL);
-	}
 
-	if (unzGoToFirstFile(pakfile) != UNZ_OK)
+	if (unzGoToFirstFile(finalpakfile) != UNZ_OK)
 	{
-		unzClose(pakfile);
 		MemCache_Free(filelist);
 		return(NULL);
 	}
@@ -370,7 +390,7 @@ filedata_t *FileSys_ListFilesInPAK(unsigned int *numfiles, const char *directory
 		char filename[SYS_MAX_PATH] = { 0 };
 		unz_file_info64 info;
 
-		if (unzGetCurrentFileInfo64(pakfile, &info, filename, SYS_MAX_PATH, NULL, 0, NULL, 0) != UNZ_OK)
+		if (unzGetCurrentFileInfo64(finalpakfile, &info, filename, SYS_MAX_PATH, NULL, 0, NULL, 0) != UNZ_OK)
 			continue;
 
 		if (PathMatchSpec(filename, filter))
@@ -396,10 +416,9 @@ filedata_t *FileSys_ListFilesInPAK(unsigned int *numfiles, const char *directory
 
 			index++;
 		}
-	} while (unzGoToNextFile(pakfile) == UNZ_OK);
+	} while (unzGoToNextFile(finalpakfile) == UNZ_OK);
 
 	*numfiles = filecount;
-	unzClose(pakfile);
 
 	return(filelist);
 }
