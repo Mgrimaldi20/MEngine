@@ -150,10 +150,12 @@ if(MSVC)
 	if(CMAKE_BUILD_TYPE STREQUAL "Debug")																		# Debug build compiler options
 		target_compile_options(MEngine PRIVATE "/Zi" "/fsanitize=address" "/Od" "/MDd" "/JMC" "/FAs")
 	elseif(CMAKE_BUILD_TYPE STREQUAL "Release")																	# Release build compiler options
-		target_compile_options(MEngine PRIVATE "/O2" "/MD" "/GL" "/Gw" "/Ot" "/FAs")
+		target_compile_options(MEngine PRIVATE "/O2" "/Od2" "/MD" "/GL" "/Gw" "/Ot" "/FAs")
 	endif()
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-	target_compile_options(MEngine PRIVATE "-Wall" "-Werror" "-Wpedantic" "-ffast-math")						# Common options for all build types
+	target_compile_options(MEngine PRIVATE "-Wall" "-Werror" "-Wpedantic" "-ffast-math"
+		"--analyze" "-Xanalyzer" "-analyzer-output=html" "-o" "${CMAKE_BINARY_DIR}"
+	)																											# Common options for all build types
 	if(CMAKE_BUILD_TYPE STREQUAL "Debug")																		# Debug build compiler options
 		target_compile_options(MEngine PRIVATE
 			"-g"
@@ -174,7 +176,9 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 		target_compile_options(MEngine PRIVATE "-O3" "-flto")
 	endif()
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-	target_compile_options(MEngine PRIVATE "-Wall" "-Werror" "-Wpedantic" "-ffast-math")						# Common options for all build types
+	target_compile_options(MEngine PRIVATE "-Wall" "-Werror" "-Wpedantic" "-ffast-math"
+		"--analyze" "-Xanalyzer" "-analyzer-output=text"
+	)																											# Common options for all build types
 	if(CMAKE_BUILD_TYPE STREQUAL "Debug")																		# Debug build compiler options
 		target_compile_options(MEngine PRIVATE
 			"-g"
