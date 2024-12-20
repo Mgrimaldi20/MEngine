@@ -146,11 +146,11 @@ include_directories("libs/minizip-ng")
 
 # Set up all the compiler options here
 if(MSVC)
-	target_compile_options(MEngine PRIVATE "/W4" "/WX" "/permissive-" "/analyze" "/fp:fast")					# Common options for all build types
+	target_compile_options(MEngine PRIVATE "/W4" "/WX" "/permissive-" "/analyze" "/fp:fast" "/FAs")				# Common options for all build types
 	if(CMAKE_BUILD_TYPE STREQUAL "Debug")																		# Debug build compiler options
-		target_compile_options(MEngine PRIVATE "/Zi" "/fsanitize=address" "/Od" "/MDd" "/JMC" "/FAs")
+		target_compile_options(MEngine PRIVATE "/Zi" "/fsanitize=address" "/Od" "/MDd" "/JMC")
 	elseif(CMAKE_BUILD_TYPE STREQUAL "Release")																	# Release build compiler options
-		target_compile_options(MEngine PRIVATE "/O2" "/MD" "/GL" "/Gw" "/FAs")
+		target_compile_options(MEngine PRIVATE "/O2" "/MD" "/GL" "/Gw")
 	endif()
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 	target_compile_options(MEngine PRIVATE "-Wall" "-Werror" "-Wpedantic" "-ffast-math"

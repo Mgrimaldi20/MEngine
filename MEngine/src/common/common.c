@@ -8,12 +8,11 @@
 
 typedef enum
 {
-	CMD_MODE_HELP = 1 << 0,
-	CMD_MODE_EDITOR = 1 << 1,
-	CMD_MODE_DEBUG = 1 << 2,
-	CMD_IGNORE_OSVER = 1 << 3,
-	CMD_RUN_DEMO_GAME = 1 << 4,
-	CMD_USE_DEF_ALLOC = 1 << 5
+	CMD_MODE_EDITOR = 1 << 0,
+	CMD_MODE_DEBUG = 1 << 1,
+	CMD_IGNORE_OSVER = 1 << 2,
+	CMD_RUN_DEMO_GAME = 1 << 3,
+	CMD_USE_DEF_ALLOC = 1 << 4
 } cmdlineflags_t;
 
 typedef union
@@ -35,7 +34,7 @@ static void *gamedllhandle;
 
 static bool gameinitialized;
 
-static void ParseCommandLine(void)
+static bool ParseCommandLine(void)
 {
 	char cmdline[SYS_MAX_CMDLINE_ARGS][SYS_MAX_CMDLINE_ARGS] = { 0 };
 	Sys_ProcessCommandLine(cmdline);
@@ -46,7 +45,22 @@ static void ParseCommandLine(void)
 			break;
 
 		if (!strcmp(cmdline[i], "help"))
-			cmdlineflags |= CMD_MODE_HELP;
+		{
+			const char *helpmsg = "MEngine\n"
+				"Usage: MEngine [options]\n"
+				"Options:\n"
+				"\t-help\t\tPrint this help message\n"
+				"\t-editor\t\tRun the editor\n"
+				"\t-debug\t\tRun the game in debug mode\n"
+				"\t-demo\t\tRun the demo game\n"
+				"\t-ignoreosver\tIgnore OS version check\n"
+				"\t-nocache\tDo not use the memory cache allocator\n";
+
+			printf("%s", helpmsg);
+			fflush(stdout);
+
+			return(false);
+		}
 
 		else if (!strcmp(cmdline[i], "editor"))
 			cmdlineflags |= CMD_MODE_EDITOR;
@@ -63,22 +77,8 @@ static void ParseCommandLine(void)
 		else if (!strcmp(cmdline[i], "nocache"))
 			cmdlineflags |= CMD_USE_DEF_ALLOC;
 	}
-}
 
-static void PrintHelpMsg(void)
-{
-	const char *helpmsg = "MEngine\n"
-		"Usage: MEngine [options]\n"
-		"Options:\n"
-		"\t-help\t\tPrint this help message\n"
-		"\t-editor\t\tRun the editor\n"
-		"\t-debug\t\tRun the game in debug mode\n"
-		"\t-demo\t\tRun the demo game\n"
-		"\t-ignoreosver\tIgnore OS version check\n"
-		"\t-nocache\tDo not use the memory cache allocator\n";
-
-	printf("%s", helpmsg);
-	fflush(stdout);
+	return(true);
 }
 
 static void CreateMServices(void)
@@ -242,13 +242,8 @@ static void UpdateConfigs(void)
 
 bool Common_Init(void)
 {
-	ParseCommandLine();
-
-	if (Common_HelpMode())
-	{
-		PrintHelpMsg();
-		return(false);		// just print the help message and exit, return false even though the operation was successful to shut down the engine
-	}
+	if (!ParseCommandLine())
+		return(false);
 
 	if (!MemCache_Init())
 		return(false);
@@ -300,11 +295,6 @@ void Common_Frame(void)		// happens every frame
 	Render_StartFrame();
 	Render_Frame();
 	Render_EndFrame();
-}
-
-bool Common_HelpMode(void)
-{
-	return((cmdlineflags & CMD_MODE_HELP));
 }
 
 bool Common_EditorMode(void)
