@@ -6,6 +6,10 @@
 #include "unzip.h"
 #include "zip.h"
 
+static cvar_t *fs_basepath;
+static cvar_t *fs_pakpath;
+static cvar_t *fs_savepath;
+
 static bool initialized;
 
 static bool PathMatchSpec(const char *path, const char *filter)
