@@ -534,18 +534,23 @@ bool GLWnd_Init(glwndparams_t params)
 
 	// if the user has refresh, width, and height set to 0, use the desktop settings
 	if ((params.refreshrate == 0) || (params.refreshrate > win32state.desktoprefresh))
+	{
 		params.refreshrate = win32state.desktoprefresh;
+		Log_WriteSeq(LOG_WARN, "Could not set refresh rate. Refresh rate set to desktop refresh rate: %d", params.refreshrate);
+	}
 
 	if ((params.width == 0) || (params.width > win32state.desktopwidth))
 	{
 		params.width = win32state.desktopwidth;
 		glstate.width = win32state.desktopwidth;
+		Log_WriteSeq(LOG_WARN, "Could not set window width. Width set to desktop width: %d", params.width);
 	}
 
 	if ((params.height == 0) || (params.height > win32state.desktopheight))
 	{
 		params.height = win32state.desktopheight;
 		glstate.height = win32state.desktopheight;
+		Log_WriteSeq(LOG_WARN, "Could not set window height. Height set to desktop height: %d", params.height);
 	}
 
 	CreateWndClasses();
