@@ -171,7 +171,7 @@ static bool GetNameValue(char *line, const int length, char *name, char *value)
 
 /*
 * Function: ReadCVarsFromFile
-* Inserts the CVars into the hashmap from the file given.
+* Inserts the cvars into the hashmap from the file given.
 * 
 *	infile: The file with the cvars in it
 *	filename: A string to insert into the log messages so you can tell what file it came from
