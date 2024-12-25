@@ -6,6 +6,9 @@ static bool initialized;
 
 bool GLWnd_Init(glwndparams_t params)
 {
+	if (initialized)
+		return(true);
+
 	if (!glfwInit())
 	{
 		Log_WriteSeq(LOG_ERROR, "Failed to initialise GLFW");

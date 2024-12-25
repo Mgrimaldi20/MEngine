@@ -5,6 +5,9 @@
 
 bool Sys_Init(void)
 {
+	if (posixstate.initialized)
+		return(true);
+
 	if (uname(&posixstate.osinfo) == -1) 	// get the OS version information, only run if the OS version is high enough
 	{
 		Log_WriteSeq(LOG_ERROR, "Failed to get OS version information");

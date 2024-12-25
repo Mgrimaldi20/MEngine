@@ -26,7 +26,7 @@ static FILE *cvarfile;
 
 static const char *cvardir = "configs";
 static const char *cvarfilename = "MEngine.cfg";
-static const char *override_filename = "overrides.cfg";
+static const char *overridefilename = "overrides.cfg";
 
 static bool initialized;
 
@@ -109,140 +109,106 @@ static void ListAllCVars(void)
 }
 
 /*
-* Function: get_name_value
+* Function: GetNameValue
 * Gets a name and value pair from the config file. Ignores comments and leading whitespace.
 *
-*   line: The line to parse
-*   length: The length of the line
-*   name: The first word in the name-value pair
-*   value: The second term in the name-value pair, enclosed in double quotes
+*	line: The line to parse
+*	length: The length of the line
+*	name: The first word in the name-value pair
+*	value: The second term in the name-value pair, enclosed in double quotes
 *
 * Returns: A boolean if it's acceptable or not
 */
-bool get_name_value(char* line, int length, char* name, char* value)
+static bool GetNameValue(char *line, const int length, char *name, char *value)
 {
+	if (length == 0)
+		return(false);
+
+	if (line[0] == '#' || line[0] == '\n' || line[0] == '\r')
+		return(false);
+
 	bool acceptable = true;
+	bool readingvalue = false;		// this changes to true when we are inside quotes
 
-	// This changes to true when we are inside quotes
-	bool reading_value = false;
+	char *context = NULL;
+	char *token = Sys_Strtok(line, " ", &context);
 
-	int i = 0, ni = 0, vi = 0;
-	while (i < length && line[i] != '\0')
+	if (token && token[0] == '"')
 	{
-		if (line[i] == '"')
-		{
-			if (reading_value)
-			{
-				// End quote reached, save the value
-				break;
-			}
-			else
-			{
-				// Start quote reached, save the name
-				reading_value = true;
-			}
-		}
-		else if (line[i] == ' ')
-		{
-			if (reading_value)
-			{
-				// Names are not allowed to have whitespace, only add to values
-				value[vi] += line[i];
-				vi += 1;
-			}
-			else
-			{
-				// The next char must be a quote to be acceptable
-				if (i == length - 1 || line[i + 1] != '"')
-				{
-					acceptable = false;
-					break;
-				}
-			}
-		}
-		else if (line[i] == '#')
-		{
-			if (!reading_value)
-			{
-				// This is a comment, ignore anything after this
-				acceptable = false;
-				break;
-			}
-			else
-			{
-				value[vi] = line[i];
-				vi += 1;
-			}
-		}
-		else if (line[i] == '\n' || line[i] == '\r')
-		{
-			// We do not allow these characters
-			acceptable = false;
-			break;
-		}
-		else
-		{
-			if (reading_value)
-			{
-				value[vi] = line[i];
-				vi += 1;
-			}
-			else
-			{
-				name[ni] = line[i];
-				ni += 1;
-			}
-		}
-
-		i++;
+		readingvalue = true;
+		token++;
 	}
 
-	name[ni] = '\0';
-	value[vi] = '\0';
+	while (token)
+	{
+		if (readingvalue)
+		{
+			if (token[strlen(token) - 1] == '"')
+			{
+				token[strlen(token) - 1] = '\0';
+				snprintf(value, length, "%s", token);
+				break;
+			}
 
-	return acceptable;
+			else
+				snprintf(value, length, "%s", token);
+		}
+
+		else
+		{
+			snprintf(name, length, "%s", token);
+			readingvalue = true;
+		}
+
+		token = Sys_Strtok(NULL, " ", &context);
+	}
+
+	if (!readingvalue || strlen(name) == 0 || strlen(value) == 0)
+		acceptable = false;
+
+	return(acceptable);
 }
 
-/* 
-* Function: read_CVars_from_file
+/*
+* Function: ReadCVarsFromFile
 * Inserts the CVars into the hashmap from the file given.
 * 
-*   cVar_file: The file with the cVars in it
-*   log_message: A string to insert into the log messages so you can tell what file it came from
+*	infile: The file with the cvars in it
+*	filename: A string to insert into the log messages so you can tell what file it came from
 */
-void read_CVars_from_file(FILE *cVar_file, char *log_message) 
+static void ReadCVarsFromFile(FILE *infile, const char *filename)
 {
 	char line[1024] = { 0 };
-	while (fgets(line, sizeof(line), cVar_file))
+	while (fgets(line, sizeof(line), infile))
 	{
 		char name[1024] = { 0 };
 		char value[1024] = { 0 };
 
-		bool acceptable = get_name_value(line, sizeof(line), name, value);
+		bool acceptable = GetNameValue(line, sizeof(line), name, value);
 
 		if (!acceptable)
 		{
-			Log_WriteSeq(LOG_ERROR, "Line is not a %s pair, line: %s", log_message, line);
+			Log_WriteSeq(LOG_ERROR, "%s: Line is not a key/value pair, line: %s", filename, line);
 			continue;
 		}
 
 		if ((strnlen(name, 1024) == 0) || (strnlen(value, 1024) == 0))
 		{
-			Log_WriteSeq(LOG_ERROR, "Invalid %s parsed, line: %s", log_message, line);
+			Log_WriteSeq(LOG_ERROR, "%s: Invalid cvar parsed, line: %s", filename, line);
 			continue;
 		}
 
 		size_t slen = strnlen(value, CVAR_MAX_STR_LEN);
 		if (slen > CVAR_MAX_STR_LEN)
 		{
-			Log_WriteSeq(LOG_ERROR, "%s value too long: %s", log_message, value);
+			Log_WriteSeq(LOG_ERROR, "%s: Value too long: %s", filename, value);
 			continue;
 		}
 
-		cvar_t* cvar = CVar_RegisterString(name, value, CVAR_NONE, "");
+		cvar_t *cvar = CVar_RegisterString(name, value, CVAR_NONE, "");
 		if (!cvar)
 		{
-			Log_WriteSeq(LOG_ERROR, "Failed to register %s: %s", log_message, name);
+			Log_WriteSeq(LOG_ERROR, "%s: Failed to register cvar: %s", filename, name);
 			continue;
 		}
 	}
@@ -250,6 +216,9 @@ void read_CVars_from_file(FILE *cVar_file, char *log_message)
 
 bool CVar_Init(void)
 {
+	if (initialized)
+		return(true);
+
 	if (!Sys_Mkdir(cvardir))
 		return(false);
 
@@ -296,28 +265,24 @@ bool CVar_Init(void)
 	for (size_t i=0; i<cvarmap->capacity; i++)
 		cvarmap->cvars[i] = NULL;
 
-	// Read the cvar file and populate the cvar list if cvars exist and if the file exists
-	read_CVars_from_file(cvarfile, "cvar");
+	ReadCVarsFromFile(cvarfile, cvarfullname);
 
 	fclose(cvarfile);
 	cvarfile = NULL;
 
-	// Read the overrides file and populate the cvar list if cvars exist and if the file exists
-	char override_fullname[SYS_MAX_PATH] = { 0 };
-	snprintf(override_fullname, sizeof(override_fullname), "%s/%s", cvardir, override_filename);
-	FILE* overrides_file = fopen(override_fullname, "r");
-	if (overrides_file)
-	{
-		Log_WriteSeq(LOG_INFO, "Overrides file exists: %s", override_fullname);
+	// read the overrides file and populate the cvar list if cvars exist and if the file exists
+	if (!FileSys_FileExists(overridefilename))
+		Log_WriteSeq(LOG_INFO, "Overrides file does not exist: %s", overridefilename);
 
-		read_CVars_from_file(overrides_file, "overrides cVar");
-
-		fclose(overrides_file);
-		overrides_file = NULL;
-	} 
-	else 
+	FILE *overridesfile = fopen(overridefilename, "r");
+	if (overridesfile)
 	{
-		Log_WriteSeq(LOG_INFO, "Overrides file does not exist: %s", override_fullname);
+		Log_WriteSeq(LOG_INFO, "Overrides file exists: %s", overridefilename);
+
+		ReadCVarsFromFile(overridesfile, overridefilename);
+
+		fclose(overridesfile);
+		overridesfile = NULL;
 	}
 
 	initialized = true;
@@ -334,7 +299,7 @@ void CVar_Shutdown(void)
 	ListAllCVars();
 #endif
 
-	(void)ListAllCVars;		// unused runction error fix
+	(void)ListAllCVars;		// gets rid of unused function warning
 
 	char cvarfullname[SYS_MAX_PATH] = { 0 };
 	snprintf(cvarfullname, sizeof(cvarfullname), "%s/%s", cvardir, cvarfilename);

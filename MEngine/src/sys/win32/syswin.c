@@ -36,6 +36,9 @@ static bool initialized;
 
 bool Sys_Init(void)
 {
+	if (initialized)
+		return(true);
+
 	DWORDLONG dwlcondmask = 0;
 
 	ZeroMemory(&win32state.osver, sizeof(OSVERSIONINFOEX));

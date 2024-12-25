@@ -363,6 +363,9 @@ void DumpAllocData(void)
 
 bool MemCache_Init(void)
 {
+	if (initialized)
+		return(true);
+
 	if ((Sys_GetSystemMemory() < (4 * 1024)) || Common_UseDefaultAlloc())	// only use cache if system memory is greater than 4GB or the command line flag is set
 	{
 		allocator = (allocator_t)
