@@ -43,6 +43,9 @@ static bool PathMatchSpec(const char *path, const char *filter)
 
 bool FileSys_Init(void)
 {
+	if (initialized)
+		return(true);
+
 	initialized = true;
 
 	return(true);

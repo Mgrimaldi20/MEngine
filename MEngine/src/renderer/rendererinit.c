@@ -95,6 +95,9 @@ static void InitOpenGL(void)
 
 bool Render_Init(void)
 {
+	if (initialized)
+		return(true);
+
 	glstate = (glstate_t)
 	{
 		.viewportsized = false,
@@ -178,6 +181,7 @@ bool Render_Init(void)
 	Log_WriteSeq(LOG_INFO, "OpenGL version: %s", (const char *)glGetString(GL_VERSION));
 
 	initialized = true;
+	glstate.initialized = initialized;
 
 	return(true);
 }
@@ -190,4 +194,5 @@ void Render_Shutdown(void)
 	GLWnd_Shutdown();
 
 	initialized = false;
+	glstate.initialized = initialized;
 }

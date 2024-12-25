@@ -6,7 +6,6 @@
 #include "renderer/renderer.h"
 #include "wglext.h"		// for OpenGL Windows extensions
 
-#define WINDOW_STYLE (WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_VISIBLE | WS_SIZEBOX)
 #define FS_WINDOW_STYLE (WS_POPUP | WS_VISIBLE | WS_SYSMENU)
 
 typedef long long (*glwndproc_t)(void);
@@ -513,6 +512,9 @@ static bool SetFullScreen(glwndparams_t params)
 
 bool GLWnd_Init(glwndparams_t params)
 {
+	if (initialized)
+		return(true);
+
 	HDC hdc = GetDC(GetDesktopWindow());
 	if (!hdc)
 		WindowsError();

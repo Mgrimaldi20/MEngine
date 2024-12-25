@@ -173,6 +173,9 @@ static void *ProcessLogQueue(void *args)
 
 bool Log_Init(void)
 {
+	if (initialized)
+		return(true);
+
 	const char *logdir = "logs";
 
 	if (!Sys_Mkdir(logdir))
