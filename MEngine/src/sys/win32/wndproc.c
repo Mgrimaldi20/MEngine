@@ -15,6 +15,33 @@ static void ResizeWindow(HWND hwnd)
 	glstate.viewportsized = true;
 }
 
+static void WindowSizing(WPARAM wparam, RECT *rect)
+{
+	if (!glstate.initialized || glstate.width <=0 || glstate.height <= 0)
+		return;
+
+	int minwidth = 320;
+	int minheight = 240;
+
+	if (rect->right - rect->left < minwidth)
+	{
+		if (wparam == WMSZ_LEFT || wparam == WMSZ_TOPLEFT || wparam == WMSZ_BOTTOMLEFT)
+			rect->left = rect->right - minwidth;
+
+		else
+			rect->right = rect->left + minwidth;
+	}
+
+	if (rect->bottom - rect->top < minheight)
+	{
+		if (wparam == WMSZ_TOP || wparam == WMSZ_TOPLEFT || wparam == WMSZ_TOPRIGHT)
+			rect->top = rect->bottom - minheight;
+
+		else
+			rect->bottom = rect->top + minheight;
+	}
+}
+
 LRESULT CALLBACK MainWndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 {
 	switch (umsg)
@@ -25,6 +52,10 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 
 		case WM_SIZE:
 			ResizeWindow(hwnd);
+			break;
+
+		case WM_SIZING:
+			WindowSizing(wparam, (RECT *)lparam);
 			break;
 
 		case WM_SYSCOMMAND:
