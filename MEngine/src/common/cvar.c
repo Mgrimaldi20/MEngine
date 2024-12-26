@@ -121,50 +121,80 @@ static void ListAllCVars(void)
 */
 static bool GetNameValue(char *line, const int length, char *name, char *value)
 {
-	if (length == 0)
-		return(false);
-
-	if (line[0] == '#' || line[0] == '\n' || line[0] == '\r')
-		return(false);
-
 	bool acceptable = true;
-	bool readingvalue = false;		// this changes to true when we are inside quotes
+	bool readingvalue = false;	// this changes to true when we are inside quotes
 
-	char *context = NULL;
-	char *token = Sys_Strtok(line, " ", &context);
-
-	if (token && token[0] == '"')
+	int i = 0, ni = 0, vi = 0;
+	while (i < length && line[i] != '\0')
 	{
-		readingvalue = true;
-		token++;
-	}
-
-	while (token)
-	{
-		if (readingvalue)
+		if (line[i] == '"')
 		{
-			if (token[strlen(token) - 1] == '"')
+			if (readingvalue)		// end quote reached, save the value
+				break;
+
+			else
+				readingvalue = true;	// start quote reached, save the name
+		}
+
+		else if (line[i] == ' ')
+		{
+			if (readingvalue)
 			{
-				token[strlen(token) - 1] = '\0';
-				snprintf(value, length, "%s", token);
+				value[vi] += line[i];	// names are not allowed to have whitespace, only add to values
+				vi += 1;
+			}
+
+			else
+			{
+				if (i == length - 1 || line[i + 1] != '"')		// the next char must be a quote to be acceptable
+				{
+					acceptable = false;
+					break;
+				}
+			}
+		}
+
+		else if (line[i] == '#')
+		{
+			if (!readingvalue)
+			{
+				acceptable = false;		// this is a comment, ignore anything after this
 				break;
 			}
 
 			else
-				snprintf(value, length, "%s", token);
+			{
+				value[vi] = line[i];
+				vi += 1;
+			}
+		}
+
+		else if (line[i] == '\n' || line[i] == '\r')
+		{
+			acceptable = false;		// we do not allow these characters
+			break;
 		}
 
 		else
 		{
-			snprintf(name, length, "%s", token);
-			readingvalue = true;
+			if (readingvalue)
+			{
+				value[vi] = line[i];
+				vi += 1;
+			}
+
+			else
+			{
+				name[ni] = line[i];
+				ni += 1;
+			}
 		}
 
-		token = Sys_Strtok(NULL, " ", &context);
+		i++;
 	}
 
-	if (!readingvalue || strlen(name) == 0 || strlen(value) == 0)
-		acceptable = false;
+	name[ni] = '\0';
+	value[vi] = '\0';
 
 	return(acceptable);
 }
