@@ -40,7 +40,7 @@ static freeblock_t *freeblocks;		// this is the actual free block list which sto
 static freeblock_t *pool;			// this is the pool of free blocks to use instead of allocating new blocks every time
 static taglist_t *taglist;			// this is used by the default allocator only
 
-static allocator_t allocator;		// if system memory is less than 4GB, use malloc/free, else use the cache allocator
+static allocator_t allocator;		// if system memory is less than 4GB or the nocache param is active, use malloc/free, else use the cache allocator
 
 static bool initialized;
 
@@ -366,7 +366,7 @@ bool MemCache_Init(void)
 	if (initialized)
 		return(true);
 
-	if ((Sys_GetSystemMemory() < (4 * 1024)) || Common_UseDefaultAlloc())	// only use cache if system memory is greater than 4GB or the command line flag is set
+	if ((Sys_GetSystemMemory() < (4 * 1024)) || Common_UseDefaultAlloc())
 	{
 		allocator = (allocator_t)
 		{

@@ -65,10 +65,12 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 
 		case WM_SYSKEYDOWN:
 		case WM_KEYDOWN:
+			wprintf(L"%u: Key down: 0x%llx\n", umsg, wparam);
 			break;
 
 		case WM_SYSKEYUP:
 		case WM_KEYUP:
+			wprintf(L"%u: Key up: 0x%llx\n", umsg, wparam);
 			break;
 
 		default:
