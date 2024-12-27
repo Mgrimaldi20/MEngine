@@ -63,20 +63,32 @@ void Sys_Error(const char *error, ...)
 	exit(1);
 }
 
-void Sys_ProcessCommandLine(char cmdout[SYS_MAX_CMDLINE_ARGS][SYS_MAX_CMDLINE_ARGS])
+void Sys_ProcessCommandLine(cmdline_t *cmdline)
 {
-	char *saveptr = NULL;
-	int i = 0;
+	if (!cmdline)
+		return;
 
-	for (int j=1; j<posixstate.argc&&i<SYS_MAX_CMDLINE_ARGS; j++)
+	cmdline->count = posixstate.argc - 1;	// skip the executable name
+
+	cmdline->args = malloc(sizeof(*cmdline->args) * cmdline->count);
+	if (!cmdline->args)
 	{
-		char *token = Sys_Strtok(posixstate.argv[j], " -", &saveptr);
-		while (token != NULL)
+		Sys_Error("Failed to allocate memory for command line arguments");
+		return;
+	}
+
+	for (int i=0; i<cmdline->count; i++)
+	{
+		size_t len = strlen(posixstate.argv[i + 1]) + 1;
+
+		cmdline->args[i] = malloc(len * sizeof(*cmdline->args[i]));
+		if (!cmdline->args[i])
 		{
-			snprintf(cmdout[i], SYS_MAX_CMDLINE_ARGS, "%s", token);
-			token = Sys_Strtok(NULL, " -", &saveptr);
-			i++;
+			Sys_Error("Failed to allocate memory for command line argument");
+			return;
 		}
+
+		snprintf(cmdline->args[i], len, "%s", posixstate.argv[i+1]);
 	}
 }
 

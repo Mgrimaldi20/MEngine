@@ -23,6 +23,17 @@ static void CharCallback(GLFWwindow *window, unsigned int codepoint)
 
 static void WindowSizeCallback(GLFWwindow *window, int width, int height)
 {
+	if (!glstate.initialized || width <= 0 || height <= 0)
+		return;
+
+	int minwidth = 320;
+	int minheight = 240;
+
+	if (width < minwidth)
+		width = minwidth;
+
+	if (height < minheight)
+		height = minheight;
 }
 
 static void FramebufferSizeCallback(GLFWwindow *window, int width, int height)

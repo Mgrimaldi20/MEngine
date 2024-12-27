@@ -15,12 +15,16 @@
 
 #include "common/common.h"
 
-#define SYS_MAX_CMDLINE_ARGS 32
+typedef struct
+{
+	char **args;
+	int count;
+} cmdline_t;
 
 bool Sys_Init(void);
 void Sys_Shutdown(void);
 void Sys_Error(const char *error, ...);
-void Sys_ProcessCommandLine(char cmdout[SYS_MAX_CMDLINE_ARGS][SYS_MAX_CMDLINE_ARGS]);
+void Sys_ProcessCommandLine(cmdline_t *cmdline);
 
 bool Sys_Mkdir(const char *path);
 void Sys_Stat(const char *filepath, filedata_t *filedata);

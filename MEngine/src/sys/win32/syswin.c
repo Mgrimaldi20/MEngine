@@ -121,18 +121,48 @@ void Sys_Error(const char *error, ...)
 	exit(1);
 }
 
-void Sys_ProcessCommandLine(char cmdout[SYS_MAX_CMDLINE_ARGS][SYS_MAX_CMDLINE_ARGS])
+void Sys_ProcessCommandLine(cmdline_t *cmdline)
 {
-	wchar_t *saveptr = NULL;
-	int i = 0;
+	if (!cmdline)
+		return;
 
-	wchar_t *token = wcstok(win32state.pcmdline, L" -", &saveptr);
+	wchar_t *saveptr = NULL;
+	int count = 0;
+	int capacity = 10;
+
+	cmdline->args = malloc(capacity * sizeof(*cmdline->args));
+	if (!cmdline->args)
+		Sys_Error("Failed to allocate memory for command line arguments");
+
+	wchar_t *token = wcstok(win32state.pcmdline, L" ", &saveptr);
 	while (token != NULL)
 	{
-		WideCharToMultiByte(CP_UTF8, 0, token, -1, cmdout[i], SYS_MAX_CMDLINE_ARGS, NULL, NULL);
-		token = wcstok(NULL, L" -", &saveptr);
-		i++;
+		if (count >= capacity)
+		{
+			capacity *= 2;
+
+			char **newargs = realloc(cmdline->args, capacity * sizeof(*cmdline->args));
+			if (!newargs)
+			{
+				free(cmdline->args);
+				Sys_Error("Failed to reallocate memory for command line arguments");
+			}
+
+			cmdline->args = newargs;
+		}
+
+		size_t len = wcslen(token) + 1;
+
+		cmdline->args[count] = malloc(len * sizeof(*cmdline->args[count]));
+		if (!cmdline->args[count])
+			Sys_Error("Failed to allocate memory for command line argument");
+
+		WideCharToMultiByte(CP_UTF8, 0, token, -1, cmdline->args[count], (int)len, NULL, NULL);
+		count++;
+		token = wcstok(NULL, L" ", &saveptr);
 	}
+
+	cmdline->count = count;
 }
 
 bool Sys_Mkdir(const char *path)
