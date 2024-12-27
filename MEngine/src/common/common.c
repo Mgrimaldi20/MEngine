@@ -71,7 +71,7 @@ static bool ParseCommandLine(void)
 		if (!cmdline->args[i][0])
 			break;
 
-		if (strcmp(cmdline->args[i], "help") == 0)
+		if (strcmp(cmdline->args[i], "-help") == 0)
 		{
 			static const char *helpmsg = "MEngine\n"
 				"Usage: MEngine [options]\n"
@@ -89,19 +89,19 @@ static bool ParseCommandLine(void)
 			return(false);
 		}
 
-		else if (strcmp(cmdline->args[i], "editor") == 0)
+		else if (strcmp(cmdline->args[i], "-editor") == 0)
 			cmdlineflags |= CMD_MODE_EDITOR;
 
-		else if (strcmp(cmdline->args[i], "debug") == 0)
+		else if (strcmp(cmdline->args[i], "-debug") == 0)
 			cmdlineflags |= CMD_MODE_DEBUG;
 
-		else if (strcmp(cmdline->args[i], "ignoreosver") == 0)
+		else if (strcmp(cmdline->args[i], "-ignoreosver") == 0)
 			cmdlineflags |= CMD_IGNORE_OSVER;
 
-		else if (strcmp(cmdline->args[i], "demo") == 0)
+		else if (strcmp(cmdline->args[i], "-demo") == 0)
 			cmdlineflags |= CMD_RUN_DEMO_GAME;
 
-		else if (strcmp(cmdline->args[i], "nocache") == 0)
+		else if (strcmp(cmdline->args[i], "-nocache") == 0)
 			cmdlineflags |= CMD_USE_DEF_ALLOC;
 	}
 
