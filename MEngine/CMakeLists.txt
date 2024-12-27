@@ -38,6 +38,7 @@ if(WIN32)
 		"src/sys/win32/wndproc.c"
 		"src/sys/win32/syswin.c"
 		"src/sys/win32/glwnd.c"
+		"src/sys/win32/wininput.c"
 	)
 elseif(LINUX OR APPLE)
 	target_sources(MEngine PRIVATE
@@ -46,6 +47,7 @@ elseif(LINUX OR APPLE)
 		"src/sys/posix/wndcb.c"
 		"src/sys/posix/sysposix.c"
 		"src/sys/posix/posixglwnd.c"		# On POSIX systems using GLFW for the windowing system instead of X11 or Wayland directly
+		"src/sys/posix/posixinput.c"
 	)
 
 	include_directories(src/sys/posix)
@@ -71,6 +73,7 @@ target_sources(MEngine PRIVATE
 	"src/common/cvar.c"
 	"src/common/memory.c"
 	"src/common/filesystem.c"
+	"src/common/input.h"
 	"src/renderer/renderer.h"
 	"src/renderer/rendererinit.c"
 	"src/renderer/renderer.c"

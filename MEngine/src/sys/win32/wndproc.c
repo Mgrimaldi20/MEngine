@@ -65,13 +65,19 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 
 		case WM_SYSKEYDOWN:
 		case WM_KEYDOWN:
-			wprintf(L"%u: Key down: 0x%llx\n", umsg, wparam);
+		{
+			keycode_t key = MapKey(wparam);
+			printf("%u: Key down: %d\n", umsg, key);
 			break;
+		}
 
 		case WM_SYSKEYUP:
 		case WM_KEYUP:
-			wprintf(L"%u: Key up: 0x%llx\n", umsg, wparam);
+		{
+			keycode_t key = MapKey(wparam);
+			printf("%u: Key up: %d\n", umsg, key);
 			break;
+		}
 
 		default:
 			return(DefWindowProc(hwnd, umsg, wparam, lparam));

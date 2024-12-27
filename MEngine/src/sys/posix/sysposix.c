@@ -10,8 +10,8 @@
 #include <pthread.h>
 #include <dirent.h>
 #include <fnmatch.h>
-#include "common/common.h"
 #include "sys/sys.h"
+#include "common/common.h"
 #include "posixlocal.h"
 
 struct thread
