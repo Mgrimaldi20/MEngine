@@ -34,19 +34,46 @@ static void *gamedllhandle;
 
 static bool gameinitialized;
 
+static cmdline_t *CreateCommandLine(void)
+{
+	cmdline_t *cmdline = malloc(sizeof(*cmdline));
+	if (!cmdline)
+	{
+		Sys_Error("Failed to allocate memory for command line");
+		return(NULL);
+	}
+
+	cmdline->args = NULL;
+	cmdline->count = 0;
+
+	return(cmdline);
+}
+
+static void DestroyCommandLine(cmdline_t *cmdline)
+{
+	if (!cmdline)
+		return;
+
+	for (int i=0; i<cmdline->count; i++)
+		free(cmdline->args[i]);
+
+	free(cmdline->args);
+	free(cmdline);
+}
+
 static bool ParseCommandLine(void)
 {
-	char cmdline[SYS_MAX_CMDLINE_ARGS][SYS_MAX_CMDLINE_ARGS] = { 0 };
+	cmdline_t *cmdline = CreateCommandLine();
 	Sys_ProcessCommandLine(cmdline);
 
-	for (int i=0; i<SYS_MAX_CMDLINE_ARGS; i++)
+	for (int i=0; i<cmdline->count; i++)
 	{
-		if (!cmdline[i][0])
+		if (!cmdline->args[i][0])
 			break;
 
-		if (!strcmp(cmdline[i], "help"))
+		if (strcmp(cmdline->args[i], "help") == 0)
 		{
-			const char *helpmsg = "MEngine\n"
+			static const char *helpmsg = "MEngine\n"
 				"Usage: MEngine [options]\n"
 				"Options:\n"
 				"\t-help\t\tPrint this help message\n"
@@ -62,21 +89,23 @@ static bool ParseCommandLine(void)
 			return(false);
 		}
 
-		else if (!strcmp(cmdline[i], "editor"))
+		else if (strcmp(cmdline->args[i], "editor") == 0)
 			cmdlineflags |= CMD_MODE_EDITOR;
 
-		else if (!strcmp(cmdline[i], "debug"))
+		else if (strcmp(cmdline->args[i], "debug") == 0)
 			cmdlineflags |= CMD_MODE_DEBUG;
 
-		else if (!strcmp(cmdline[i], "ignoreosver"))
+		else if (strcmp(cmdline->args[i], "ignoreosver") == 0)
 			cmdlineflags |= CMD_IGNORE_OSVER;
 
-		else if (!strcmp(cmdline[i], "demo"))
+		else if (strcmp(cmdline->args[i], "demo") == 0)
 			cmdlineflags |= CMD_RUN_DEMO_GAME;
 
-		else if (!strcmp(cmdline[i], "nocache"))
+		else if (strcmp(cmdline->args[i], "nocache") == 0)
 			cmdlineflags |= CMD_USE_DEF_ALLOC;
 	}
+
+	DestroyCommandLine(cmdline);
 
 	return(true);
 }
