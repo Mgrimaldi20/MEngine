@@ -86,6 +86,8 @@ static bool ParseCommandLine(void)
 			printf("%s", helpmsg);
 			fflush(stdout);
 
+			DestroyCommandLine(cmdline);
+
 			return(false);
 		}
 

@@ -191,6 +191,8 @@ void Render_Shutdown(void)
 	if (!initialized)
 		return;
 
+	Log_WriteSeq(LOG_INFO, "Shutting down rendering system");
+
 	GLWnd_Shutdown();
 
 	initialized = false;
