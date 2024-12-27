@@ -8,6 +8,8 @@
 #include <sys/utsname.h>
 #include "GLFW/glfw3.h"
 
+#include "common/input.h"
+
 typedef struct
 {
 	bool initialized;
