@@ -93,9 +93,9 @@ typedef struct		// system services
 typedef struct
 {
 	int version;
-	char gamename[256];
-	char iconpath[260];			// games icon path
-	char smiconpath[260];		// games icon path for small icon
+	char gamename[SYS_MAX_PATH];
+	char iconpath[SYS_MAX_PATH];			// games icon path
+	char smiconpath[SYS_MAX_PATH];			// games icon path for small icon
 
 	bool (*Init)(void);			// initialize game code, called once at startup
 	void (*Shutdown)(void);		// shutdown game code, called once at shutdown

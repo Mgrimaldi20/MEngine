@@ -42,4 +42,4 @@ void ShutdownConsole(void);
 void ShowConsole(void);
 void HideConsole(void);
 
-keycode_t MapKey(WPARAM key);
+keycode_t MapWin32Key(WPARAM key);
