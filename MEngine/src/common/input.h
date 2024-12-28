@@ -101,6 +101,7 @@ typedef enum
 	KEY_F22,
 	KEY_F23,
 	KEY_F24,
+	KEY_F25,
 	KEY_NUMPAD0,
 	KEY_NUMPAD1,
 	KEY_NUMPAD2,
@@ -117,18 +118,18 @@ typedef enum
 	KEY_SUBTRACT,
 	KEY_DECIMAL,
 	KEY_DIVIDE,
-	KEY_MISCELANIOUS_1,		// misc keys: ; and :
-	KEY_MISCELANIOUS_2,		// misc keys: / and ?
-	KEY_MISCELANIOUS_3,		// misc keys: ` and ~
-	KEY_MISCELANIOUS_4,		// misc keys: [ and {
-	KEY_MISCELANIOUS_5,		// misc keys: \ and |
-	KEY_MISCELANIOUS_6,		// misc keys: ] and }
-	KEY_MISCELANIOUS_7,		// misc keys: ' and "
-	KEY_MISCELANIOUS_8,		// varies by keyboard
-	KEY_MISCELANIOUS_9,		// misc keys: < and >
-	KEY_OEM_PLUS,
-	KEY_OEM_COMMA,
-	KEY_OEM_MINUS,
-	KEY_OEM_PERIOD,
+	KEY_SEMICOLON,			// misc keys: ; and :
+	KEY_SLASH,				// misc keys: / and ?
+	KEY_GRAVE,				// misc keys: ` and ~
+	KEY_LEFTBRACKET,		// misc keys: [ and {
+	KEY_BACKSLASH,			// misc keys: \ and |
+	KEY_RIGHTBRACKET,		// misc keys: ] and }
+	KEY_APOSTROPHE,			// misc keys: ' and "
+	KEY_MISCELANIOUS_1,		// varies by keyboard
+	KEY_MISCELANIOUS_2,		// misc keys: < and >
+	KEY_EQUAL,
+	KEY_COMMA,
+	KEY_MINUS,
+	KEY_PERIOD,
 	KEY_FINAL
 } keycode_t;

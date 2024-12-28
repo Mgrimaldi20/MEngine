@@ -190,13 +190,13 @@ static int scancodes[] =
 	KEY_UNKNOWN,		// start application 2
 	KEY_UNKNOWN,		// reserved
 	KEY_UNKNOWN,		// reserved
-	KEY_MISCELANIOUS_1,	// misc keys: ; and :
-	KEY_OEM_PLUS,		// oem plus
-	KEY_OEM_COMMA,		// oem comma
-	KEY_OEM_MINUS,		// oem minus
-	KEY_OEM_PERIOD,		// oem period
-	KEY_MISCELANIOUS_2,	// misc keys: / and ?
-	KEY_MISCELANIOUS_3,	// misc keys: ` and ~
+	KEY_SEMICOLON,		// misc keys: ; and :
+	KEY_EQUAL,			// oem plus
+	KEY_COMMA,			// oem comma
+	KEY_MINUS,			// oem minus
+	KEY_PERIOD,			// oem period
+	KEY_SLASH,			// misc keys: / and ?
+	KEY_GRAVE,			// misc keys: ` and ~
 	KEY_UNKNOWN,		// reserved
 	KEY_UNKNOWN,		// reserved
 	KEY_UNKNOWN,		// reserved
@@ -223,14 +223,14 @@ static int scancodes[] =
 	KEY_UNKNOWN,		// reserved
 	KEY_UNKNOWN,		// reserved
 	KEY_UNKNOWN,		// reserved
-	KEY_MISCELANIOUS_4,	// misc keys: [ and {
-	KEY_MISCELANIOUS_5,	// misc keys: \ and |
-	KEY_MISCELANIOUS_6,	// misc keys: ] and }
-	KEY_MISCELANIOUS_7,	// misc keys: ' and "
-	KEY_MISCELANIOUS_8,	// varies by keyboard
+	KEY_LEFTBRACKET,	// misc keys: [ and {
+	KEY_BACKSLASH,		// misc keys: \ and |
+	KEY_RIGHTBRACKET,	// misc keys: ] and }
+	KEY_APOSTROPHE,		// misc keys: ' and "
+	KEY_MISCELANIOUS_1,	// varies by keyboard
 	KEY_UNKNOWN,		// reserved
 	KEY_UNKNOWN,		// oem specific
-	KEY_MISCELANIOUS_9,	// misc keys: < and >
+	KEY_MISCELANIOUS_2,	// misc keys: < and >
 	KEY_UNKNOWN,		// oem specific
 	KEY_UNKNOWN,		// oem specific
 	KEY_UNKNOWN,		// ime process
