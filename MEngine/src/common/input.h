@@ -126,5 +126,9 @@ typedef enum
 	KEY_MISCELANIOUS_7,		// misc keys: ' and "
 	KEY_MISCELANIOUS_8,		// varies by keyboard
 	KEY_MISCELANIOUS_9,		// misc keys: < and >
+	KEY_OEM_PLUS,
+	KEY_OEM_COMMA,
+	KEY_OEM_MINUS,
+	KEY_OEM_PERIOD,
 	KEY_FINAL
 } keycode_t;

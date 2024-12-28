@@ -4,54 +4,54 @@
 
 static int scancodes[] =
 {
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_CANCEL,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_BACKSPACE,
-	KEY_TAB,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_CLEAR,
-	KEY_ENTER,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_SHIFT,
-	KEY_CONTROL,
-	KEY_ALT,
-	KEY_PAUSE,
-	KEY_CAPSLOCK,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_ESCAPE,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_SPACE,
-	KEY_PAGEUP,
-	KEY_PAGEDOWN,
-	KEY_END,
-	KEY_HOME,
-	KEY_LEFT,
-	KEY_UP,
-	KEY_RIGHT,
-	KEY_DOWN,
-	KEY_SELECT,
-	KEY_PRINT,
-	KEY_EXEC,
-	KEY_PRINTSCREEN,
-	KEY_INSERT,
-	KEY_DELETE,
-	KEY_HELP,
+	KEY_UNKNOWN,		// unknown key 0x00
+	KEY_UNKNOWN,		// left mouse button
+	KEY_UNKNOWN,		// right mouse button
+	KEY_CANCEL,			// control-break processing
+	KEY_UNKNOWN,		// middle mouse button
+	KEY_UNKNOWN,		// x1 mouse button
+	KEY_UNKNOWN,		// x2 mouse button
+	KEY_UNKNOWN,		// reserved
+	KEY_BACKSPACE,		// backspace
+	KEY_TAB,			// tab
+	KEY_UNKNOWN,		// reserved
+	KEY_UNKNOWN,		// reserved
+	KEY_CLEAR,			// clear
+	KEY_ENTER,			// enter
+	KEY_UNKNOWN,		// unasigned
+	KEY_UNKNOWN,		// unasigned
+	KEY_SHIFT,			// shift
+	KEY_CONTROL,		// control
+	KEY_ALT,			// alt
+	KEY_PAUSE,			// pause
+	KEY_CAPSLOCK,		// caps lock
+	KEY_UNKNOWN,		// ime kana mode / ime hanguel mode
+	KEY_UNKNOWN,		// ime on
+	KEY_UNKNOWN,		// ime junja mode
+	KEY_UNKNOWN,		// ime final mode
+	KEY_UNKNOWN,		// ime hanja mode / ime kanji mode
+	KEY_UNKNOWN,		// ime off
+	KEY_ESCAPE,			// escape
+	KEY_UNKNOWN,		// ime convert
+	KEY_UNKNOWN,		// ime nonconvert
+	KEY_UNKNOWN,		// ime accept
+	KEY_UNKNOWN,		// ime mode change request
+	KEY_SPACE,			// spacebar
+	KEY_PAGEUP,			// page up
+	KEY_PAGEDOWN,		// page down
+	KEY_END,			// end
+	KEY_HOME,			// home
+	KEY_LEFT,			// left arrow
+	KEY_UP,				// up arrow
+	KEY_RIGHT,			// right arrow
+	KEY_DOWN,			// down arrow
+	KEY_SELECT,			// select
+	KEY_PRINT,			// print
+	KEY_EXEC,			// execute
+	KEY_PRINTSCREEN,	// print screen
+	KEY_INSERT,			// insert
+	KEY_DELETE,			// delete
+	KEY_HELP,			// help
 	KEY_0,
 	KEY_1,
 	KEY_2,
@@ -62,13 +62,13 @@ static int scancodes[] =
 	KEY_7,
 	KEY_8,
 	KEY_9,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
+	KEY_UNKNOWN,		// undefined
+	KEY_UNKNOWN,		// undefined
+	KEY_UNKNOWN,		// undefined
+	KEY_UNKNOWN,		// undefined
+	KEY_UNKNOWN,		// undefined
+	KEY_UNKNOWN,		// undefined
+	KEY_UNKNOWN,		// undefined
 	KEY_A,
 	KEY_B,
 	KEY_C,
@@ -95,11 +95,11 @@ static int scancodes[] =
 	KEY_X,
 	KEY_Y,
 	KEY_Z,
-	KEY_LEFTSPECIAL,
-	KEY_RIGHTSPECIAL,
-	KEY_APPLICATION,
-	KEY_UNKNOWN,
-	KEY_SLEEP,
+	KEY_LEFTSPECIAL,	// left windows key
+	KEY_RIGHTSPECIAL,	// right windows key
+	KEY_APPLICATION,	// applications key
+	KEY_UNKNOWN,		// reserved
+	KEY_SLEEP,			// computer sleep key
 	KEY_NUMPAD0,
 	KEY_NUMPAD1,
 	KEY_NUMPAD2,
@@ -110,12 +110,12 @@ static int scancodes[] =
 	KEY_NUMPAD7,
 	KEY_NUMPAD8,
 	KEY_NUMPAD9,
-	KEY_MULTIPLY,
-	KEY_ADD,
-	KEY_SEPARATOR,
-	KEY_SUBTRACT,
-	KEY_DECIMAL,
-	KEY_DIVIDE,
+	KEY_MULTIPLY,		// multiply key (numpad *)
+	KEY_ADD,			// add key (numpad +)
+	KEY_SEPARATOR,		// separator key
+	KEY_SUBTRACT,		// subtract key (numpad -)
+	KEY_DECIMAL,		// decimal key (numpad .)
+	KEY_DIVIDE,			// divide key (numpad /)
 	KEY_F1,
 	KEY_F2,
 	KEY_F3,
@@ -140,122 +140,125 @@ static int scancodes[] =
 	KEY_F22,
 	KEY_F23,
 	KEY_F24,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_NUMLOCK,
-	KEY_SCROLLLOCK,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_LEFTSHIFT,
-	KEY_RIGHTSHIFT,
-	KEY_LEFTCONTROL,
-	KEY_RIGHTCONTROL,
-	KEY_LEFTALT,
-	KEY_RIGHTALT,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_MISCELANIOUS_1,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_MISCELANIOUS_2,
-	KEY_MISCELANIOUS_3,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_MISCELANIOUS_4,
-	KEY_MISCELANIOUS_5,
-	KEY_MISCELANIOUS_6,
-	KEY_MISCELANIOUS_7,
-	KEY_MISCELANIOUS_8,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_MISCELANIOUS_9,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
-	KEY_UNKNOWN,
+	KEY_UNKNOWN,		// reserved
+	KEY_UNKNOWN,		// reserved
+	KEY_UNKNOWN,		// reserved
+	KEY_UNKNOWN,		// reserved
+	KEY_UNKNOWN,		// reserved
+	KEY_UNKNOWN,		// reserved
+	KEY_UNKNOWN,		// reserved
+	KEY_UNKNOWN,		// reserved
+	KEY_NUMLOCK,		// num lock
+	KEY_SCROLLLOCK,		// scroll lock
+	KEY_UNKNOWN,		// oem specific
+	KEY_UNKNOWN,		// oem specific
+	KEY_UNKNOWN,		// oem specific
+	KEY_UNKNOWN,		// oem specific
+	KEY_UNKNOWN,		// oem specific
+	KEY_UNKNOWN,		// unassigned
+	KEY_UNKNOWN,		// unassigned
+	KEY_UNKNOWN,		// unassigned
+	KEY_UNKNOWN,		// unassigned
+	KEY_UNKNOWN,		// unassigned
+	KEY_UNKNOWN,		// unassigned
+	KEY_UNKNOWN,		// unassigned
+	KEY_UNKNOWN,		// unassigned
+	KEY_UNKNOWN,		// unassigned
+	KEY_LEFTSHIFT,		// left shift
+	KEY_RIGHTSHIFT,		// right shift
+	KEY_LEFTCONTROL,	// left control
+	KEY_RIGHTCONTROL,	// right control
+	KEY_LEFTALT,		// left alt
+	KEY_RIGHTALT,		// right alt
+	KEY_UNKNOWN,		// browser back
+	KEY_UNKNOWN,		// browser forward
+	KEY_UNKNOWN,		// browser refresh
+	KEY_UNKNOWN,		// browser stop
+	KEY_UNKNOWN,		// browser search
+	KEY_UNKNOWN,		// browser favorites
+	KEY_UNKNOWN,		// browser start and home
+	KEY_UNKNOWN,		// volume mute
+	KEY_UNKNOWN,		// volume down
+	KEY_UNKNOWN,		// volume up
+	KEY_UNKNOWN,		// next track
+	KEY_UNKNOWN,		// previous track
+	KEY_UNKNOWN,		// stop media
+	KEY_UNKNOWN,		// play/pause media
+	KEY_UNKNOWN,		// start mail
+	KEY_UNKNOWN,		// select media
+	KEY_UNKNOWN,		// start application 1
+	KEY_UNKNOWN,		// start application 2
+	KEY_UNKNOWN,		// reserved
+	KEY_UNKNOWN,		// reserved
+	KEY_MISCELANIOUS_1,	// misc keys: ; and :
+	KEY_OEM_PLUS,		// oem plus
+	KEY_OEM_COMMA,		// oem comma
+	KEY_OEM_MINUS,		// oem minus
+	KEY_OEM_PERIOD,		// oem period
+	KEY_MISCELANIOUS_2,	// misc keys: / and ?
+	KEY_MISCELANIOUS_3,	// misc keys: ` and ~
+	KEY_UNKNOWN,		// reserved
+	KEY_UNKNOWN,		// reserved
+	KEY_UNKNOWN,		// reserved
+	KEY_UNKNOWN,		// reserved
+	KEY_UNKNOWN,		// reserved
+	KEY_UNKNOWN,		// reserved
+	KEY_UNKNOWN,		// reserved
+	KEY_UNKNOWN,		// reserved
+	KEY_UNKNOWN,		// reserved
+	KEY_UNKNOWN,		// reserved
+	KEY_UNKNOWN,		// reserved
+	KEY_UNKNOWN,		// reserved
+	KEY_UNKNOWN,		// reserved
+	KEY_UNKNOWN,		// reserved
+	KEY_UNKNOWN,		// reserved
+	KEY_UNKNOWN,		// reserved
+	KEY_UNKNOWN,		// reserved
+	KEY_UNKNOWN,		// reserved
+	KEY_UNKNOWN,		// reserved
+	KEY_UNKNOWN,		// reserved
+	KEY_UNKNOWN,		// reserved
+	KEY_UNKNOWN,		// reserved
+	KEY_UNKNOWN,		// reserved
+	KEY_UNKNOWN,		// reserved
+	KEY_UNKNOWN,		// reserved
+	KEY_UNKNOWN,		// reserved
+	KEY_MISCELANIOUS_4,	// misc keys: [ and {
+	KEY_MISCELANIOUS_5,	// misc keys: \ and |
+	KEY_MISCELANIOUS_6,	// misc keys: ] and }
+	KEY_MISCELANIOUS_7,	// misc keys: ' and "
+	KEY_MISCELANIOUS_8,	// varies by keyboard
+	KEY_UNKNOWN,		// reserved
+	KEY_UNKNOWN,		// oem specific
+	KEY_MISCELANIOUS_9,	// misc keys: < and >
+	KEY_UNKNOWN,		// oem specific
+	KEY_UNKNOWN,		// oem specific
+	KEY_UNKNOWN,		// ime process
+	KEY_UNKNOWN,		// oem specific
+	KEY_UNKNOWN,		// unicode character packer
+	KEY_UNKNOWN,		// unassigned
+	KEY_UNKNOWN,		// oem specific
+	KEY_UNKNOWN,		// oem specific
+	KEY_UNKNOWN,		// oem specific
+	KEY_UNKNOWN,		// oem specific
+	KEY_UNKNOWN,		// oem specific
+	KEY_UNKNOWN,		// oem specific
+	KEY_UNKNOWN,		// oem specific
+	KEY_UNKNOWN,		// oem specific
+	KEY_UNKNOWN,		// oem specific
+	KEY_UNKNOWN,		// oem specific
+	KEY_UNKNOWN,		// oem specific
+	KEY_UNKNOWN,		// oem specific
+	KEY_UNKNOWN,		// oem specific
+	KEY_UNKNOWN,		// attn
+	KEY_UNKNOWN,		// crsel
+	KEY_UNKNOWN,		// exsel
+	KEY_UNKNOWN,		// ereof
+	KEY_UNKNOWN,		// play
+	KEY_UNKNOWN,		// zoom
+	KEY_UNKNOWN,		// reserved
+	KEY_UNKNOWN,		// pa1
+	KEY_UNKNOWN,		// clear
 	KEY_FINAL
 };
 
