@@ -78,7 +78,7 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 			key = MapWin32Key(wparam);
 
 #if defined(MENGINE_DEBUG)
-			printf("%u: Key down: %d\n", umsg, key);
+			printf("%u: Key down: Translated: %d, Wparam: %llu\n", umsg, key, wparam);
 #endif
 			break;
 		}
@@ -89,7 +89,7 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 			key = MapWin32Key(wparam);
 
 #if defined(MENGINE_DEBUG)
-			printf("%u: Key up: %d\n", umsg, key);
+			printf("%u: Key up: Translated: %d, Wparam: %llu\n", umsg, key, wparam);
 #endif
 			break;
 		}
