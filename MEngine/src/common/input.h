@@ -1,3 +1,5 @@
+#pragma once
+
 typedef enum
 {
 	KEY_UNKNOWN = 0,
