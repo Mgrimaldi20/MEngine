@@ -264,7 +264,7 @@ static int scancodes[] =
 
 keycode_t MapWin32Key(WPARAM key)
 {
-	if (key < 0 || key >= sizeof(scancodes) / sizeof(scancodes[0]))
+	if (key < 0 || key >= (sizeof(scancodes) / sizeof(scancodes[0])))
 		return(KEY_UNKNOWN);
 
 	return(scancodes[key]);

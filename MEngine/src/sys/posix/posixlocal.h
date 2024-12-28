@@ -27,3 +27,5 @@ typedef struct
 extern posixvars_t posixstate;
 
 void RegisterCallbacks(GLFWwindow *window);
+
+int MapGLFWKey(int key);

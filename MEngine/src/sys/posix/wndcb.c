@@ -3,6 +3,29 @@
 
 static void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
+	keycode_t keycode = KEY_UNKNOWN;
+
+	switch (action)
+	{
+		case GLFW_PRESS:
+			keycode = MapGLFWKey(key);
+
+#if defined(MENGINE_DEBUG)
+			printf("%u: Key down: Translated: %d, GLFW keycode: %d\n", umsg, keycode, key);
+#endif
+			break;
+
+		case GLFW_RELEASE:
+			keycode = MapGLFWKey(key);
+
+#if defined(MENGINE_DEBUG)
+			printf("%u: Key up: Translated: %d, GLFW keycode: %d\n", umsg, keycode, key);
+#endif
+			break;
+
+		case GLFW_REPEAT:
+			break;
+	}
 }
 
 static void MouseMoveCallback(GLFWwindow *window, double xpos, double ypos)
