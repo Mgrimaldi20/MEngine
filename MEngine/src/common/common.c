@@ -266,11 +266,6 @@ static void ShutdownGame(void)
 	gameinitialized = false;
 }
 
-static void UpdateConfigs(void)
-{
-	// TODO: update any config changes, key binds, etc.
-}
-
 bool Common_Init(void)
 {
 	if (!ParseCommandLine())
@@ -319,8 +314,6 @@ void Common_Shutdown(void)
 
 void Common_Frame(void)		// happens every frame
 {
-	UpdateConfigs();		// update any config changes, key binds, etc.
-
 	// also run the game loop here, and any on frame events
 
 	Render_StartFrame();

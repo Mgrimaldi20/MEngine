@@ -40,10 +40,19 @@ static void WindowSizing(WPARAM wparam, RECT *rect)
 		else
 			rect->bottom = rect->top + minheight;
 	}
+
+	// get new the full window size including decorations
+	int newwidth = rect->right - rect->left;;
+	int newheight = rect->bottom - rect->top;
+
+	(int)newwidth;
+	(int)newheight;
 }
 
 LRESULT CALLBACK MainWndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 {
+	keycode_t key = KEY_UNKNOWN;
+
 	switch (umsg)
 	{
 		case WM_DESTROY:
@@ -66,16 +75,22 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 		case WM_SYSKEYDOWN:
 		case WM_KEYDOWN:
 		{
-			keycode_t key = MapKey(wparam);
+			key = MapWin32Key(wparam);
+
+#if defined(MENGINE_DEBUG)
 			printf("%u: Key down: %d\n", umsg, key);
+#endif
 			break;
 		}
 
 		case WM_SYSKEYUP:
 		case WM_KEYUP:
 		{
-			keycode_t key = MapKey(wparam);
+			key = MapWin32Key(wparam);
+
+#if defined(MENGINE_DEBUG)
 			printf("%u: Key up: %d\n", umsg, key);
+#endif
 			break;
 		}
 
