@@ -7,7 +7,7 @@
 #include "sys/sys.h"
 #include "common.h"
 
-#define LOG_TIMESTR_LEN 256
+#define LOG_TIMESTR_LEN 32
 #define LOG_TIME_FMT "%Y-%m-%d %H:%M:%S"
 #define MAX_LOG_ENTRIES 256
 #define MAX_LOG_FILES 5
