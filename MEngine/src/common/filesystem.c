@@ -46,6 +46,9 @@ bool FileSys_Init(void)
 	if (initialized)
 		return(true);
 
+	fs_basepath = CVar_RegisterString("fs_basepath", ".", CVAR_ARCHIVE | CVAR_READONLY, "The base path for the engine. Path to the installation");
+	fs_savepath = CVar_RegisterString("fs_savepath", "save", CVAR_ARCHIVE, "The path to the games save files");
+
 	initialized = true;
 
 	return(true);
@@ -127,6 +130,15 @@ filedata_t *FileSys_ListFiles(unsigned int *numfiles, const char *directory, con
 	{
 		if (PathMatchSpec(filename, filter))
 		{
+			size_t dirlen = strlen(directory);
+			size_t filelen = strlen(filename);
+
+			if ((dirlen + 1 + filelen + 1) >= SYS_MAX_PATH)
+			{
+				Log_Write(LOG_WARN, "File path too long: %s/%s", directory, filename);
+				continue;
+			}
+
 			char filepath[SYS_MAX_PATH] = { 0 };
 			snprintf(filepath, SYS_MAX_PATH, "%s/%s", directory, filename);
 
