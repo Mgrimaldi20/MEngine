@@ -73,7 +73,7 @@ target_sources(MEngine PRIVATE
 	"src/common/cvar.c"
 	"src/common/memory.c"
 	"src/common/filesystem.c"
-	"src/common/input.h"
+	"src/common/keycodes.h"
 	"src/renderer/renderer.h"
 	"src/renderer/rendererinit.c"
 	"src/renderer/renderer.c"

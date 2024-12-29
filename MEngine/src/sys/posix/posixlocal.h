@@ -8,7 +8,7 @@
 #include <sys/utsname.h>
 #include "GLFW/glfw3.h"
 
-#include "common/input.h"
+#include "common/keycodes.h"
 
 typedef struct
 {
@@ -28,4 +28,4 @@ extern posixvars_t posixstate;
 
 void RegisterCallbacks(GLFWwindow *window);
 
-int MapGLFWKey(int key);
+keycode_t MapGLFWKey(int key);
