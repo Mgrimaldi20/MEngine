@@ -167,6 +167,7 @@ void Sys_ProcessCommandLine(cmdline_t *cmdline)
 	}
 
 	cmdline->count = count;
+	cmdline->allocated = true;
 }
 
 bool Sys_Mkdir(const char *path)

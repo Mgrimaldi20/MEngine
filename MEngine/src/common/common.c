@@ -54,6 +54,9 @@ static void DestroyCommandLine(cmdline_t *cmdline)
 	if (!cmdline)
 		return;
 
+	if (!cmdline->allocated)
+		return;
+
 	for (int i=0; i<cmdline->count; i++)
 		free(cmdline->args[i]);
 
