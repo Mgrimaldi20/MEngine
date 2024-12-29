@@ -81,7 +81,7 @@ void Sys_ProcessCommandLine(cmdline_t *cmdline)
 		cmdline->args[i] = malloc(len * sizeof(*cmdline->args[i]));
 		if (!cmdline->args[i])
 		{
-			for (int j=0; j<i; j++)
+			for (int j=0; j<i; ++j)
 				free(cmdline->args[j]);
 
 			free(cmdline->args);
