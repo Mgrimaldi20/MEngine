@@ -67,6 +67,9 @@ static void DestroyCommandLine(cmdline_t *cmdline)
 static bool ParseCommandLine(void)
 {
 	cmdline_t *cmdline = CreateCommandLine();
+	if (!cmdline)
+		return(false);
+
 	Sys_ProcessCommandLine(cmdline);
 
 	for (int i=0; i<cmdline->count; i++)
