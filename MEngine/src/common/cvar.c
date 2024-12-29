@@ -265,6 +265,9 @@ bool CVar_Init(void)
 		}
 	}
 
+	if (cvarfile)				// in case the file was opened in the previous block
+		fclose(cvarfile);
+
 	cvarfile = fopen(cvarfullname, "r");
 	if (!cvarfile)
 	{
