@@ -1,5 +1,4 @@
 #include <stdio.h>
-
 #include "renderer/renderer.h"
 #include "posixlocal.h"
 
@@ -13,7 +12,7 @@ static void KeyCallback(GLFWwindow *window, int key, int scancode, int action, i
 			keycode = MapGLFWKey(key);
 
 #if defined(MENGINE_DEBUG)
-			printf("%u: Key down: Translated: %d, GLFW keycode: %d\n", umsg, keycode, key);
+			printf("%d: Key down: Translated: %d, GLFW keycode: %d\n", action, keycode, key);
 #endif
 			break;
 
@@ -21,7 +20,7 @@ static void KeyCallback(GLFWwindow *window, int key, int scancode, int action, i
 			keycode = MapGLFWKey(key);
 
 #if defined(MENGINE_DEBUG)
-			printf("%u: Key up: Translated: %d, GLFW keycode: %d\n", umsg, keycode, key);
+			printf("%d: Key up: Translated: %d, GLFW keycode: %d\n", action, keycode, key);
 #endif
 			break;
 
