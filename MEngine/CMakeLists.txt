@@ -186,17 +186,17 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")																	# GCC compiler opti
 		target_compile_options(MEngine PRIVATE
 			"-g"
 			"-fanalyzer"
-			"-fsanitize=leak"
-			"-fsanitize=undefined"
-			"-fsanitize=address"
-			"-fsanitize=thread"
+			#"-fsanitize=leak"
+			#"-fsanitize=undefined"
+			#"-fsanitize=address"
+			#"-fsanitize=thread"
 			"-O0"
 		)
 		target_link_libraries(MEngine PRIVATE
-			"-fsanitize=leak"
-			"-fsanitize=undefined"
-			"-fsanitize=address"
-			"-fsanitize=thread"
+			#"-fsanitize=leak"
+			#"-fsanitize=undefined"
+			#"-fsanitize=address"
+			#"-fsanitize=thread"
 		)
 	elseif(CMAKE_BUILD_TYPE STREQUAL "Release")																	# Release build compiler options
 		target_compile_options(MEngine PRIVATE "-O3" "-flto")
