@@ -131,19 +131,20 @@ filedata_t *FileSys_ListFiles(unsigned int *numfiles, const char *directory, con
 		{
 			size_t dirlen = strlen(directory);
 			size_t filelen = strlen(filename);
-			size_t pathlen = dirlen + 1 + filelen + 1;
 
-			if (pathlen <= SYS_MAX_PATH)
+			if ((dirlen + 1 + filelen + 1) > SYS_MAX_PATH)
 			{
-				char filepath[SYS_MAX_PATH] = { 0 };
-				snprintf(filepath, pathlen, "%s/%s", directory, filename);
-
-				Sys_Stat(filepath, &filelist[index]);
-				index++;
+				Log_Write(LOG_WARN, "File path too long: %s/%s", directory, filename);
+				continue;
 			}
 
-			Log_Write(LOG_WARN, "File path too long: %s/%s", directory, filename);
-			continue;
+			char filepath[SYS_MAX_PATH] = { 0 };
+			strncpy(filepath, directory, SYS_MAX_PATH - 1);
+			strncat(filepath, "/", strlen(filepath) - 1);
+			strncat(filepath, filename, strlen(filepath) - 1);
+
+			Sys_Stat(filepath, &filelist[index]);
+			index++;
 		}
 	}
 
