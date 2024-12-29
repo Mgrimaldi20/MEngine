@@ -17,6 +17,7 @@
 
 typedef struct
 {
+	bool allocated;
 	char **args;
 	int count;
 } cmdline_t;

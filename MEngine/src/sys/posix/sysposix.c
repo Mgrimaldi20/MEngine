@@ -69,30 +69,8 @@ void Sys_ProcessCommandLine(cmdline_t *cmdline)
 		return;
 
 	cmdline->count = posixstate.argc;
-
-	cmdline->args = malloc(cmdline->count * sizeof(*cmdline->args));
-	if (!cmdline->args)
-		Sys_Error("Failed to allocate memory for command line arguments");
-
-	for (int i=0; i<cmdline->count; i++)
-	{
-		size_t len = strlen(posixstate.argv[i]) + 1;
-
-		cmdline->args[i] = malloc(len);
-		if (!cmdline->args[i])
-		{
-			for (int j=0; j<cmdline->count; j++)
-			{
-				if (cmdline->args[j])
-					free(cmdline->args[j]);
-			}
-
-			free(cmdline->args);
-			Sys_Error("Failed to allocate memory for command line argument");
-		}
-
-		snprintf(cmdline->args[i], len, "%s", posixstate.argv[i]);
-	}
+	cmdline->args = posixstate.argv;
+	cmdline->allocated = false;
 }
 
 bool Sys_Mkdir(const char *path)
