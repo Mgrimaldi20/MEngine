@@ -81,8 +81,11 @@ void Sys_ProcessCommandLine(cmdline_t *cmdline)
 		cmdline->args[i] = malloc(len);
 		if (!cmdline->args[i])
 		{
-			for (int j=0; j<i; j++)
-				free(cmdline->args[j]);
+			for (int j=0; j<cmdline->count; j++)
+			{
+				if (cmdline->args[j])
+					free(cmdline->args[j]);
+			}
 
 			free(cmdline->args);
 			Sys_Error("Failed to allocate memory for command line argument");
