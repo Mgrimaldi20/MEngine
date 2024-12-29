@@ -32,6 +32,9 @@ static sys_t sys;
 static unsigned long long cmdlineflags;
 static void *gamedllhandle;
 
+static FILE *outfp;
+static FILE *errfp;
+
 static bool gameinitialized;
 
 static cmdline_t *CreateCommandLine(void)
@@ -89,7 +92,7 @@ static bool ParseCommandLine(void)
 				"\t-ignoreosver\tIgnore OS version check\n"
 				"\t-nocache\tDo not use the memory cache allocator\n";
 
-			printf("%s", helpmsg);
+			Common_Printf("%s", helpmsg);
 			fflush(stdout);
 
 			DestroyCommandLine(cmdline);
@@ -274,6 +277,23 @@ static void ShutdownGame(void)
 
 bool Common_Init(void)
 {
+	outfp = NULL;
+	errfp = NULL;
+
+#if defined(MENGINE_DEBUG)
+	if (Sys_Mkdir("logs"))		// if this cant be done, just forget about this
+	{
+		char outfilename[SYS_MAX_PATH] = { 0 };
+		char errfilename[SYS_MAX_PATH] = { 0 };
+
+		snprintf(outfilename, SYS_MAX_PATH, "logs/stdout.log");
+		snprintf(errfilename, SYS_MAX_PATH, "logs/stderr.log");
+
+		(FILE *)outfp = fopen(outfilename, "w");
+		(FILE *)errfp = fopen(errfilename, "w");
+	}
+#endif
+
 	if (!ParseCommandLine())
 		return(false);
 
@@ -316,6 +336,12 @@ void Common_Shutdown(void)
 	CVar_Shutdown();
 	MemCache_Shutdown();
 	Log_Shutdown();
+
+	if (outfp)
+		fclose(outfp);
+
+	if (errfp)
+		fclose(errfp);
 }
 
 void Common_Frame(void)		// happens every frame
@@ -325,6 +351,40 @@ void Common_Frame(void)		// happens every frame
 	Render_StartFrame();
 	Render_Frame();
 	Render_EndFrame();
+}
+
+int Common_Printf(const char *msg, ...)
+{
+	va_list argptr;
+	char buffer[LOG_MAX_LEN] = { 0 };
+
+	va_start(argptr, msg);
+	vsnprintf(buffer, sizeof(buffer), msg, argptr);
+	va_end(argptr);
+
+	printf("%s", buffer);
+
+	if (outfp)
+		fprintf(outfp, "%s", buffer);
+
+	return(0);
+}
+
+int Common_Errorf(const char *msg, ...)
+{
+	va_list argptr;
+	char buffer[LOG_MAX_LEN] = { 0 };
+
+	va_start(argptr, msg);
+	vsnprintf(buffer, sizeof(buffer), msg, argptr);
+	va_end(argptr);
+
+	fprintf(stderr, "%s", buffer);
+
+	if (errfp)
+		fprintf(errfp, "%s", buffer);
+
+	return(0);
 }
 
 bool Common_EditorMode(void)

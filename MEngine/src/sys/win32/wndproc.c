@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <time.h>
+#include <math.h>
 #include "common/common.h"
 #include "winlocal.h"
 #include "renderer/renderer.h"
@@ -52,6 +53,7 @@ static void WindowSizing(WPARAM wparam, RECT *rect)
 LRESULT CALLBACK MainWndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 {
 	keycode_t key = KEY_UNKNOWN;
+	mousecode_t code = MOUSE_UNKNOWN;
 
 	switch (umsg)
 	{
@@ -72,13 +74,20 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 				return(0);
 			break;
 
+		case WM_SYSCHAR:
+		case WM_CHAR:
+			break;
+
 		case WM_SYSKEYDOWN:
 		case WM_KEYDOWN:
 		{
 			key = MapWin32Key(wparam);
 
+			if (key == KEY_PRINTSCREEN)		// it should only send a key up but this is just in case
+				break;
+
 #if defined(MENGINE_DEBUG)
-			printf("%u: Key down: Translated: %d, Wparam: %llu\n", umsg, key, wparam);
+			Common_Printf("%u: Key down: Translated: %d, Wparam: %llu\n", umsg, key, wparam);
 #endif
 			break;
 		}
@@ -88,9 +97,102 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 		{
 			key = MapWin32Key(wparam);
 
+			if (key == KEY_PRINTSCREEN)
+				break;
+
 #if defined(MENGINE_DEBUG)
-			printf("%u: Key up: Translated: %d, Wparam: %llu\n", umsg, key, wparam);
+			Common_Printf("%u: Key up: Translated: %d, Wparam: %llu\n", umsg, key, wparam);
 #endif
+			break;
+		}
+
+		case WM_MOUSEMOVE:
+		{
+			POINTS pt = MAKEPOINTS(lparam);
+			int posx = pt.x;
+			int posy = pt.y;
+
+			if (posx >= 0 && posx < glstate.width && posy >= 0 && posy < glstate.height)	// only update if the mouse is inside the framebuffer
+			{
+				Common_Printf("Mouse moved X: %d\n", posx);	// just do this for now TODO: change later to do something with this
+				Common_Printf("Mouse moved Y: %d\n", posy);
+			}
+
+			break;
+		}
+
+		case WM_LBUTTONDOWN:
+		{
+			code = MOUSE_LEFT;
+
+#if defined(MENGINE_DEBUG)
+			Common_Printf("Mouse button down: %d\n", code);
+#endif
+			break;
+		}
+
+		case WM_RBUTTONDOWN:
+		{
+			code = MOUSE_RIGHT;
+
+#if defined(MENGINE_DEBUG)
+			Common_Printf("Mouse button down: %d\n", code);
+#endif
+			break;
+		}
+
+		case WM_MBUTTONDOWN:
+		{
+			code = MOUSE_MIDDLE;
+
+#if defined(MENGINE_DEBUG)
+			Common_Printf("Mouse button down: %d\n", code);
+#endif
+			break;
+		}
+
+		case WM_LBUTTONUP:
+		{
+			code = MOUSE_LEFT;
+
+#if defined(MENGINE_DEBUG)
+			Common_Printf("Mouse button up: %d\n", code);
+#endif
+			break;
+		}
+
+		case WM_RBUTTONUP:
+		{
+			code = MOUSE_RIGHT;
+
+#if defined(MENGINE_DEBUG)
+			Common_Printf("Mouse button up: %d\n", code);
+#endif
+			break;
+		}
+
+		case WM_MBUTTONUP:
+		{
+			code = MOUSE_MIDDLE;
+
+#if defined(MENGINE_DEBUG)
+			Common_Printf("Mouse button up: %d\n", code);
+#endif
+			break;
+		}
+
+		case WM_MOUSEWHEEL:
+		{
+			int delta = GET_WHEEL_DELTA_WPARAM(wparam);
+			code = delta < 0 ? MOUSE_WHEELDOWN : MOUSE_WHEELUP;
+			delta = abs(delta);
+
+			while (delta-- > 0)
+			{
+				Common_Printf("Mouse wheel delta: %d\n", delta);	// just do this for now TODO: change later to do something with this
+				Common_Printf("Mouse wheel code: %d\n", code);
+			}
+
 			break;
 		}
 

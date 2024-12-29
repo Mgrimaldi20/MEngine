@@ -11,16 +11,22 @@ static void KeyCallback(GLFWwindow *window, int key, int scancode, int action, i
 		case GLFW_PRESS:
 			keycode = MapGLFWKey(key);
 
+			if (key == KEY_PRINTSCREEN)
+				break;
+
 #if defined(MENGINE_DEBUG)
-			printf("%d: Key down: Translated: %d, GLFW keycode: %d\n", action, keycode, key);
+			Common_Printf("%d: Key down: Translated: %d, GLFW keycode: %d\n", action, keycode, key);
 #endif
 			break;
 
 		case GLFW_RELEASE:
 			keycode = MapGLFWKey(key);
 
+			if (key == KEY_PRINTSCREEN)
+				break;
+
 #if defined(MENGINE_DEBUG)
-			printf("%d: Key up: Translated: %d, GLFW keycode: %d\n", action, keycode, key);
+			Common_Printf("%d: Key up: Translated: %d, GLFW keycode: %d\n", action, keycode, key);
 #endif
 			break;
 
@@ -35,6 +41,29 @@ static void MouseMoveCallback(GLFWwindow *window, double xpos, double ypos)
 
 static void MouseButtonCallback(GLFWwindow *window, int button, int action, int mods)
 {
+	mousecode_t code = MOUSE_UNKNOWN;
+
+	switch (action)
+	{
+		case GLFW_PRESS:
+			code = MapGLFWMouse(button);
+
+#if defined(MENGINE_DEBUG)
+			Common_Printf("Mouse button down: %d\n", code);
+#endif
+			break;
+
+		case GLFW_RELEASE:
+			code = MapGLFWMouse(button);
+
+#if defined(MENGINE_DEBUG)
+			Common_Printf("Mouse button up: %d\n", code);
+#endif
+			break;
+
+		case GLFW_REPEAT:		// do mouse buttons have repeats?
+			break;
+	}
 }
 
 static void MouseScrollCallback(GLFWwindow *window, double xoffset, double yoffset)
@@ -58,6 +87,8 @@ static void WindowSizeCallback(GLFWwindow *window, int width, int height)
 
 	if (height < minheight)
 		height = minheight;
+
+	glfwSetWindowSize(window, width, height);
 }
 
 static void FramebufferSizeCallback(GLFWwindow *window, int width, int height)
