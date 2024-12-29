@@ -72,7 +72,10 @@ void Sys_ProcessCommandLine(cmdline_t *cmdline)
 
 	cmdline->args = malloc(sizeof(*cmdline->args) * cmdline->count);
 	if (!cmdline->args)
+	{
 		Sys_Error("Failed to allocate memory for command line arguments");
+		return;
+	}
 
 	for (int i=0; i<cmdline->count; i++)
 	{
@@ -87,9 +90,10 @@ void Sys_ProcessCommandLine(cmdline_t *cmdline)
 			free(cmdline->args);
 
 			Sys_Error("Failed to allocate memory for command line argument");
+			return;
 		}
 
-		snprintf(cmdline->args[i], len, "%s", posixstate.argv[i+1]);
+		snprintf(cmdline->args[i], len, "%s", posixstate.argv[i + 1]);
 	}
 }
 
