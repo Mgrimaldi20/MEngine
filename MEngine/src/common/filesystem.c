@@ -7,7 +7,6 @@
 #include "zip.h"
 
 static cvar_t *fs_basepath;
-static cvar_t *fs_pakpath;
 static cvar_t *fs_savepath;
 
 static bool initialized;
@@ -133,7 +132,7 @@ filedata_t *FileSys_ListFiles(unsigned int *numfiles, const char *directory, con
 			size_t dirlen = strlen(directory);
 			size_t filelen = strlen(filename);
 
-			if ((dirlen + 1 + filelen + 1) >= SYS_MAX_PATH)
+			if ((dirlen + 1 + filelen + 1) > SYS_MAX_PATH)
 			{
 				Log_Write(LOG_WARN, "File path too long: %s/%s", directory, filename);
 				continue;
