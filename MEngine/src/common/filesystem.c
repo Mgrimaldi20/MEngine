@@ -131,11 +131,12 @@ filedata_t *FileSys_ListFiles(unsigned int *numfiles, const char *directory, con
 		{
 			size_t dirlen = strlen(directory);
 			size_t filelen = strlen(filename);
+			size_t pathlen = dirlen + 1 + filelen + 1;
 
-			if ((dirlen + 1 + filelen + 1) <= SYS_MAX_PATH)
+			if (pathlen <= SYS_MAX_PATH)
 			{
 				char filepath[SYS_MAX_PATH] = { 0 };
-				snprintf(filepath, SYS_MAX_PATH, "%s/%s", directory, filename);
+				snprintf(filepath, pathlen, "%s/%s", directory, filename);
 
 				Sys_Stat(filepath, &filelist[index]);
 				index++;
