@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 #include "renderer/renderer.h"
 #include "posixlocal.h"
 
