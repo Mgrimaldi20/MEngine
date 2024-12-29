@@ -88,6 +88,7 @@ void Sys_ProcessCommandLine(cmdline_t *cmdline)
 				free(cmdline->args[j]);
 
 			free(cmdline->args);
+			cmdline->args = NULL;
 
 			Sys_Error("Failed to allocate memory for command line argument");
 			return;
