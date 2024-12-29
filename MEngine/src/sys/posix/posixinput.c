@@ -346,7 +346,7 @@ static int scancodes[] =
 	KEY_FINAL
 };
 
-int MapGLFWKey(int key)
+keycode_t MapGLFWKey(int key)
 {
 	if (key < 0 || key >= (sizeof(scancodes) / sizeof(scancodes[0])) || key == GLFW_KEY_UNKNOWN)
 		return(KEY_UNKNOWN);
