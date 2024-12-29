@@ -9,17 +9,17 @@ static int scancodes[] =
 	KEY_UNKNOWN,		// right mouse button
 	KEY_CANCEL,			// control-break processing
 	KEY_UNKNOWN,		// middle mouse button
-	KEY_UNKNOWN,		// x1 mouse button
-	KEY_UNKNOWN,		// x2 mouse button
+	KEY_UNKNOWN,		// x1 mouse button .. x2 mouse button
+	KEY_UNKNOWN,
 	KEY_UNKNOWN,		// reserved
 	KEY_BACKSPACE,		// backspace
 	KEY_TAB,			// tab
 	KEY_UNKNOWN,		// reserved
-	KEY_UNKNOWN,		// reserved
+	KEY_UNKNOWN,
 	KEY_CLEAR,			// clear
 	KEY_ENTER,			// enter
 	KEY_UNKNOWN,		// unasigned
-	KEY_UNKNOWN,		// unasigned
+	KEY_UNKNOWN,
 	KEY_SHIFT,			// shift
 	KEY_CONTROL,		// control
 	KEY_ALT,			// alt
@@ -63,12 +63,12 @@ static int scancodes[] =
 	KEY_8,
 	KEY_9,
 	KEY_UNKNOWN,		// undefined
-	KEY_UNKNOWN,		// undefined
-	KEY_UNKNOWN,		// undefined
-	KEY_UNKNOWN,		// undefined
-	KEY_UNKNOWN,		// undefined
-	KEY_UNKNOWN,		// undefined
-	KEY_UNKNOWN,		// undefined
+	KEY_UNKNOWN,
+	KEY_UNKNOWN,
+	KEY_UNKNOWN,
+	KEY_UNKNOWN,
+	KEY_UNKNOWN,
+	KEY_UNKNOWN,
 	KEY_A,
 	KEY_B,
 	KEY_C,
@@ -141,29 +141,29 @@ static int scancodes[] =
 	KEY_F23,
 	KEY_F24,
 	KEY_UNKNOWN,		// reserved
-	KEY_UNKNOWN,		// reserved
-	KEY_UNKNOWN,		// reserved
-	KEY_UNKNOWN,		// reserved
-	KEY_UNKNOWN,		// reserved
-	KEY_UNKNOWN,		// reserved
-	KEY_UNKNOWN,		// reserved
-	KEY_UNKNOWN,		// reserved
+	KEY_UNKNOWN,
+	KEY_UNKNOWN,
+	KEY_UNKNOWN,
+	KEY_UNKNOWN,
+	KEY_UNKNOWN,
+	KEY_UNKNOWN,
+	KEY_UNKNOWN,
 	KEY_NUMLOCK,		// num lock
 	KEY_SCROLLLOCK,		// scroll lock
 	KEY_UNKNOWN,		// oem specific
-	KEY_UNKNOWN,		// oem specific
-	KEY_UNKNOWN,		// oem specific
-	KEY_UNKNOWN,		// oem specific
-	KEY_UNKNOWN,		// oem specific
+	KEY_UNKNOWN,
+	KEY_UNKNOWN,
+	KEY_UNKNOWN,
+	KEY_UNKNOWN,
 	KEY_UNKNOWN,		// unassigned
-	KEY_UNKNOWN,		// unassigned
-	KEY_UNKNOWN,		// unassigned
-	KEY_UNKNOWN,		// unassigned
-	KEY_UNKNOWN,		// unassigned
-	KEY_UNKNOWN,		// unassigned
-	KEY_UNKNOWN,		// unassigned
-	KEY_UNKNOWN,		// unassigned
-	KEY_UNKNOWN,		// unassigned
+	KEY_UNKNOWN,
+	KEY_UNKNOWN,
+	KEY_UNKNOWN,
+	KEY_UNKNOWN,
+	KEY_UNKNOWN,
+	KEY_UNKNOWN,
+	KEY_UNKNOWN,
+	KEY_UNKNOWN,
 	KEY_LEFTSHIFT,		// left shift
 	KEY_RIGHTSHIFT,		// right shift
 	KEY_LEFTCONTROL,	// left control
@@ -186,10 +186,10 @@ static int scancodes[] =
 	KEY_UNKNOWN,		// play/pause media
 	KEY_UNKNOWN,		// start mail
 	KEY_UNKNOWN,		// select media
-	KEY_UNKNOWN,		// start application 1
-	KEY_UNKNOWN,		// start application 2
+	KEY_UNKNOWN,		// start application 1 .. 2
+	KEY_UNKNOWN,
 	KEY_UNKNOWN,		// reserved
-	KEY_UNKNOWN,		// reserved
+	KEY_UNKNOWN,
 	KEY_SEMICOLON,		// misc keys: ; and :
 	KEY_EQUAL,			// oem plus
 	KEY_COMMA,			// oem comma
@@ -198,31 +198,31 @@ static int scancodes[] =
 	KEY_SLASH,			// misc keys: / and ?
 	KEY_GRAVE,			// misc keys: ` and ~
 	KEY_UNKNOWN,		// reserved
-	KEY_UNKNOWN,		// reserved
-	KEY_UNKNOWN,		// reserved
-	KEY_UNKNOWN,		// reserved
-	KEY_UNKNOWN,		// reserved
-	KEY_UNKNOWN,		// reserved
-	KEY_UNKNOWN,		// reserved
-	KEY_UNKNOWN,		// reserved
-	KEY_UNKNOWN,		// reserved
-	KEY_UNKNOWN,		// reserved
-	KEY_UNKNOWN,		// reserved
-	KEY_UNKNOWN,		// reserved
-	KEY_UNKNOWN,		// reserved
-	KEY_UNKNOWN,		// reserved
-	KEY_UNKNOWN,		// reserved
-	KEY_UNKNOWN,		// reserved
-	KEY_UNKNOWN,		// reserved
-	KEY_UNKNOWN,		// reserved
-	KEY_UNKNOWN,		// reserved
-	KEY_UNKNOWN,		// reserved
-	KEY_UNKNOWN,		// reserved
-	KEY_UNKNOWN,		// reserved
-	KEY_UNKNOWN,		// reserved
-	KEY_UNKNOWN,		// reserved
-	KEY_UNKNOWN,		// reserved
-	KEY_UNKNOWN,		// reserved
+	KEY_UNKNOWN,
+	KEY_UNKNOWN,
+	KEY_UNKNOWN,
+	KEY_UNKNOWN,
+	KEY_UNKNOWN,
+	KEY_UNKNOWN,
+	KEY_UNKNOWN,
+	KEY_UNKNOWN,
+	KEY_UNKNOWN,
+	KEY_UNKNOWN,
+	KEY_UNKNOWN,
+	KEY_UNKNOWN,
+	KEY_UNKNOWN,
+	KEY_UNKNOWN,
+	KEY_UNKNOWN,
+	KEY_UNKNOWN,
+	KEY_UNKNOWN,
+	KEY_UNKNOWN,
+	KEY_UNKNOWN,
+	KEY_UNKNOWN,
+	KEY_UNKNOWN,
+	KEY_UNKNOWN,
+	KEY_UNKNOWN,
+	KEY_UNKNOWN,
+	KEY_UNKNOWN,
 	KEY_LEFTBRACKET,	// misc keys: [ and {
 	KEY_BACKSLASH,		// misc keys: \ and |
 	KEY_RIGHTBRACKET,	// misc keys: ] and }
@@ -232,24 +232,24 @@ static int scancodes[] =
 	KEY_UNKNOWN,		// oem specific
 	KEY_MISCELANIOUS_2,	// misc keys: < and >
 	KEY_UNKNOWN,		// oem specific
-	KEY_UNKNOWN,		// oem specific
+	KEY_UNKNOWN,
 	KEY_UNKNOWN,		// ime process
 	KEY_UNKNOWN,		// oem specific
 	KEY_UNKNOWN,		// unicode character packer
 	KEY_UNKNOWN,		// unassigned
 	KEY_UNKNOWN,		// oem specific
-	KEY_UNKNOWN,		// oem specific
-	KEY_UNKNOWN,		// oem specific
-	KEY_UNKNOWN,		// oem specific
-	KEY_UNKNOWN,		// oem specific
-	KEY_UNKNOWN,		// oem specific
-	KEY_UNKNOWN,		// oem specific
-	KEY_UNKNOWN,		// oem specific
-	KEY_UNKNOWN,		// oem specific
-	KEY_UNKNOWN,		// oem specific
-	KEY_UNKNOWN,		// oem specific
-	KEY_UNKNOWN,		// oem specific
-	KEY_UNKNOWN,		// oem specific
+	KEY_UNKNOWN,
+	KEY_UNKNOWN,
+	KEY_UNKNOWN,
+	KEY_UNKNOWN,
+	KEY_UNKNOWN,
+	KEY_UNKNOWN,
+	KEY_UNKNOWN,
+	KEY_UNKNOWN,
+	KEY_UNKNOWN,
+	KEY_UNKNOWN,
+	KEY_UNKNOWN,
+	KEY_UNKNOWN,
 	KEY_UNKNOWN,		// attn
 	KEY_UNKNOWN,		// crsel
 	KEY_UNKNOWN,		// exsel

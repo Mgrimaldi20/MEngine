@@ -7,7 +7,9 @@
 
 #pragma warning(disable: 28251)		// disables windows annotations warning
 
-static FILE *outfp, *infp, *errfp;
+static FILE *outfp;
+static FILE *infp;
+static FILE *errfp;
 
 win32vars_t win32state;
 
@@ -22,16 +24,19 @@ int WINAPI wWinMain(HINSTANCE hinst, HINSTANCE hprevinst, PWSTR pcmdline, int nc
 	win32state.pcmdline = pcmdline;
 	win32state.ncmdshow = ncmdshow;
 
-	win32state.conshow = false;
+	win32state.conshow = false;		// just use this to control console creation
 
 #if defined(MENGINE_DEBUG)
 	win32state.conshow = true;
 #endif
 
-	if (!GetConsoleWindow())
+	if (win32state.conshow)
 	{
-		InitConsole();
-		HideConsole();
+		if (!GetConsoleWindow())
+		{
+			InitConsole();
+			HideConsole();
+		}
 	}
 
 	if (win32state.conshow)
@@ -40,7 +45,10 @@ int WINAPI wWinMain(HINSTANCE hinst, HINSTANCE hprevinst, PWSTR pcmdline, int nc
 	if (!Common_Init())
 	{
 		Common_Shutdown();
-		ShutdownConsole();
+
+		if (win32state.conshow)
+			ShutdownConsole();
+
 		return(1);
 	}
 
@@ -52,7 +60,9 @@ int WINAPI wWinMain(HINSTANCE hinst, HINSTANCE hprevinst, PWSTR pcmdline, int nc
 			if (!GetMessage(&msg, NULL, 0, 0))
 			{
 				Common_Shutdown();
-				ShutdownConsole();
+
+				if (win32state.conshow)
+					ShutdownConsole();
 
 				return(0);
 			}
@@ -85,7 +95,9 @@ void WindowsError(void)
 	LocalFree(wlpmsgbuf);
 
 	Common_Shutdown();
-	ShutdownConsole();
+
+	if (win32state.conshow)
+		ShutdownConsole();
 
 	exit(1);
 }
@@ -116,12 +128,12 @@ void InitConsole(void)
 		return;
 	}
 
-	printf("Opening debugging console\n");
+	Common_Printf("Opening debugging console\n");
 }
 
 void ShutdownConsole(void)
 {
-	printf("\nClosing debugging console\n");
+	Common_Printf("\nClosing debugging console\n");
 
 	if (outfp)
 		fclose(outfp);

@@ -4,7 +4,7 @@
 
 static int scancodes[] =
 {
-	KEY_UNKNOWN,		// unused
+	KEY_UNKNOWN,		// unused 0 .. 31
 	KEY_UNKNOWN,
 	KEY_UNKNOWN,
 	KEY_UNKNOWN,
@@ -362,4 +362,9 @@ keycode_t MapGLFWKey(int key)
 		return(KEY_UNKNOWN);
 
 	return(scancodes[key]);
+}
+
+mousecode_t MapGLFWMouse(int button)
+{
+	return(0);
 }

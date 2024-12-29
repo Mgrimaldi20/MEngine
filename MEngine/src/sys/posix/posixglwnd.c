@@ -74,7 +74,7 @@ bool GLWnd_Init(glwndparams_t params)
 
 	glfwMakeContextCurrent(posixstate.window);		// create the OpenGL context
 
-	RegisterCallbacks(posixstate.window);
+	RegisterCallbacks(posixstate.window);			// register all the window callbacks
 
 	Log_WriteSeq(LOG_INFO, "OpenGL initalised and created window");
 

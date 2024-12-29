@@ -11,6 +11,9 @@ extern gameservices_t gameservices;
 bool Common_Init(void);
 void Common_Shutdown(void);
 void Common_Frame(void);
+int Common_Printf(const char *msg, ...);
+int Common_Errorf(const char *msg, ...);
+
 bool Common_EditorMode(void);
 bool Common_DebugMode(void);
 bool Common_IgnoreOSVer(void);
