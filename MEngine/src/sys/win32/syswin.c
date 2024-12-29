@@ -156,7 +156,14 @@ void Sys_ProcessCommandLine(cmdline_t *cmdline)
 
 		cmdline->args[count] = malloc(len * sizeof(*cmdline->args[count]));
 		if (!cmdline->args[count])
+		{
+			for (int i=0; i<count; i++)
+				free(cmdline->args[i]);
+
+			free(cmdline->args);
+
 			Sys_Error("Failed to allocate memory for command line argument");
+		}
 
 		WideCharToMultiByte(CP_UTF8, 0, token, -1, cmdline->args[count], (int)len, NULL, NULL);
 		count++;
