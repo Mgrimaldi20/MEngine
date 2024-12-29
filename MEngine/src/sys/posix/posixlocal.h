@@ -29,4 +29,3 @@ extern posixvars_t posixstate;
 void RegisterCallbacks(GLFWwindow *window);
 
 keycode_t MapGLFWKey(int key);
-mousecode_t MapGLFWMouse(int button);

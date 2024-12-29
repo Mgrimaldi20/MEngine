@@ -363,8 +363,3 @@ keycode_t MapGLFWKey(int key)
 
 	return(scancodes[key]);
 }
-
-mousecode_t MapGLFWMouse(int button)
-{
-	return(0);
-}
