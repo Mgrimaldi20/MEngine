@@ -7,7 +7,7 @@
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
-#include "common/input.h"
+#include "common/keycodes.h"
 
 #define WINDOW_STYLE (WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_VISIBLE | WS_SIZEBOX)
 

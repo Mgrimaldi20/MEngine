@@ -5,7 +5,7 @@
 
 static int scancodes[] =
 {
-	KEY_UNKNOWN,
+	KEY_UNKNOWN,		// unused
 	KEY_UNKNOWN,
 	KEY_UNKNOWN,
 	KEY_UNKNOWN,
@@ -99,6 +99,8 @@ static int scancodes[] =
 	KEY_LEFTBRACKET,
 	KEY_BACKSLASH,
 	KEY_RIGHTBRACKET,
+	KEY_UNKNOWN,
+	KEY_UNKNOWN,
 	KEY_GRAVE,
 	KEY_UNKNOWN,
 	KEY_UNKNOWN,
