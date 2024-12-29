@@ -157,13 +157,10 @@ if(MSVC)
 	endif()
 
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")																	# CLANG compiler options
-	target_compile_options(MEngine PRIVATE "-Wall" "-Werror" "-Wpedantic" "-ffast-math"
-		"--analyze" "-Xanalyzer" "-analyzer-output=html" "-o" "${CMAKE_BINARY_DIR}"
-	)																											# Common options for all build types
+	target_compile_options(MEngine PRIVATE "-Wall" "-Werror" "-Wpedantic" "-ffast-math" "-fanalyzer")			# Common options for all build types
 	if(CMAKE_BUILD_TYPE STREQUAL "Debug")																		# Debug build compiler options
 		target_compile_options(MEngine PRIVATE
 			"-g"
-			"-fanalyzer"
 			"-fsanitize=leak"
 			"-fsanitize=undefined"
 			"-fsanitize=address"
@@ -181,11 +178,10 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")																	# CLANG compiler 
 	endif()
 
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")																	# GCC compiler options
-	target_compile_options(MEngine PRIVATE "-Wall" "-Werror" "-Wpedantic" "-ffast-math")						# Common options for all build types
+	target_compile_options(MEngine PRIVATE "-Wall" "-Werror" "-Wpedantic" "-ffast-math" "-fanalyzer")			# Common options for all build types
 	if(CMAKE_BUILD_TYPE STREQUAL "Debug")																		# Debug build compiler options
 		target_compile_options(MEngine PRIVATE
 			"-g"
-			"-fanalyzer"
 			#"-fsanitize=leak"
 			#"-fsanitize=undefined"
 			#"-fsanitize=address"
