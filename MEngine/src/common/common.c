@@ -289,7 +289,7 @@ bool Common_Init(void)
 		snprintf(outfilename, SYS_MAX_PATH, "logs/stdout.log");
 		snprintf(errfilename, SYS_MAX_PATH, "logs/stderr.log");
 
-		(FILE *)outfp = fopen(outfilename, "w");
+		(FILE *)outfp = fopen(outfilename, "w");	// truncate for each run
 		(FILE *)errfp = fopen(errfilename, "w");
 	}
 #endif
