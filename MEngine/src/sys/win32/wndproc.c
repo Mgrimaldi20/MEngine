@@ -181,6 +181,34 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 			break;
 		}
 
+		case WM_XBUTTONDOWN:
+		{
+			if (GET_XBUTTON_WPARAM(wparam) == XBUTTON1)
+				code = MOUSE_X1;
+
+			else if (GET_XBUTTON_WPARAM(wparam) == XBUTTON2)
+				code = MOUSE_X2;
+
+#if defined(MENGINE_DEBUG)
+			Common_Printf("Mouse button down: %d, Wparam: %llu\n", code, wparam);
+#endif
+			break;
+		}
+
+		case WM_XBUTTONUP:
+		{
+			if (GET_XBUTTON_WPARAM(wparam) == XBUTTON1)
+				code = MOUSE_X1;
+
+			else if (GET_XBUTTON_WPARAM(wparam) == XBUTTON2)
+				code = MOUSE_X2;
+
+#if defined(MENGINE_DEBUG)
+			Common_Printf("Mouse button up: %d, Wparam: %llu\n", code, wparam);
+#endif
+			break;
+		}
+
 		case WM_MOUSEWHEEL:
 		{
 			int delta = GET_WHEEL_DELTA_WPARAM(wparam);

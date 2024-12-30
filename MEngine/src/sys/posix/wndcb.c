@@ -46,64 +46,84 @@ static void MouseButtonCallback(GLFWwindow *window, int button, int action, int 
 	switch (action)
 	{
 		case GLFW_PRESS:
+		{
 			switch (button)
 			{
 				case GLFW_MOUSE_BUTTON_LEFT:
 					code = MOUSE_LEFT;
 					break;
+
 				case GLFW_MOUSE_BUTTON_RIGHT:
 					code = MOUSE_RIGHT;
 					break;
+
 				case GLFW_MOUSE_BUTTON_MIDDLE:
 					code = MOUSE_MIDDLE;
 					break;
+
 				case GLFW_MOUSE_BUTTON_4:
 					code = MOUSE_BUTTON4;
 					break;
+
 				case GLFW_MOUSE_BUTTON_5:
 					code = MOUSE_BUTTON5;
 					break;
+
 				case GLFW_MOUSE_BUTTON_6:
 					code = MOUSE_BUTTON6;
 					break;
+
 				case GLFW_MOUSE_BUTTON_7:
 					code = MOUSE_BUTTON7;
 					break;
+
 				case GLFW_MOUSE_BUTTON_8:
 					code = MOUSE_BUTTON8;
 					break;
 			}
+
 			break;
+		}
 
 		case GLFW_RELEASE:
+		{
 			switch (button)
 			{
 				case GLFW_MOUSE_BUTTON_LEFT:
 					code = MOUSE_LEFT;
 					break;
+
 				case GLFW_MOUSE_BUTTON_RIGHT:
 					code = MOUSE_RIGHT;
 					break;
+
 				case GLFW_MOUSE_BUTTON_MIDDLE:
 					code = MOUSE_MIDDLE;
 					break;
+
 				case GLFW_MOUSE_BUTTON_4:
 					code = MOUSE_BUTTON4;
 					break;
+
 				case GLFW_MOUSE_BUTTON_5:
 					code = MOUSE_BUTTON5;
 					break;
+
 				case GLFW_MOUSE_BUTTON_6:
 					code = MOUSE_BUTTON6;
 					break;
+
 				case GLFW_MOUSE_BUTTON_7:
 					code = MOUSE_BUTTON7;
 					break;
+
 				case GLFW_MOUSE_BUTTON_8:
 					code = MOUSE_BUTTON8;
 					break;
 			}
+
 			break;
+		}
 	}
 }
 
