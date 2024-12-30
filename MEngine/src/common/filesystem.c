@@ -121,7 +121,9 @@ filedata_t *FileSys_ListFiles(unsigned int *numfiles, const char *directory, con
 		return(NULL);
 	}
 
-	Sys_CloseDir(dir);
+	Sys_CloseDir(dir);	// reset the directory pointer
+	dir = NULL;
+
 	dir = Sys_OpenDir(directory);
 
 	unsigned int index = 0;
