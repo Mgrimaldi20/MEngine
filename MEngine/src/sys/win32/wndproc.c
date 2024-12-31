@@ -43,11 +43,11 @@ static void WindowSizing(WPARAM wparam, RECT *rect)
 	}
 
 	// get new the full window size including decorations
-	int newwidth = rect->right - rect->left;;
+	int newwidth = rect->right - rect->left;
 	int newheight = rect->bottom - rect->top;
 
-	(int)newwidth;
-	(int)newheight;
+	win32state.fullwinwidth = newwidth;
+	win32state.fullwinheight = newheight;
 }
 
 LRESULT CALLBACK MainWndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
@@ -86,9 +86,6 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 			if (key == KEY_PRINTSCREEN)		// it should only send a key up but this is just in case
 				break;
 
-#if defined(MENGINE_DEBUG)
-			Common_Printf("%u: Key down: Translated: %d, Wparam: %llu\n", umsg, key, wparam);
-#endif
 			break;
 		}
 
@@ -100,9 +97,6 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 			if (key == KEY_PRINTSCREEN)
 				break;
 
-#if defined(MENGINE_DEBUG)
-			Common_Printf("%u: Key up: Translated: %d, Wparam: %llu\n", umsg, key, wparam);
-#endif
 			break;
 		}
 
@@ -124,60 +118,36 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 		case WM_LBUTTONDOWN:
 		{
 			code = MOUSE_LEFT;
-
-#if defined(MENGINE_DEBUG)
-			Common_Printf("Mouse button down: %d\n", code);
-#endif
 			break;
 		}
 
 		case WM_RBUTTONDOWN:
 		{
 			code = MOUSE_RIGHT;
-
-#if defined(MENGINE_DEBUG)
-			Common_Printf("Mouse button down: %d\n", code);
-#endif
 			break;
 		}
 
 		case WM_MBUTTONDOWN:
 		{
 			code = MOUSE_MIDDLE;
-
-#if defined(MENGINE_DEBUG)
-			Common_Printf("Mouse button down: %d\n", code);
-#endif
 			break;
 		}
 
 		case WM_LBUTTONUP:
 		{
 			code = MOUSE_LEFT;
-
-#if defined(MENGINE_DEBUG)
-			Common_Printf("Mouse button up: %d\n", code);
-#endif
 			break;
 		}
 
 		case WM_RBUTTONUP:
 		{
 			code = MOUSE_RIGHT;
-
-#if defined(MENGINE_DEBUG)
-			Common_Printf("Mouse button up: %d\n", code);
-#endif
 			break;
 		}
 
 		case WM_MBUTTONUP:
 		{
 			code = MOUSE_MIDDLE;
-
-#if defined(MENGINE_DEBUG)
-			Common_Printf("Mouse button up: %d\n", code);
-#endif
 			break;
 		}
 
@@ -189,9 +159,6 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 			else if (GET_XBUTTON_WPARAM(wparam) == XBUTTON2)
 				code = MOUSE_X2;
 
-#if defined(MENGINE_DEBUG)
-			Common_Printf("Mouse button down: %d, Wparam: %llu\n", code, wparam);
-#endif
 			break;
 		}
 
@@ -203,9 +170,6 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 			else if (GET_XBUTTON_WPARAM(wparam) == XBUTTON2)
 				code = MOUSE_X2;
 
-#if defined(MENGINE_DEBUG)
-			Common_Printf("Mouse button up: %d, Wparam: %llu\n", code, wparam);
-#endif
 			break;
 		}
 
