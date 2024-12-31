@@ -41,7 +41,7 @@ static int CompareFileData(const void *a, const void *b)
 	return((int)difftime(((filedata_t *)b)->mtime, ((filedata_t *)a)->mtime));
 }
 
-static bool RemoveOldLogFiles(const char *dir)	// ahhh its alright
+static bool RemoveOldLogFiles(const char *dir)
 {
 	const char *logfilter = "logs.*.log";
 	unsigned int filecount = 0;
