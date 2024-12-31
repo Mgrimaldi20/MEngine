@@ -23,6 +23,8 @@ typedef struct
 	long desktopheight;
 	int desktopbpp;
 	int desktoprefresh;
+	int fullwinwidth;		// full windows size including decorations
+	int fullwinheight;
 	HWND hwnd;
 	HINSTANCE hinst;
 	HDC hdc;

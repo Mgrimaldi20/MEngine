@@ -9,26 +9,24 @@ static void KeyCallback(GLFWwindow *window, int key, int scancode, int action, i
 	switch (action)
 	{
 		case GLFW_PRESS:
+		{
 			keycode = MapGLFWKey(key);
 
 			if (key == KEY_PRINTSCREEN)
 				break;
 
-#if defined(MENGINE_DEBUG)
-			Common_Printf("%d: Key down: Translated: %d, GLFW keycode: %d\n", action, keycode, key);
-#endif
 			break;
+		}
 
 		case GLFW_RELEASE:
+		{
 			keycode = MapGLFWKey(key);
 
 			if (key == KEY_PRINTSCREEN)
 				break;
 
-#if defined(MENGINE_DEBUG)
-			Common_Printf("%d: Key up: Translated: %d, GLFW keycode: %d\n", action, keycode, key);
-#endif
 			break;
+		}
 
 		case GLFW_REPEAT:
 			break;

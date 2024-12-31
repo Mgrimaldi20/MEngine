@@ -14,7 +14,7 @@ static void Shutdown(void)
 }
 
 static void RunFrame(void)
-{	
+{
 }
 
 gameservices_t *GetMServices(mservices_t *services)
