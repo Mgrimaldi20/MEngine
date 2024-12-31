@@ -56,15 +56,13 @@ static bool RemoveOldLogFiles(const char *dir)	// ahhh its alright
 
 	qsort(filelist, filecount, sizeof(*filelist), CompareFileData);
 
-	unsigned int tempfilecount = filecount;
-
-	while (tempfilecount > MAX_LOG_FILES)
+	while (filecount > MAX_LOG_FILES)
 	{
 		char oldfile[SYS_MAX_PATH] = { 0 };
-		snprintf(oldfile, SYS_MAX_PATH, "%s", filelist[--tempfilecount].filename);
+		snprintf(oldfile, SYS_MAX_PATH, "%s", filelist[filecount - 1].filename);
 
-		if (oldfile[0] != '\0')
-			remove(oldfile);
+		if (oldfile[0] != '\0' && remove(oldfile) == 0)
+			filecount--;
 	}
 
 	FileSys_FreeFileList(filelist);
