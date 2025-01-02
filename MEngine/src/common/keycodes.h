@@ -133,13 +133,7 @@ typedef enum
 	KEY_COMMA,
 	KEY_MINUS,
 	KEY_PERIOD,
-	KEY_FINAL
-} keycode_t;
-
-typedef enum
-{
-	MOUSE_UNKNOWN = 0,
-	MOUSE_BUTTON1,
+	MOUSE_BUTTON1,			// mouse buttons
 	MOUSE_BUTTON2,
 	MOUSE_BUTTON3,
 	MOUSE_BUTTON4,
@@ -149,10 +143,10 @@ typedef enum
 	MOUSE_BUTTON8,
 	MOUSE_WHEELUP,
 	MOUSE_WHEELDOWN,
-	MOUSE_FINAL,
-	MOUSE_LEFT = MOUSE_BUTTON1,
+	KEY_FINAL,
+	MOUSE_LEFT = MOUSE_BUTTON1,		// aliases for some mouse buttons, come after final key
 	MOUSE_RIGHT = MOUSE_BUTTON2,
 	MOUSE_MIDDLE = MOUSE_BUTTON3,
 	MOUSE_X1 = MOUSE_BUTTON4,
 	MOUSE_X2 = MOUSE_BUTTON5
-} mousecode_t;
+} keycode_t;

@@ -2,6 +2,7 @@
 
 #include <stddef.h>
 #include <stdbool.h>
+#include "keycodes.h"
 #include "mservices.h"
 
 typedef gameservices_t *(*getmservices_t)(mservices_t *services);
@@ -97,3 +98,18 @@ filedata_t *FileSys_ListFilesInPAK(unsigned int *numfiles, const char *filter);
 bool FileSys_FileExists(const char *filename);
 filedata_t *FileSys_ListFiles(unsigned int *numfiles, const char *directory, const char *filter);
 void FileSys_FreeFileList(filedata_t *filelist);
+
+typedef enum
+{
+	EVENT_NONE = 0,
+	EVENT_KEYDOWN,
+	EVENT_KEYUP,
+	EVENT_MOUSEDOWN,
+	EVENT_MOUSEUP,
+	EVENT_CHAR
+} eventtype_t;
+
+bool Event_Init(void);
+void Event_Shutdown(void);
+void Event_QueueEvent(const eventtype_t type, const keycode_t key);
+void Event_RunEventLoop(void);

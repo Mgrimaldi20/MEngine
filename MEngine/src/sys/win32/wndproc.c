@@ -53,7 +53,6 @@ static void WindowSizing(WPARAM wparam, RECT *rect)
 LRESULT CALLBACK MainWndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 {
 	keycode_t key = KEY_UNKNOWN;
-	mousecode_t code = MOUSE_UNKNOWN;
 
 	switch (umsg)
 	{
@@ -117,47 +116,47 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 
 		case WM_LBUTTONDOWN:
 		{
-			code = MOUSE_LEFT;
+			key = MOUSE_LEFT;
 			break;
 		}
 
 		case WM_RBUTTONDOWN:
 		{
-			code = MOUSE_RIGHT;
+			key = MOUSE_RIGHT;
 			break;
 		}
 
 		case WM_MBUTTONDOWN:
 		{
-			code = MOUSE_MIDDLE;
+			key = MOUSE_MIDDLE;
 			break;
 		}
 
 		case WM_LBUTTONUP:
 		{
-			code = MOUSE_LEFT;
+			key = MOUSE_LEFT;
 			break;
 		}
 
 		case WM_RBUTTONUP:
 		{
-			code = MOUSE_RIGHT;
+			key = MOUSE_RIGHT;
 			break;
 		}
 
 		case WM_MBUTTONUP:
 		{
-			code = MOUSE_MIDDLE;
+			key = MOUSE_MIDDLE;
 			break;
 		}
 
 		case WM_XBUTTONDOWN:
 		{
 			if (GET_XBUTTON_WPARAM(wparam) == XBUTTON1)
-				code = MOUSE_X1;
+				key = MOUSE_X1;
 
 			else if (GET_XBUTTON_WPARAM(wparam) == XBUTTON2)
-				code = MOUSE_X2;
+				key = MOUSE_X2;
 
 			break;
 		}
@@ -165,10 +164,10 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 		case WM_XBUTTONUP:
 		{
 			if (GET_XBUTTON_WPARAM(wparam) == XBUTTON1)
-				code = MOUSE_X1;
+				key = MOUSE_X1;
 
 			else if (GET_XBUTTON_WPARAM(wparam) == XBUTTON2)
-				code = MOUSE_X2;
+				key = MOUSE_X2;
 
 			break;
 		}
@@ -176,13 +175,13 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 		case WM_MOUSEWHEEL:
 		{
 			int delta = GET_WHEEL_DELTA_WPARAM(wparam);
-			code = delta < 0 ? MOUSE_WHEELDOWN : MOUSE_WHEELUP;
+			key = delta < 0 ? MOUSE_WHEELDOWN : MOUSE_WHEELUP;
 			delta = abs(delta);
 
 			while (delta-- > 0)
 			{
 				Common_Printf("Mouse wheel delta: %d\n", delta);	// just do this for now TODO: change later to do something with this
-				Common_Printf("Mouse wheel code: %d\n", code);
+				Common_Printf("Mouse wheel key: %d\n", key);
 			}
 
 			break;
