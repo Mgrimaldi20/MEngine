@@ -75,6 +75,7 @@ target_sources(MEngine PRIVATE
 	"src/common/filesystem.c"
 	"src/common/keycodes.h"
 	"src/common/input.c"
+	"src/common/event.c"
 	"src/renderer/renderer.h"
 	"src/renderer/rendererinit.c"
 	"src/renderer/renderer.c"

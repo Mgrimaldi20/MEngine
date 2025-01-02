@@ -39,7 +39,7 @@ static void MouseMoveCallback(GLFWwindow *window, double xpos, double ypos)
 
 static void MouseButtonCallback(GLFWwindow *window, int button, int action, int mods)
 {
-	mousecode_t code = MOUSE_UNKNOWN;
+	keycode_t keycode = KEY_UNKNOWN;
 
 	switch (action)
 	{
@@ -48,35 +48,35 @@ static void MouseButtonCallback(GLFWwindow *window, int button, int action, int 
 			switch (button)
 			{
 				case GLFW_MOUSE_BUTTON_LEFT:
-					code = MOUSE_LEFT;
+					keycode = MOUSE_LEFT;
 					break;
 
 				case GLFW_MOUSE_BUTTON_RIGHT:
-					code = MOUSE_RIGHT;
+					keycode = MOUSE_RIGHT;
 					break;
 
 				case GLFW_MOUSE_BUTTON_MIDDLE:
-					code = MOUSE_MIDDLE;
+					keycode = MOUSE_MIDDLE;
 					break;
 
 				case GLFW_MOUSE_BUTTON_4:
-					code = MOUSE_BUTTON4;
+					keycode = MOUSE_BUTTON4;
 					break;
 
 				case GLFW_MOUSE_BUTTON_5:
-					code = MOUSE_BUTTON5;
+					keycode = MOUSE_BUTTON5;
 					break;
 
 				case GLFW_MOUSE_BUTTON_6:
-					code = MOUSE_BUTTON6;
+					keycode = MOUSE_BUTTON6;
 					break;
 
 				case GLFW_MOUSE_BUTTON_7:
-					code = MOUSE_BUTTON7;
+					keycode = MOUSE_BUTTON7;
 					break;
 
 				case GLFW_MOUSE_BUTTON_8:
-					code = MOUSE_BUTTON8;
+					keycode = MOUSE_BUTTON8;
 					break;
 			}
 
@@ -88,35 +88,35 @@ static void MouseButtonCallback(GLFWwindow *window, int button, int action, int 
 			switch (button)
 			{
 				case GLFW_MOUSE_BUTTON_LEFT:
-					code = MOUSE_LEFT;
+					keycode = MOUSE_LEFT;
 					break;
 
 				case GLFW_MOUSE_BUTTON_RIGHT:
-					code = MOUSE_RIGHT;
+					keycode = MOUSE_RIGHT;
 					break;
 
 				case GLFW_MOUSE_BUTTON_MIDDLE:
-					code = MOUSE_MIDDLE;
+					keycode = MOUSE_MIDDLE;
 					break;
 
 				case GLFW_MOUSE_BUTTON_4:
-					code = MOUSE_BUTTON4;
+					keycode = MOUSE_BUTTON4;
 					break;
 
 				case GLFW_MOUSE_BUTTON_5:
-					code = MOUSE_BUTTON5;
+					keycode = MOUSE_BUTTON5;
 					break;
 
 				case GLFW_MOUSE_BUTTON_6:
-					code = MOUSE_BUTTON6;
+					keycode = MOUSE_BUTTON6;
 					break;
 
 				case GLFW_MOUSE_BUTTON_7:
-					code = MOUSE_BUTTON7;
+					keycode = MOUSE_BUTTON7;
 					break;
 
 				case GLFW_MOUSE_BUTTON_8:
-					code = MOUSE_BUTTON8;
+					keycode = MOUSE_BUTTON8;
 					break;
 			}
 
