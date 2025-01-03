@@ -41,7 +41,7 @@ void Event_QueueEvent(const eventtype_t type, const keycode_t key)
 {
 	if (eventcount >= MAX_EVENTS)
 	{
-		Log_Write(LOG_WARN, "Event queue is full, dropping event");
+		Log_Write(LOG_WARN, "Event queue is full, dropping event");		// TODO: remove this
 		return;
 	}
 

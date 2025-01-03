@@ -318,6 +318,12 @@ bool Common_Init(void)
 	if (!Sys_Init())
 		return(false);
 
+	if (!Input_Init())
+		return(false);
+
+	if (!Event_Init())
+		return(false);
+
 	if (!InitGame())
 		return(false);
 
@@ -331,8 +337,10 @@ void Common_Shutdown(void)
 	Log_WriteSeq(LOG_INFO, "Engine shutting down...");
 
 	ShutdownGame();
-	FileSys_Shutdown();
+	Event_Shutdown();
+	Input_Shutdown();
 	Sys_Shutdown();
+	FileSys_Shutdown();
 	CVar_Shutdown();
 	MemCache_Shutdown();
 	Log_Shutdown();

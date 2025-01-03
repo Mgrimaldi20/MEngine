@@ -1,3 +1,4 @@
+#include <string.h>
 #include "common.h"
 
 typedef struct
@@ -160,3 +161,41 @@ static const keyname_t keynames[] =
 };
 
 static key_t *keys;
+
+static bool initialized;
+
+bool Input_Init(void)
+{
+	if (initialized)
+		return(true);
+
+	keys = MemCache_Alloc(sizeof(key_t) * KEY_FINAL);
+	if (!keys)
+	{
+		Log_WriteSeq(LOG_ERROR, "failed to allocate memory for keys");
+		return(false);
+	}
+
+	memset(keys, 0, sizeof(key_t) * KEY_FINAL);
+
+	initialized = true;
+
+	return(true);
+}
+
+void Input_Shutdown(void)
+{
+	if (!initialized)
+		return;
+
+	for (int i=0; i<KEY_FINAL; i++)		// free all key bindings if they exist
+	{
+		if (keys[i].binding)
+			MemCache_Free(keys[i].binding);
+	}
+
+	MemCache_Free(keys);
+	keys = NULL;
+
+	initialized = false;
+}
