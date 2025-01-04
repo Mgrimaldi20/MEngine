@@ -85,6 +85,7 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 			if (key == KEY_PRINTSCREEN)		// it should only send a key up but this is just in case
 				break;
 
+			Event_QueueEvent(EVENT_KEYDOWN, key);
 			break;
 		}
 
@@ -96,6 +97,7 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 			if (key == KEY_PRINTSCREEN)
 				break;
 
+			Event_QueueEvent(EVENT_KEYUP, key);
 			break;
 		}
 
@@ -117,36 +119,42 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 		case WM_LBUTTONDOWN:
 		{
 			key = MOUSE_LEFT;
+			Event_QueueEvent(EVENT_MOUSEDOWN, key);
 			break;
 		}
 
 		case WM_RBUTTONDOWN:
 		{
 			key = MOUSE_RIGHT;
+			Event_QueueEvent(EVENT_MOUSEDOWN, key);
 			break;
 		}
 
 		case WM_MBUTTONDOWN:
 		{
 			key = MOUSE_MIDDLE;
+			Event_QueueEvent(EVENT_MOUSEDOWN, key);
 			break;
 		}
 
 		case WM_LBUTTONUP:
 		{
 			key = MOUSE_LEFT;
+			Event_QueueEvent(EVENT_MOUSEUP, key);
 			break;
 		}
 
 		case WM_RBUTTONUP:
 		{
 			key = MOUSE_RIGHT;
+			Event_QueueEvent(EVENT_MOUSEUP, key);
 			break;
 		}
 
 		case WM_MBUTTONUP:
 		{
 			key = MOUSE_MIDDLE;
+			Event_QueueEvent(EVENT_MOUSEUP, key);
 			break;
 		}
 
@@ -158,6 +166,7 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 			else if (GET_XBUTTON_WPARAM(wparam) == XBUTTON2)
 				key = MOUSE_X2;
 
+			Event_QueueEvent(EVENT_MOUSEDOWN, key);
 			break;
 		}
 
@@ -169,6 +178,7 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 			else if (GET_XBUTTON_WPARAM(wparam) == XBUTTON2)
 				key = MOUSE_X2;
 
+			Event_QueueEvent(EVENT_MOUSEUP, key);
 			break;
 		}
 
@@ -182,6 +192,9 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 			{
 				Common_Printf("Mouse wheel delta: %d\n", delta);	// just do this for now TODO: change later to do something with this
 				Common_Printf("Mouse wheel key: %d\n", key);
+
+				Event_QueueEvent(EVENT_WHEEL, key);
+				Event_QueueEvent(EVENT_WHEELSTOP, key);
 			}
 
 			break;
