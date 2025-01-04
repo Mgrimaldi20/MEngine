@@ -11,7 +11,7 @@ typedef struct
 {
 	bool down;
 	unsigned int repeats;
-	const char *binding;
+	char *binding;
 } key_t;
 
 static const keyname_t keynames[] =

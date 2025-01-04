@@ -354,7 +354,9 @@ void Common_Shutdown(void)
 
 void Common_Frame(void)		// happens every frame
 {
-	// also run the game loop here, and any on frame events
+	Event_RunEventLoop();
+
+	gameservices.RunFrame();
 
 	Render_StartFrame();
 	Render_Frame();
