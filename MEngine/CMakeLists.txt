@@ -70,6 +70,7 @@ target_sources(MEngine PRIVATE
 	"src/common/common.h"
 	"src/common/common.c"
 	"src/common/log.c"
+	"src/common/cmd.c"
 	"src/common/cvar.c"
 	"src/common/memory.c"
 	"src/common/filesystem.c"
