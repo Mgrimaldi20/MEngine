@@ -39,19 +39,13 @@ bool MemCache_UseCache(void);
 
 #define CMD_MAX_ARGS 16
 
-typedef void (*cmdfunction_t)(cmdargs_t *args);
+typedef void (*cmdfunction_t)(void *args);
 
 typedef enum
 {
 	CMD_EXEC_NOW = 0,
 	CMD_EXEC_APPEND
 } cmdexecution_t;
-
-typedef struct
-{
-	int argc;
-	char *args[CMD_MAX_ARGS];
-} cmdargs_t;
 
 bool Cmd_Init(void);
 void Cmd_Shutdown(void);
