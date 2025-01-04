@@ -309,6 +309,9 @@ bool Common_Init(void)
 	else
 		Log_WriteSeq(LOG_INFO, "Memory Cache allocated [bytes: %zu]", MemCache_GetTotalMemory());
 
+	if (!Cmd_Init())
+		return(false);
+
 	if (!CVar_Init())
 		return(false);
 
@@ -342,6 +345,7 @@ void Common_Shutdown(void)
 	Sys_Shutdown();
 	FileSys_Shutdown();
 	CVar_Shutdown();
+	Cmd_Shutdown();
 	MemCache_Shutdown();
 	Log_Shutdown();
 

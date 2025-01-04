@@ -2,7 +2,6 @@
 
 #include <stddef.h>
 #include <stdbool.h>
-#include "keycodes.h"
 #include "mservices.h"
 
 typedef gameservices_t *(*getmservices_t)(mservices_t *services);
@@ -37,6 +36,26 @@ void MemCache_Reset(void);
 size_t MemCahce_GetMemUsed(void);
 size_t MemCache_GetTotalMemory(void);
 bool MemCache_UseCache(void);
+
+#define CMD_MAX_ARGS 16
+
+typedef void (*cmdfunction_t)(cmdargs_t *args);
+
+typedef enum
+{
+	CMD_EXEC_NOW = 0,
+	CMD_EXEC_APPEND
+} cmdexecution_t;
+
+typedef struct
+{
+	int argc;
+	char *args[CMD_MAX_ARGS];
+} cmdargs_t;
+
+bool Cmd_Init(void);
+void Cmd_Shutdown(void);
+void Cmd_AddCommand(const char *name, const char *description, cmdfunction_t function);
 
 #define CVAR_MAX_STR_LEN 256
 
@@ -105,16 +124,18 @@ void Input_Shutdown(void);
 typedef enum
 {
 	EVENT_NONE = 0,
-	EVENT_KEYDOWN,
-	EVENT_KEYUP,
-	EVENT_MOUSEDOWN,
-	EVENT_MOUSEUP,
-	EVENT_WHEEL,
-	EVENT_WHEELSTOP,
-	EVENT_CHAR
+	EVENT_KEY,			// evar1 is the keycode, evar2 is an eventstate_t (key up or down)
+	EVENT_MOUSE,		// evar1 is the posx and evar2 is the posy of the mouse
+	EVENT_CHAR,			// evar1 stores the unicode char
 } eventtype_t;
+
+typedef enum
+{
+	EVENT_TYPE_KEYUP = 0,
+	EVENT_TYPE_KEYDOWN,
+} eventstate_t;
 
 bool Event_Init(void);
 void Event_Shutdown(void);
-void Event_QueueEvent(const eventtype_t type, const keycode_t key);
+void Event_QueueEvent(const eventtype_t type, int var1, int var2);
 void Event_RunEventLoop(void);

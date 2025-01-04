@@ -5,7 +5,8 @@
 typedef struct
 {
 	eventtype_t type;
-	keycode_t key;
+	int evar1;
+	int evar2;
 } event_t;
 
 static unsigned int eventcount;
@@ -17,8 +18,9 @@ static event_t GetEvent(void)
 {
 	event_t event =
 	{
-		.key = KEY_UNKNOWN,
-		.type = EVENT_NONE
+		.type = EVENT_NONE,
+		.evar1 = 0,
+		.evar2 = 0
 	};
 
 	if (eventcount > 0)
@@ -36,19 +38,6 @@ static event_t GetEvent(void)
 
 static void ProcessEvent(event_t event)
 {
-	switch (event.type)		// TODO: just for testing remove this
-	{
-		case EVENT_KEYDOWN:
-			Common_Printf("Key down: %d\n", event.key);
-			break;
-
-		case EVENT_KEYUP:
-			Common_Printf("Key up: %d\n", event.key);
-			break;
-
-		default:
-			break;
-	}
 }
 
 bool Event_Init(void)
@@ -59,7 +48,8 @@ bool Event_Init(void)
 	for (unsigned int i=0; i<MAX_EVENTS; i++)
 	{
 		eventqueue[i].type = EVENT_NONE;
-		eventqueue[i].key = KEY_UNKNOWN;
+		eventqueue[i].evar1 = 0;
+		eventqueue[i].evar2 = 0;
 	}
 
 	initialized = true;
@@ -75,25 +65,28 @@ void Event_Shutdown(void)
 	initialized = false;
 }
 
-void Event_QueueEvent(const eventtype_t type, const keycode_t key)
+void Event_QueueEvent(const eventtype_t type, int var1, int var2)
 {
+	event_t *event = &eventqueue[eventcount++];
+
 	if (eventcount >= MAX_EVENTS)
 	{
 		Log_Write(LOG_WARN, "Event queue is full, dropping event");		// TODO: remove this
 		return;
 	}
 
-	event_t *event = &eventqueue[eventcount++];
 	event->type = type;
-	event->key = key;
+	event->evar1 = var1;
+	event->evar2 = var2;
 }
 
 void Event_RunEventLoop(void)
 {
 	event_t event =
 	{
-		.key = KEY_UNKNOWN,
-		.type = EVENT_NONE
+		.type = EVENT_NONE,
+		.evar1 = 0,
+		.evar2 = 0
 	};
 
 	while (1)

@@ -85,7 +85,7 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 			if (key == KEY_PRINTSCREEN)		// it should only send a key up but this is just in case
 				break;
 
-			Event_QueueEvent(EVENT_KEYDOWN, key);
+			Event_QueueEvent(EVENT_KEY, key, EVENT_TYPE_KEYDOWN);
 			break;
 		}
 
@@ -97,7 +97,7 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 			if (key == KEY_PRINTSCREEN)
 				break;
 
-			Event_QueueEvent(EVENT_KEYUP, key);
+			Event_QueueEvent(EVENT_KEY, key, EVENT_TYPE_KEYUP);
 			break;
 		}
 
@@ -111,50 +111,52 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 			{
 				Common_Printf("Mouse moved X: %d\n", posx);	// just do this for now TODO: change later to do something with this
 				Common_Printf("Mouse moved Y: %d\n", posy);
+
+				Event_QueueEvent(EVENT_MOUSE, posx, posy);	// event vars 1 and 2 become the x and y pos of the mouse
 			}
 
 			break;
 		}
 
-		case WM_LBUTTONDOWN:
+		case WM_LBUTTONDOWN:	// mouse events have a keycode, so they still are key events
 		{
 			key = MOUSE_LEFT;
-			Event_QueueEvent(EVENT_MOUSEDOWN, key);
+			Event_QueueEvent(EVENT_KEY, key, EVENT_TYPE_KEYDOWN);
 			break;
 		}
 
 		case WM_RBUTTONDOWN:
 		{
 			key = MOUSE_RIGHT;
-			Event_QueueEvent(EVENT_MOUSEDOWN, key);
+			Event_QueueEvent(EVENT_KEY, key, EVENT_TYPE_KEYDOWN);
 			break;
 		}
 
 		case WM_MBUTTONDOWN:
 		{
 			key = MOUSE_MIDDLE;
-			Event_QueueEvent(EVENT_MOUSEDOWN, key);
+			Event_QueueEvent(EVENT_KEY, key, EVENT_TYPE_KEYDOWN);
 			break;
 		}
 
 		case WM_LBUTTONUP:
 		{
 			key = MOUSE_LEFT;
-			Event_QueueEvent(EVENT_MOUSEUP, key);
+			Event_QueueEvent(EVENT_KEY, key, EVENT_TYPE_KEYUP);
 			break;
 		}
 
 		case WM_RBUTTONUP:
 		{
 			key = MOUSE_RIGHT;
-			Event_QueueEvent(EVENT_MOUSEUP, key);
+			Event_QueueEvent(EVENT_KEY, key, EVENT_TYPE_KEYUP);
 			break;
 		}
 
 		case WM_MBUTTONUP:
 		{
 			key = MOUSE_MIDDLE;
-			Event_QueueEvent(EVENT_MOUSEUP, key);
+			Event_QueueEvent(EVENT_KEY, key, EVENT_TYPE_KEYUP);
 			break;
 		}
 
@@ -166,7 +168,7 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 			else if (GET_XBUTTON_WPARAM(wparam) == XBUTTON2)
 				key = MOUSE_X2;
 
-			Event_QueueEvent(EVENT_MOUSEDOWN, key);
+			Event_QueueEvent(EVENT_KEY, key, EVENT_TYPE_KEYDOWN);
 			break;
 		}
 
@@ -178,11 +180,11 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 			else if (GET_XBUTTON_WPARAM(wparam) == XBUTTON2)
 				key = MOUSE_X2;
 
-			Event_QueueEvent(EVENT_MOUSEUP, key);
+			Event_QueueEvent(EVENT_KEY, key, EVENT_TYPE_KEYUP);
 			break;
 		}
 
-		case WM_MOUSEWHEEL:
+		case WM_MOUSEWHEEL:		// mouse wheel also has a keycode, so its a key event
 		{
 			int delta = GET_WHEEL_DELTA_WPARAM(wparam);
 			key = delta < 0 ? MOUSE_WHEELDOWN : MOUSE_WHEELUP;
@@ -193,8 +195,8 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 				Common_Printf("Mouse wheel delta: %d\n", delta);	// just do this for now TODO: change later to do something with this
 				Common_Printf("Mouse wheel key: %d\n", key);
 
-				Event_QueueEvent(EVENT_WHEEL, key);
-				Event_QueueEvent(EVENT_WHEELSTOP, key);
+				Event_QueueEvent(EVENT_KEY, key, EVENT_TYPE_KEYDOWN);
+				Event_QueueEvent(EVENT_KEY, key, EVENT_TYPE_KEYUP);
 			}
 
 			break;
