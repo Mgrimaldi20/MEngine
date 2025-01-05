@@ -105,4 +105,6 @@ void Cmd_RemoveCommand(const char *name)
 
 void Cmd_BufferCommand(const cmdexecution_t exec, const char *cmd)
 {
+	if (!cmd || !cmd[0])
+		return;
 }
