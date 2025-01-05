@@ -202,3 +202,30 @@ void Input_Shutdown(void)
 
 	initialized = false;
 }
+
+void Input_ProcessKeyInput(const int key, bool down)
+{
+	if (key <= KEY_UNKNOWN || key >= KEY_FINAL)
+		return;
+
+	if (down)
+	{
+		if (!keys[key].down)
+		{
+			keys[key].down = true;
+			keys[key].repeats = 0;
+		}
+
+		keys[key].repeats++;
+	}
+
+	else
+		keys[key].down = false;
+
+	if (down)
+	{
+		const char *binding = keys[key].binding;
+		if (binding && binding[0])
+			Cmd_BufferCommand(CMD_EXEC_APPEND, binding);
+	}
+}
