@@ -62,6 +62,8 @@ void Event_Shutdown(void)
 	if (!initialized)
 		return;
 
+	Log_WriteSeq(LOG_INFO, "Shutting down event system");
+
 	initialized = false;
 }
 

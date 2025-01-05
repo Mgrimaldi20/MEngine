@@ -1,4 +1,5 @@
 #include <string.h>
+#include "keycodes.h"
 #include "common.h"
 
 typedef struct
@@ -187,6 +188,8 @@ void Input_Shutdown(void)
 {
 	if (!initialized)
 		return;
+
+	Log_WriteSeq(LOG_INFO, "Shutting down input system");
 
 	for (int i=0; i<KEY_FINAL; i++)		// free all key bindings if they exist
 	{

@@ -58,6 +58,8 @@ void FileSys_Shutdown(void)
 	if (!initialized)
 		return;
 
+	Log_WriteSeq(LOG_INFO, "Shutting down filesystem");
+
 	initialized = false;
 }
 
