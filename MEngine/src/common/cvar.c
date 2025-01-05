@@ -398,6 +398,9 @@ void CVar_Shutdown(void)
 
 cvar_t *CVar_Find(const char *name)
 {
+	if (!name || !name[0])
+		return(NULL);
+
 	size_t index = HashFunction(name);
 	cvarentry_t *current = cvarmap->cvars[index];
 	while (current)
@@ -501,7 +504,6 @@ cvar_t *CVar_Register(const char *name, const cvarvalue_t value, const cvartype_
 	cvar->flags = flags;
 	cvar->description = description;
 
-	size_t index = HashFunction(name);
 	cvarentry_t *entry = MemCache_Alloc(sizeof(*entry));
 	if (!entry)
 	{
@@ -513,6 +515,8 @@ cvar_t *CVar_Register(const char *name, const cvarvalue_t value, const cvartype_
 
 	entry->value = cvar;
 	entry->next = NULL;
+
+	size_t index = HashFunction(name);
 
 	if (!cvarmap->cvars[index])
 		cvarmap->cvars[index] = entry;
@@ -529,6 +533,7 @@ cvar_t *CVar_Register(const char *name, const cvarvalue_t value, const cvartype_
 	if (cvarmap->numcvars >= (cvarmap->capacity * 0.75))
 	{
 		cvarmap->capacity *= 2;
+
 		cvarentry_t **newcvars = MemCache_Alloc(sizeof(*newcvars) * cvarmap->capacity);
 		if (!newcvars)
 		{

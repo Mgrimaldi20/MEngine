@@ -1,7 +1,8 @@
+#include <string.h>
 #include "common.h"
 
 #define DEF_CMD_MAP_CAPACITY 256
-#define DEF_CMD_BUFFER_SIZE 1024
+#define DEF_CMD_BUFFER_SIZE CMD_MAX_STR_LEN
 
 typedef struct
 {
@@ -24,27 +25,49 @@ typedef struct
 } cmdmap_t;
 
 static cmdmap_t *cmdmap;
-static char *cmdbuffer;
+static char cmdbuffer[DEF_CMD_BUFFER_SIZE];		// TODO: might make this dynamic in the future again, just make it fixed len for now
+static int cmdbufferpos;
 
 static bool initialized;
+
+static size_t HashFunction(const char *name)	// hash the name, same as the cvar hash function
+{
+	size_t hash = 0;
+	size_t len = strnlen(name, CVAR_MAX_STR_LEN);
+
+	for (size_t i=0; i<len; i++)
+		hash = (hash * 31) + name[i];
+
+	return(hash % cmdmap->capacity);
+}
+
+static cmd_t *FindCommand(const char *name)
+{
+	if (!name || !name[0])
+		return(NULL);
+
+	size_t index = HashFunction(name);
+	cmdentry_t *current = cmdmap->cmds[index];
+	while (current)
+	{
+		if (strcmp(current->value->name, name) == 0)
+			return(current->value);
+
+		current = current->next;
+	}
+
+	return(NULL);
+}
 
 bool Cmd_Init(void)
 {
 	if (initialized)
 		return(true);
 
-	cmdbuffer = MemCache_Alloc(sizeof(*cmdbuffer) * DEF_CMD_BUFFER_SIZE);
-	if (!cmdbuffer)
-	{
-		Log_WriteSeq(LOG_ERROR, "Failed to allocate memory for command buffer");
-		return(false);
-	}
-
 	cmdmap = MemCache_Alloc(sizeof(*cmdmap));
 	if (!cmdmap)
 	{
 		Log_WriteSeq(LOG_ERROR, "Failed to allocate memory for command map");
-		MemCache_Free(cmdbuffer);
 		return(false);
 	}
 
@@ -56,7 +79,6 @@ bool Cmd_Init(void)
 	{
 		Log_WriteSeq(LOG_ERROR, "Failed to allocate memory for command map entries");
 		MemCache_Free(cmdmap);
-		MemCache_Free(cmdbuffer);
 		return(false);
 	}
 
@@ -90,13 +112,105 @@ void Cmd_Shutdown(void)
 	MemCache_Free(cmdmap->cmds);
 	MemCache_Free(cmdmap);
 
-	MemCache_Free(cmdbuffer);
-
 	initialized = false;
 }
 
-void Cmd_RegisterCommand(const char *name, const char *description, cmdfunction_t function)
+void Cmd_RegisterCommand(const char *name, cmdfunction_t function, const char *description)
 {
+	if (!name || !name[0])
+	{
+		Log_Write(LOG_WARN, "Failed to register command, invalid command name: Command name could be empty");
+		return;
+	}
+
+	if (!function)
+	{
+		Log_Write(LOG_WARN, "Failed to register command, invalid command function: Command function could be NULL");
+		return;
+	}
+
+	if (FindCommand(name))		// if the command already exists, dont register it
+	{
+		Log_WriteSeq(LOG_WARN, "Failed to register command, command already exists: %s", name);
+		return;
+	}
+
+	cmd_t *cmd = MemCache_Alloc(sizeof(*cmd));
+	if (!cmd)
+	{
+		Log_WriteSeq(LOG_ERROR, "Failed to allocate memory for command: %s", name);
+		return;
+	}
+
+	cmd->name = name;
+	cmd->description = description;
+	cmd->function = function;
+
+	cmdentry_t *entry = MemCache_Alloc(sizeof(*entry));
+	if (!entry)
+	{
+		Log_WriteSeq(LOG_ERROR, "Failed to allocate memory for command entry: %s", name);
+		MemCache_Free(cmd);
+		return;
+	}
+
+	entry->value = cmd;
+	entry->next = NULL;
+
+	size_t index = HashFunction(name);
+
+	if (!cmdmap->cmds[index])
+		cmdmap->cmds[index] = entry;
+
+	else	// collision, add to start of list
+	{
+		entry->next = cmdmap->cmds[index];
+		cmdmap->cmds[index] = entry;
+	}
+
+	cmdmap->numcmds++;
+
+	// if the number of cvars is st 75% capacity, resize the map to double, move all the cvars to the new map, and free the old map
+	if (cmdmap->numcmds >= (cmdmap->capacity * 0.75))
+	{
+		cmdmap->capacity *= 2;
+
+		cmdentry_t **newcmds = MemCache_Alloc(sizeof(*newcmds) * cmdmap->capacity);
+		if (!newcmds)
+		{
+			Log_WriteSeq(LOG_ERROR, "Failed to allocate memory for new command map");
+			MemCache_Free(cmdmap->cmds);
+			MemCache_Free(cmdmap);
+			return;
+		}
+
+		for (size_t i=0; i<cmdmap->capacity; i++)
+			newcmds[i] = NULL;
+
+		for (size_t i=0; i<cmdmap->capacity/2; i++)
+		{
+			cmdentry_t *current = cmdmap->cmds[i];
+			while (current)
+			{
+				cmdentry_t *next = current->next;
+				size_t newindex = HashFunction(current->value->name);
+
+				if (!newcmds[newindex])
+					newcmds[newindex] = current;
+
+				else
+				{
+					current->next = newcmds[newindex];
+					newcmds[newindex] = current;
+				}
+
+				current = next;
+			}
+		}
+
+		MemCache_Free(cmdmap->cmds);
+		cmdmap->cmds = newcmds;
+	}
 }
 
 void Cmd_RemoveCommand(const char *name)
@@ -106,5 +220,24 @@ void Cmd_RemoveCommand(const char *name)
 void Cmd_BufferCommand(const cmdexecution_t exec, const char *cmd)
 {
 	if (!cmd || !cmd[0])
+	{
+		Log_Write(LOG_WARN, "Failed to buffer command, invalid command string: Command string could be empty");
 		return;
+	}
+
+	int len = strlen(cmd);
+	if ((len + cmdbufferpos) >= DEF_CMD_BUFFER_SIZE)
+	{
+		Log_Write(LOG_WARN, "Failed to buffer command, command buffer overflow");
+		return;
+	}
+
+	switch (exec)
+	{
+		case CMD_EXEC_NOW:
+			break;
+
+		case CMD_EXEC_APPEND:
+			break;
+	}
 }
