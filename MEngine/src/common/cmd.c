@@ -28,7 +28,7 @@ typedef struct
 
 static cmdmap_t *cmdmap;
 static char cmdbuffer[DEF_CMD_BUFFER_SIZE];		// TODO: might make this dynamic in the future again, just make it fixed len for now
-static int cmdbufferlen;
+static size_t cmdbufferlen;
 
 static bool initialized;
 
@@ -286,7 +286,7 @@ void Cmd_BufferCommand(const cmdexecution_t exec, const char *cmd)
 		return;
 	}
 
-	int len = strnlen(cmd, CMD_MAX_STR_LEN);
+	size_t len = strnlen(cmd, CMD_MAX_STR_LEN);
 	if ((len + cmdbufferlen) >= DEF_CMD_BUFFER_SIZE)
 	{
 		Log_Write(LOG_WARN, "Failed to buffer command, command buffer overflow");
@@ -317,7 +317,7 @@ void Cmd_ExecuteCommandBuffer(void)
 	char *cmd = cmdbuffer;
 	while (cmdbufferlen > 0)
 	{
-		char *end = strchr(cmd, '\n');	// TODO: maybe change this to a semi-colon, newline is nice for writing keybinds to a file however as its invisible
+		char *end = strchr(cmd, '\n');
 		if (!end)
 			end = cmd + cmdbufferlen;
 
