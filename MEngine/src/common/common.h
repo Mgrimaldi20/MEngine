@@ -49,7 +49,9 @@ typedef enum
 
 bool Cmd_Init(void);
 void Cmd_Shutdown(void);
-void Cmd_AddCommand(const char *name, const char *description, cmdfunction_t function);
+void Cmd_RegisterCommand(const char *name, const char *description, cmdfunction_t function);
+void Cmd_RemoveCommand(const char *name);
+void Cmd_BufferCommand(const cmdexecution_t exec, const char *cmd);
 
 #define CVAR_MAX_STR_LEN 256
 

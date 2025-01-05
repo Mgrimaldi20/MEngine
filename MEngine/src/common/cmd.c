@@ -95,7 +95,14 @@ void Cmd_Shutdown(void)
 	initialized = false;
 }
 
-void Cmd_AddCommand(const char *name, const char *description, cmdfunction_t function)
+void Cmd_RegisterCommand(const char *name, const char *description, cmdfunction_t function)
 {
+}
 
+void Cmd_RemoveCommand(const char *name)
+{
+}
+
+void Cmd_BufferCommand(const cmdexecution_t exec, const char *cmd)
+{
 }
