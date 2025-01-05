@@ -38,6 +38,8 @@ static event_t GetEvent(void)
 
 static void ProcessEvent(event_t event)
 {
+	if (event.type == EVENT_KEY)
+		Input_ProcessKeyInput(event.evar1, event.evar2);
 }
 
 bool Event_Init(void)

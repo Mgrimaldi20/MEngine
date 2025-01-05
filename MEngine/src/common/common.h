@@ -125,6 +125,7 @@ void FileSys_FreeFileList(filedata_t *filelist);
 
 bool Input_Init(void);
 void Input_Shutdown(void);
+void Input_ProcessKeyInput(const int key, bool down);
 
 typedef enum
 {

@@ -302,6 +302,8 @@ void Cmd_BufferCommand(const cmdexecution_t exec, const char *cmd)
 		case CMD_EXEC_APPEND:
 			memcpy(cmdbuffer + cmdbufferlen, cmd, len);
 			cmdbufferlen += len;
+			cmdbuffer[cmdbufferlen] = '\n';		// TODO: I think this might cause an issue later down the road
+			cmdbufferlen++;
 			break;
 
 		default:
@@ -315,7 +317,7 @@ void Cmd_ExecuteCommandBuffer(void)
 	char *cmd = cmdbuffer;
 	while (cmdbufferlen > 0)
 	{
-		char *end = strchr(cmd, '\n');
+		char *end = strchr(cmd, '\n');	// TODO: maybe change this to a semi-colon, newline is nice for writing keybinds to a file however as its invisible
 		if (!end)
 			end = cmd + cmdbufferlen;
 
