@@ -215,6 +215,35 @@ void Cmd_RegisterCommand(const char *name, cmdfunction_t function, const char *d
 
 void Cmd_RemoveCommand(const char *name)
 {
+	if (!name || !name[0])
+	{
+		Log_Write(LOG_WARN, "Failed to remove command, invalid command name: Command name could be empty");
+		return;
+	}
+
+	size_t index = HashFunction(name);
+
+	cmdentry_t *prev = NULL;
+	cmdentry_t *current = cmdmap->cmds[index];
+	while (current)
+	{
+		if (strcmp(current->value->name, name) == 0)
+		{
+			if (!prev)
+				cmdmap->cmds[index] = current->next;
+
+			else
+				prev->next = current->next;
+
+			MemCache_Free(current->value);
+			MemCache_Free(current);
+			cmdmap->numcmds--;
+			return;
+		}
+
+		prev = current;
+		current = current->next;
+	}
 }
 
 void Cmd_BufferCommand(const cmdexecution_t exec, const char *cmd)
