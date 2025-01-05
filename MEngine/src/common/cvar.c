@@ -328,6 +328,8 @@ void CVar_Shutdown(void)
 	if (!initialized)
 		return;
 
+	Log_WriteSeq(LOG_INFO, "Shutting down cvar system");
+
 #if defined(MENGINE_DEBUG)
 	ListAllCVars();
 #endif

@@ -446,11 +446,11 @@ void MemCache_Shutdown(void)
 	if (!initialized)
 		return;
 
+	Log_WriteSeq(LOG_INFO, "Shutting down memory cache");
+
 #if defined(MENGINE_DEBUG)
 	DumpAllocData();
 #endif
-
-	Log_WriteSeq(LOG_INFO, "Shutting down memory cache");
 
 	if (memcache)
 	{
