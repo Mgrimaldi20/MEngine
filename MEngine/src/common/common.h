@@ -43,7 +43,7 @@ bool MemCache_UseCache(void);
 typedef struct
 {
 	int argc;
-	char *args[CMD_MAX_ARGS];
+	char *argv[CMD_MAX_ARGS];
 	char cmdstr[CMD_MAX_STR_LEN];
 } cmdargs_t;
 
@@ -60,6 +60,7 @@ void Cmd_Shutdown(void);
 void Cmd_RegisterCommand(const char *name, cmdfunction_t function, const char *description);
 void Cmd_RemoveCommand(const char *name);
 void Cmd_BufferCommand(const cmdexecution_t exec, const char *cmd);
+void Cmd_ExecuteCommandBuffer(void);
 
 #define CVAR_MAX_STR_LEN 256
 

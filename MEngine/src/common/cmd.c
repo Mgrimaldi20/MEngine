@@ -1,4 +1,6 @@
+#include <stdio.h>
 #include <string.h>
+#include "sys/sys.h"
 #include "common.h"
 
 #define DEF_CMD_MAP_CAPACITY 256
@@ -26,7 +28,7 @@ typedef struct
 
 static cmdmap_t *cmdmap;
 static char cmdbuffer[DEF_CMD_BUFFER_SIZE];		// TODO: might make this dynamic in the future again, just make it fixed len for now
-static int cmdbufferpos;
+static int cmdbufferlen;
 
 static bool initialized;
 
@@ -57,6 +59,36 @@ static cmd_t *FindCommand(const char *name)
 	}
 
 	return(NULL);
+}
+
+static void ExecuteCommand(const char *cmdstr)	// tokenizes and executes
+{
+	cmdargs_t args = { 0 };
+
+	snprintf(args.cmdstr, CMD_MAX_STR_LEN, "%s", cmdstr);
+
+	char *token = NULL;
+	char *saveptr = NULL;
+
+	token = Sys_Strtok(args.cmdstr, " ", &saveptr);		// tokenize the command string into argc/argv style data
+	while (token)
+	{
+		args.argv[args.argc] = token;
+		args.argc++;
+		token = Sys_Strtok(NULL, " ", &saveptr);
+	}
+
+	if (args.argc == 0)
+		return;
+
+	cmd_t *cmd = FindCommand(args.argv[0]);
+	if (!cmd)
+	{
+		Log_WriteSeq(LOG_WARN, "Failed to execute command, command not found: %s", args.argv[0]);
+		return;
+	}
+
+	cmd->function(&args);
 }
 
 bool Cmd_Init(void)
@@ -254,8 +286,8 @@ void Cmd_BufferCommand(const cmdexecution_t exec, const char *cmd)
 		return;
 	}
 
-	int len = strlen(cmd);
-	if ((len + cmdbufferpos) >= DEF_CMD_BUFFER_SIZE)
+	int len = strnlen(cmd, CMD_MAX_STR_LEN);
+	if ((len + cmdbufferlen) >= DEF_CMD_BUFFER_SIZE)
 	{
 		Log_Write(LOG_WARN, "Failed to buffer command, command buffer overflow");
 		return;
@@ -264,9 +296,38 @@ void Cmd_BufferCommand(const cmdexecution_t exec, const char *cmd)
 	switch (exec)
 	{
 		case CMD_EXEC_NOW:
+			ExecuteCommand(cmd);
 			break;
 
 		case CMD_EXEC_APPEND:
+			memcpy(cmdbuffer + cmdbufferlen, cmd, len);
+			cmdbufferlen += len;
 			break;
+
+		default:
+			Log_Write(LOG_ERROR, "Failed to buffer command, invalid command execution type: %d", exec);
+			break;
+	}
+}
+
+void Cmd_ExecuteCommandBuffer(void)
+{
+	char *cmd = cmdbuffer;
+	while (cmdbufferlen > 0)
+	{
+		char *end = strchr(cmd, '\n');
+		if (!end)
+			end = cmd + cmdbufferlen;
+
+		else
+		{
+			*end = '\0';
+			end++;
+		}
+
+		ExecuteCommand(cmd);
+
+		cmdbufferlen -= (end - cmd);
+		cmd = end;
 	}
 }
