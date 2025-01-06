@@ -43,7 +43,7 @@ bool MemCache_UseCache(void);
 typedef struct
 {
 	int argc;
-	char *argv[CMD_MAX_ARGS];
+	char *argv[CMD_MAX_ARGS];			// points into the command string cmdstr
 	char cmdstr[CMD_MAX_STR_LEN];
 } cmdargs_t;
 

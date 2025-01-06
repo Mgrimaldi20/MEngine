@@ -222,7 +222,7 @@ static void ReadCVarsFromFile(FILE *infile, const char *filename)
 			continue;
 		}
 
-		if ((strnlen(name, 1024) == 0) || (strnlen(value, 1024) == 0))
+		if (!name[0] || !value[0])
 		{
 			Log_WriteSeq(LOG_ERROR, "%s: Invalid cvar parsed, line: %s", filename, line);
 			continue;

@@ -73,6 +73,12 @@ static void ExecuteCommand(const char *cmdstr)	// tokenizes and executes
 	token = Sys_Strtok(args.cmdstr, " ", &saveptr);		// tokenize the command string into argc/argv style data
 	while (token)
 	{
+		if (args.argc > CMD_MAX_ARGS)
+		{
+			Log_WriteLargeSeq(LOG_WARN, "Failed to execute command, too many arguments: %s", cmdstr);
+			return;
+		}
+
 		args.argv[args.argc] = token;
 		args.argc++;
 		token = Sys_Strtok(NULL, " ", &saveptr);
