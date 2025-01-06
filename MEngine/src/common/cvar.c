@@ -422,12 +422,6 @@ cvar_t *CVar_Register(const char *name, const cvarvalue_t value, const cvartype_
 		return(NULL);
 	}
 
-	if (!description || !description[0])
-	{
-		Log_Write(LOG_WARN, "Failed to register cvar, invalid cvar description: CVar description could be empty");
-		return(NULL);
-	}
-
 	cvar_t *existing = CVar_Find(name);
 	if (existing)
 	{

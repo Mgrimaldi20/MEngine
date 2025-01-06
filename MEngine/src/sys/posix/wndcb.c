@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <math.h>
+#include "common/common.h"
 #include "renderer/renderer.h"
 #include "posixlocal.h"
 
@@ -15,6 +17,7 @@ static void KeyCallback(GLFWwindow *window, int key, int scancode, int action, i
 			if (key == KEY_PRINTSCREEN)
 				break;
 
+			Event_QueueEvent(EVENT_KEY, keycode, EVENT_TYPE_KEYDOWN);
 			break;
 		}
 
@@ -25,16 +28,24 @@ static void KeyCallback(GLFWwindow *window, int key, int scancode, int action, i
 			if (key == KEY_PRINTSCREEN)
 				break;
 
+			Event_QueueEvent(EVENT_KEY, keycode, EVENT_TYPE_KEYUP);
 			break;
 		}
 
 		case GLFW_REPEAT:
+			keycode = MapGLFWKey(key);
+			Event_QueueEvent(EVENT_KEY, keycode, EVENT_TYPE_KEYDOWN);
 			break;
 	}
 }
 
 static void MouseMoveCallback(GLFWwindow *window, double xpos, double ypos)
 {
+	int posx = (int)xpos;
+	int posy = (int)ypos;
+
+	if (posx >= 0 && posx < glstate.width && posy >= 0 && posy < glstate.height)
+		Event_QueueEvent(EVENT_MOUSE, posx, posy);
 }
 
 static void MouseButtonCallback(GLFWwindow *window, int button, int action, int mods)
@@ -78,8 +89,12 @@ static void MouseButtonCallback(GLFWwindow *window, int button, int action, int 
 				case GLFW_MOUSE_BUTTON_8:
 					keycode = MOUSE_BUTTON8;
 					break;
+
+				default:
+					return;
 			}
 
+			Event_QueueEvent(EVENT_KEY, keycode, EVENT_TYPE_KEYDOWN);
 			break;
 		}
 
@@ -118,8 +133,12 @@ static void MouseButtonCallback(GLFWwindow *window, int button, int action, int 
 				case GLFW_MOUSE_BUTTON_8:
 					keycode = MOUSE_BUTTON8;
 					break;
+
+				default:
+					return;
 			}
 
+			Event_QueueEvent(EVENT_KEY, keycode, EVENT_TYPE_KEYUP);
 			break;
 		}
 	}
@@ -127,6 +146,17 @@ static void MouseButtonCallback(GLFWwindow *window, int button, int action, int 
 
 static void MouseScrollCallback(GLFWwindow *window, double xoffset, double yoffset)
 {
+	keycode_t key = yoffset < 0 ? MOUSE_WHEELDOWN : MOUSE_WHEELUP;
+	int delta = (int)fabs(yoffset);
+
+	while (delta-- > 0)
+	{
+		Common_Printf("Mouse wheel delta: %d\n", delta);	// TODO: remove later, just for testing
+		Common_Printf("Mouse wheel key: %d\n", key);
+
+		Event_QueueEvent(EVENT_KEY, key, EVENT_TYPE_KEYDOWN);
+		Event_QueueEvent(EVENT_KEY, key, EVENT_TYPE_KEYUP);
+	}
 }
 
 static void CharCallback(GLFWwindow *window, unsigned int codepoint)

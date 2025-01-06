@@ -192,9 +192,6 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 
 			while (delta-- > 0)
 			{
-				Common_Printf("Mouse wheel delta: %d\n", delta);	// just do this for now TODO: change later to do something with this
-				Common_Printf("Mouse wheel key: %d\n", key);
-
 				Event_QueueEvent(EVENT_KEY, key, EVENT_TYPE_KEYDOWN);
 				Event_QueueEvent(EVENT_KEY, key, EVENT_TYPE_KEYUP);
 			}
