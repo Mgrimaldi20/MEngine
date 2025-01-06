@@ -95,6 +95,8 @@ void Event_RunEventLoop(void)
 
 	while (1)
 	{
+		Cmd_ExecuteCommandBuffer();
+
 		event = GetEvent();
 
 		if (event.type == EVENT_NONE)

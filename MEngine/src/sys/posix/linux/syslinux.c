@@ -34,7 +34,7 @@ bool Sys_Init(void)
 	}
 
 	Log_WriteSeq(LOG_INFO, "System memory: %lluMB", Sys_GetSystemMemory());
-	Log_WriteSeq(LOG_INFO, "System supports ax threads: %lu", Sys_GetMaxThreads());
+	Log_WriteSeq(LOG_INFO, "System supports max threads: %lu", Sys_GetMaxThreads());
 
 	CVar_RegisterString("g_gamedll", "DemoGame.so", CVAR_GAME, "The name of the game DLL for Linux systems");
 	CVar_RegisterString("g_demogamedll", "DemoGame.so", CVAR_GAME | CVAR_READONLY, "The name of the demo game DLL for Linux systems");
