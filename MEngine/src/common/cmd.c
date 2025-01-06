@@ -69,6 +69,7 @@ static void ExecuteCommand(const char *cmdstr)	// tokenizes and executes
 
 	char *token = NULL;
 	char *saveptr = NULL;
+	bool inquotes = false;
 
 	token = Sys_Strtok(args.cmdstr, " ", &saveptr);		// tokenize the command string into argc/argv style data
 	while (token)
@@ -79,9 +80,25 @@ static void ExecuteCommand(const char *cmdstr)	// tokenizes and executes
 			return;
 		}
 
+		if (token[0] == '"')
+		{
+			inquotes = true;
+			token++;
+		}
+
+		if (inquotes)
+		{
+			char *endquote = strchr(token, '"');
+			if (endquote)
+			{
+				*endquote = '\0';
+				inquotes = false;
+			}
+		}
+
 		args.argv[args.argc] = token;
 		args.argc++;
-		token = Sys_Strtok(NULL, " ", &saveptr);
+		token = Sys_Strtok(NULL, inquotes ? "" : " ", &saveptr);
 	}
 
 	if (args.argc == 0)
