@@ -70,13 +70,15 @@ static void ExecuteCommand(const char *cmdstr)	// tokenizes and executes
 	char *token = NULL;
 	char *saveptr = NULL;
 	bool inquotes = false;
+	char argbuffer[CMD_MAX_STR_LEN] = { 0 };
+	size_t argbufferlen = 0;
 
 	token = Sys_Strtok(args.cmdstr, " ", &saveptr);		// tokenize the command string into argc/argv style data
 	while (token)
 	{
 		if (args.argc > CMD_MAX_ARGS)
 		{
-			Log_WriteLargeSeq(LOG_WARN, "Failed to execute command, too many arguments: %s", cmdstr);
+			Log_Write(LOG_WARN, "Failed to execute command, too many arguments: %s", cmdstr);
 			return;
 		}
 
@@ -84,6 +86,8 @@ static void ExecuteCommand(const char *cmdstr)	// tokenizes and executes
 		{
 			inquotes = true;
 			token++;
+			argbuffer[0] = '\0';
+			argbufferlen = 0;
 		}
 
 		if (inquotes)
@@ -94,11 +98,30 @@ static void ExecuteCommand(const char *cmdstr)	// tokenizes and executes
 				*endquote = '\0';
 				inquotes = false;
 			}
+
+			if (argbufferlen > 0)
+			{
+				strncat(argbuffer, " ", CMD_MAX_STR_LEN - argbufferlen - 1);
+				argbufferlen++;
+			}
+
+			strncat(argbuffer, token, CMD_MAX_STR_LEN - argbufferlen - 1);
+			argbufferlen += strlen(token);
+
+			if (!inquotes)
+			{
+				args.argv[args.argc] = argbuffer;
+				args.argc++;
+			}
 		}
 
-		args.argv[args.argc] = token;
-		args.argc++;
-		token = Sys_Strtok(NULL, inquotes ? "" : " ", &saveptr);
+		else
+		{
+			args.argv[args.argc] = token;
+			args.argc++;
+		}
+
+		token = Sys_Strtok(NULL, " ", &saveptr);
 	}
 
 	if (args.argc == 0)
@@ -107,7 +130,7 @@ static void ExecuteCommand(const char *cmdstr)	// tokenizes and executes
 	cmd_t *cmd = FindCommand(args.argv[0]);
 	if (!cmd)
 	{
-		Log_WriteSeq(LOG_WARN, "Failed to execute command, command not found: %s", args.argv[0]);
+		Log_Write(LOG_WARN, "Failed to execute command, command not found: %s", args.argv[0]);
 		return;
 	}
 
