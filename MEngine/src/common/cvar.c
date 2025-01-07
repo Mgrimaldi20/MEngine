@@ -27,6 +27,7 @@ static FILE *cvarfile;
 static const char *cvardir = "configs";
 static const char *cvarfilename = "MEngine.cfg";
 static const char *overridefilename = "overrides.cfg";
+static char cvarfullname[SYS_MAX_PATH];
 
 static bool initialized;
 
@@ -244,36 +245,81 @@ static void ReadCVarsFromFile(FILE *infile, const char *filename)
 	}
 }
 
+static void Seta_Cmd(const cmdargs_t *args)
+{
+	if (args->argc != 3)
+	{
+		Log_Write(LOG_INFO, "Usage: %s <cvarname> \"<value>\"", args->argv[0], args->argc);
+		return;
+	}
+
+	if (!CVar_RegisterString(args->argv[1], args->argv[2], CVAR_NONE, ""))
+		Log_Write(LOG_ERROR, "Failed to set cvar: %s", args->argv[1]);
+}
+
+static void Seti_Cmd(const cmdargs_t *args)
+{
+	if (args->argc != 3)
+	{
+		Log_Write(LOG_INFO, "Usage: %s <cvarname> <value>", args->argv[0], args->argc);
+		return;
+	}
+
+	errno = 0;
+	char *end = NULL;
+
+	int castval = strtol(args->argv[2], &end, 10);
+	HandleConversionErrors(args->argv[2], end);
+
+	if (!CVar_RegisterInt(args->argv[1], castval, CVAR_NONE, ""))
+		Log_Write(LOG_ERROR, "Failed to set cvar: %s", args->argv[1]);
+}
+
+static void Setf_Cmd(const cmdargs_t *args)
+{
+	if (args->argc != 3)
+	{
+		Log_Write(LOG_INFO, "Usage: %s <cvarname> <value>", args->argv[0], args->argc);
+		return;
+	}
+
+	errno = 0;
+	char *end = NULL;
+
+	float castval = strtof(args->argv[2], &end);
+	HandleConversionErrors(args->argv[2], end);
+
+	if (!CVar_RegisterFloat(args->argv[1], castval, CVAR_NONE, ""))
+		Log_Write(LOG_ERROR, "Failed to set cvar: %s", args->argv[1]);
+}
+
+static void Setb_Cmd(const cmdargs_t *args)
+{
+	if (args->argc != 3)
+	{
+		Log_Write(LOG_INFO, "Usage: %s <cvarname> <value>", args->argv[0], args->argc);
+		return;
+	}
+
+	errno = 0;
+	char *end = NULL;
+
+	bool castval = strtol(args->argv[2], &end, 10);
+	HandleConversionErrors(args->argv[2], end);
+
+	if (!CVar_RegisterBool(args->argv[1], castval, CVAR_NONE, ""))
+		Log_Write(LOG_ERROR, "Failed to set cvar: %s", args->argv[1]);
+}
+
 bool CVar_Init(void)
 {
 	if (initialized)
 		return(true);
 
-	if (!Sys_Mkdir(cvardir))
-		return(false);
-
-	char cvarfullname[SYS_MAX_PATH] = { 0 };
-	snprintf(cvarfullname, sizeof(cvarfullname), "%s/%s", cvardir, cvarfilename);
-
-	if (!FileSys_FileExists(cvarfullname))
-	{
-		cvarfile = fopen(cvarfullname, "w+");	// try to just recreate file, will lose cvars if file cant be read properly
-		if (!cvarfile)
-		{
-			Log_WriteSeq(LOG_ERROR, "CVar file does not exist and cannot be recreated: %s", cvarfullname);
-			return(false);
-		}
-	}
-
-	if (cvarfile)				// in case the file was opened in the previous block
-		fclose(cvarfile);
-
-	cvarfile = fopen(cvarfullname, "r");
-	if (!cvarfile)
-	{
-		Log_WriteSeq(LOG_ERROR, "Failed to open cvar file: %s", cvarfullname);
-		return(false);
-	}
+	Cmd_RegisterCommand("seta", Seta_Cmd, "Sets a cvar to a string value");
+	Cmd_RegisterCommand("seti", Seti_Cmd, "Sets a cvar to an integer value");
+	Cmd_RegisterCommand("setf", Setf_Cmd, "Sets a cvar to a float value");
+	Cmd_RegisterCommand("setb", Setb_Cmd, "Sets a cvar to a boolean value");
 
 	cvarmap = MemCache_Alloc(sizeof(*cvarmap));
 	if (!cvarmap)
@@ -298,19 +344,48 @@ bool CVar_Init(void)
 	for (size_t i=0; i<cvarmap->capacity; i++)
 		cvarmap->cvars[i] = NULL;
 
+	if (!Sys_Mkdir(cvardir))
+		return(false);
+
+	snprintf(cvarfullname, sizeof(cvarfullname), "%s/%s", cvardir, cvarfilename);
+
+	// read the cvar file and populate the cvar list if cvars exist
+	if (!FileSys_FileExists(cvarfullname))
+	{
+		cvarfile = fopen(cvarfullname, "w+");	// try to just recreate file, will lose cvars if file cant be read properly
+		if (!cvarfile)
+		{
+			Log_WriteSeq(LOG_ERROR, "CVar file does not exist and cannot be recreated: %s", cvarfullname);
+			return(false);
+		}
+
+		fclose(cvarfile);	// close the opened file if created
+		cvarfile = NULL;
+	}
+
+	cvarfile = fopen(cvarfullname, "r");
+	if (!cvarfile)
+	{
+		Log_WriteSeq(LOG_ERROR, "Failed to open cvar file: %s", cvarfullname);
+		return(false);
+	}
+
 	ReadCVarsFromFile(cvarfile, cvarfullname);
 
 	fclose(cvarfile);
 	cvarfile = NULL;
 
 	// read the overrides file and populate the cvar list if cvars exist and if the file exists
-	if (!FileSys_FileExists(overridefilename))
-		Log_WriteSeq(LOG_INFO, "Overrides file does not exist: %s", overridefilename);
-
-	FILE *overridesfile = fopen(overridefilename, "r");
-	if (overridesfile)
+	if (FileSys_FileExists(overridefilename))
 	{
-		Log_WriteSeq(LOG_INFO, "Overrides file exists: %s", overridefilename);
+		FILE *overridesfile = fopen(overridefilename, "r");
+		if (!overridesfile)
+		{
+			Log_WriteSeq(LOG_ERROR, "Failed to open overrides file: %s", overridefilename);
+			return(false);
+		}
+
+		Log_WriteSeq(LOG_INFO, "Reading data from the overrides file: %s", overridefilename);
 
 		ReadCVarsFromFile(overridesfile, overridefilename);
 
@@ -335,9 +410,6 @@ void CVar_Shutdown(void)
 #endif
 
 	(void)ListAllCVars;		// gets rid of unused function warning
-
-	char cvarfullname[SYS_MAX_PATH] = { 0 };
-	snprintf(cvarfullname, sizeof(cvarfullname), "%s/%s", cvardir, cvarfilename);
 
 	cvarfile = fopen(cvarfullname, "w");
 	if (!cvarfile)
@@ -384,11 +456,8 @@ void CVar_Shutdown(void)
 		}
 	}
 
-	if (cvarfile)
-	{
-		fclose(cvarfile);
-		cvarfile = NULL;
-	}
+	fclose(cvarfile);
+	cvarfile = NULL;
 
 	MemCache_Free(cvarmap->cvars);
 	MemCache_Free(cvarmap);
