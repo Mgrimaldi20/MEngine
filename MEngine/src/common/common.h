@@ -47,7 +47,7 @@ typedef struct
 	char cmdstr[CMD_MAX_STR_LEN];
 } cmdargs_t;
 
-typedef void (*cmdfunction_t)(cmdargs_t *args);
+typedef void (*cmdfunction_t)(const cmdargs_t *args);
 
 typedef enum
 {

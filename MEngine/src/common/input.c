@@ -1,5 +1,7 @@
+#include <stdio.h>
 #include <string.h>
 #include "keycodes.h"
+#include "sys/sys.h"
 #include "common.h"
 
 typedef struct
@@ -163,7 +165,135 @@ static const keyname_t keynames[] =
 
 static key_t *keys;
 
+static FILE *bindingsfile;
+static const char *bindingsdir = "configs";
+static const char *bindingsfilename = "bindings.cfg";
+static char bindingsfullname[SYS_MAX_PATH];
+
 static bool initialized;
+
+static const char *GetKeyName(const keycode_t key)
+{
+	for (int i=0; i<KEY_FINAL; i++)
+	{
+		if (keynames[i].key == key)
+			return(keynames[i].name);
+	}
+
+	return(NULL);
+}
+
+static keycode_t GetKeyFromName(const char *name)
+{
+	for (int i=0; i<KEY_FINAL; i++)
+	{
+		if (!strcmp(keynames[i].name, name))
+			return(keynames[i].key);
+	}
+
+	return(KEY_UNKNOWN);
+}
+
+static void SetBinding(const keycode_t key, const char *binding)
+{
+	if (key == KEY_UNKNOWN)
+		return;
+
+	size_t len = strnlen(binding, CMD_MAX_STR_LEN);
+	size_t currentlen = 0;
+
+	if (keys[key].binding)
+	{
+		currentlen = strnlen(keys[key].binding, CMD_MAX_STR_LEN);
+
+		if (strcmp(keys[key].binding, binding) == 0)
+			return;
+
+		// need to reallocate if the old binding is longer than the new one, otherwise just copy the new binding over the old one
+		if (len > currentlen)
+		{
+			char *newbinding = MemCache_Alloc(len + 1);
+			if (!newbinding)
+			{
+				Log_WriteSeq(LOG_ERROR, "failed to allocate memory for new key binding");
+				return;
+			}
+
+			snprintf(newbinding, len + 1, "%s", binding);
+			MemCache_Free(keys[key].binding);
+			keys[key].binding = newbinding;
+		}
+
+		else
+			snprintf(keys[key].binding, len + 1, "%s", binding);
+	}
+
+	else
+	{
+		keys[key].binding = MemCache_Alloc(len + 1);
+		if (!keys[key].binding)
+		{
+			Log_WriteSeq(LOG_ERROR, "failed to allocate memory for new key binding");
+			return;
+		}
+
+		snprintf(keys[key].binding, len + 1, "%s", binding);
+	}
+}
+
+void WriteBindings(FILE *bindings)
+{
+	if (!bindings)
+		return;
+
+	for (int i=0; i<KEY_FINAL; i++)
+	{
+		if (keys[i].binding && keys[i].binding[0])
+			fprintf(bindings, "bind %s %s\n", GetKeyName(i), keys[i].binding);
+	}
+}
+
+static void ReadBindings(FILE *bindings)
+{
+	if (!bindings)
+		return;
+
+	char line[CMD_MAX_STR_LEN] = { 0 };
+	while (fgets(line, sizeof(line), bindings))
+	{
+		char cmdline[CMD_MAX_STR_LEN] = { 0 };
+
+		if (line[0] == '\n' || line[0] == '\r' || line[0] == '#')
+			continue;
+
+		char *saveptr = NULL;
+
+		char *cmdname = Sys_Strtok(line, " ", &saveptr);
+		char *args = Sys_Strtok(NULL, "\n", &saveptr);
+
+		snprintf(cmdline, sizeof(cmdline), "%s %s", cmdname, args);
+
+		Cmd_BufferCommand(CMD_EXEC_NOW, cmdline);
+	}
+}
+
+static void Bind_Cmd(const cmdargs_t *args)
+{
+	if (args->argc != 3)
+	{
+		Log_Write(LOG_INFO, "Usage: %s <keyname> <action>", args->argv[0], args->argc);
+		return;
+	}
+
+	keycode_t key = GetKeyFromName(args->argv[1]);
+	if (key == KEY_UNKNOWN)
+	{
+		Log_Write(LOG_ERROR, "Failed to bind key, invalid key name: %s", args->argv[1]);
+		return;
+	}
+
+	SetBinding(key, args->argv[2]);
+}
 
 bool Input_Init(void)
 {
@@ -179,6 +309,45 @@ bool Input_Init(void)
 
 	memset(keys, 0, sizeof(key_t) * KEY_FINAL);
 
+	for (int i=0; i<KEY_FINAL; i++)
+	{
+		keys[i].down = false;
+		keys[i].repeats = 0;
+		keys[i].binding = NULL;
+	}
+
+	Cmd_RegisterCommand("bind", Bind_Cmd, "binds a command to a key");
+
+	if (!Sys_Mkdir(bindingsdir))
+		return(false);
+
+	snprintf(bindingsfullname, sizeof(bindingsfullname), "%s/%s", bindingsdir, bindingsfilename);
+
+	if (!FileSys_FileExists(bindingsfullname))
+	{
+		bindingsfile = fopen(bindingsfullname, "w+");
+		if (!bindingsfile)
+		{
+			Log_WriteSeq(LOG_ERROR, "bindings file does not exist and cannot be recreated: %s", bindingsfullname);
+			return(false);
+		}
+
+		fclose(bindingsfile);	// close the opened file if created
+		bindingsfile = NULL;
+	}
+
+	bindingsfile = fopen(bindingsfullname, "r");
+	if (!bindingsfile)
+	{
+		Log_WriteSeq(LOG_ERROR, "failed to open bindings file: %s", bindingsfullname);
+		return(false);
+	}
+
+	ReadBindings(bindingsfile);
+
+	fclose(bindingsfile);
+	bindingsfile = NULL;
+
 	initialized = true;
 
 	return(true);
@@ -190,6 +359,18 @@ void Input_Shutdown(void)
 		return;
 
 	Log_WriteSeq(LOG_INFO, "Shutting down input system");
+
+	bindingsfile = fopen(bindingsfullname, "w");
+	if (!bindingsfile)
+	{
+		Log_WriteSeq(LOG_ERROR, "failed to open bindings file for writing: %s", bindingsfullname);
+		return;
+	}
+
+	WriteBindings(bindingsfile);
+
+	fclose(bindingsfile);
+	bindingsfile = NULL;
 
 	for (int i=0; i<KEY_FINAL; i++)		// free all key bindings if they exist
 	{
