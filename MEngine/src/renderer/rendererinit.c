@@ -93,6 +93,17 @@ static void InitOpenGL(void)
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);	// better perspective correction
 }
 
+static void Sizeviewport_Cmd(const cmdargs_t *args)
+{
+	if (args->argc != 1)
+	{
+		Log_Write(LOG_INFO, "Usage: %s", args->argv[0]);
+		return;
+	}
+
+	glViewport(0, 0, (GLsizei)glstate.width, (GLsizei)glstate.height);
+}
+
 bool Render_Init(void)
 {
 	if (initialized)
@@ -100,11 +111,12 @@ bool Render_Init(void)
 
 	glstate = (glstate_t)
 	{
-		.viewportsized = false,
 		.width = 0,
 		.height = 0,
 		.fov = 60.0
 	};
+
+	Cmd_RegisterCommand("sizeviewport", Sizeviewport_Cmd, "Resizes the viewport to the window size, happens on screen size change");
 
 	rwidth = CVar_RegisterInt("r_width", R_DEF_WIN_WIDTH, CVAR_ARCHIVE | CVAR_RENDERER, "Custom width of the window");
 	rheight = CVar_RegisterInt("r_height", R_DEF_WIN_HEIGHT, CVAR_ARCHIVE | CVAR_RENDERER, "Custom height of the window");

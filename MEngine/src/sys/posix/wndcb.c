@@ -185,7 +185,7 @@ static void FramebufferSizeCallback(GLFWwindow *window, int width, int height)
 	glstate.width = width;		// let GLFW control the framebuffer size
 	glstate.height = height;
 
-	glstate.viewportsized = true;
+	Cmd_BufferCommand(CMD_EXEC_NOW, "sizeviewport");
 }
 
 static void WindowCloseCallback(GLFWwindow *window)

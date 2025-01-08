@@ -13,7 +13,10 @@ static void ResizeWindow(HWND hwnd)
 	glstate.width = (long)(rect.right - rect.left);
 	glstate.height = (long)(rect.bottom - rect.top);
 
-	glstate.viewportsized = true;
+	if (glstate.width <= 0 || glstate.height <= 0)
+		return;
+
+	Cmd_BufferCommand(CMD_EXEC_NOW, "sizeviewport");
 }
 
 static void WindowSizing(WPARAM wparam, RECT *rect)

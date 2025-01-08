@@ -5,7 +5,6 @@
 typedef struct
 {
 	bool initialized;
-	bool viewportsized;
 	int width;
 	int height;
 	double fov;
