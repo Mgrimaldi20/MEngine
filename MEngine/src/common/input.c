@@ -269,7 +269,7 @@ static void ReadBindings(FILE *bindings)
 		char *saveptr = NULL;
 
 		char *cmdname = Sys_Strtok(line, " ", &saveptr);
-		char *args = Sys_Strtok(NULL, "\n", &saveptr);
+		char *args = Sys_Strtok(NULL, "\n\r", &saveptr);
 
 		snprintf(cmdline, sizeof(cmdline), "%s %s", cmdname, args);
 

@@ -212,36 +212,28 @@ static void ReadCVarsFromFile(FILE *infile, const char *filename)
 	char line[1024] = { 0 };
 	while (fgets(line, sizeof(line), infile))
 	{
-		char name[1024] = { 0 };
-		char value[1024] = { 0 };
+		char cmdline[CMD_MAX_STR_LEN] = { 0 };
 
-		bool acceptable = GetNameValue(line, sizeof(line), name, value);
+		if (line[0] == '\n' || line[0] == '\r' || line[0] == '#')
+			continue;
 
-		if (!acceptable)
+		char *saveptr = NULL;
+
+		char *cmdname = Sys_Strtok(line, " ", &saveptr);
+		char *args = Sys_Strtok(NULL, "\n\r", &saveptr);
+
+		char name[CVAR_MAX_STR_LEN] = { 0 };
+		char value[CVAR_MAX_STR_LEN] = { 0 };
+
+		if (!GetNameValue(args, strnlen(args, sizeof(args)), name, value))
 		{
-			Log_WriteSeq(LOG_ERROR, "%s: Line is not a key/value pair, line: %s", filename, line);
+			Log_Write(LOG_ERROR, "Failed to read cvar from file: %s", filename);
 			continue;
 		}
 
-		if (!name[0] || !value[0])
-		{
-			Log_WriteSeq(LOG_ERROR, "%s: Invalid cvar parsed, line: %s", filename, line);
-			continue;
-		}
+		snprintf(cmdline, sizeof(cmdline), "%s %s %s", cmdname, name, value);
 
-		size_t slen = strnlen(value, CVAR_MAX_STR_LEN);
-		if (slen > CVAR_MAX_STR_LEN)
-		{
-			Log_WriteSeq(LOG_ERROR, "%s: Value too long: %s", filename, value);
-			continue;
-		}
-
-		cvar_t *cvar = CVar_RegisterString(name, value, CVAR_NONE, "");
-		if (!cvar)
-		{
-			Log_WriteSeq(LOG_ERROR, "%s: Failed to register cvar: %s", filename, name);
-			continue;
-		}
+		Cmd_BufferCommand(CMD_EXEC_NOW, cmdline);
 	}
 }
 
@@ -261,7 +253,7 @@ static void Seti_Cmd(const cmdargs_t *args)
 {
 	if (args->argc != 3)
 	{
-		Log_Write(LOG_INFO, "Usage: %s <cvarname> <value>", args->argv[0], args->argc);
+		Log_Write(LOG_INFO, "Usage: %s <cvarname> \"<value>\"", args->argv[0], args->argc);
 		return;
 	}
 
@@ -279,7 +271,7 @@ static void Setf_Cmd(const cmdargs_t *args)
 {
 	if (args->argc != 3)
 	{
-		Log_Write(LOG_INFO, "Usage: %s <cvarname> <value>", args->argv[0], args->argc);
+		Log_Write(LOG_INFO, "Usage: %s <cvarname> \"<value>\"", args->argv[0], args->argc);
 		return;
 	}
 
@@ -297,7 +289,7 @@ static void Setb_Cmd(const cmdargs_t *args)
 {
 	if (args->argc != 3)
 	{
-		Log_Write(LOG_INFO, "Usage: %s <cvarname> <value>", args->argv[0], args->argc);
+		Log_Write(LOG_INFO, "Usage: %s <cvarname> \"<value>\"", args->argv[0], args->argc);
 		return;
 	}
 
@@ -431,19 +423,19 @@ void CVar_Shutdown(void)
 				switch (cvar->type)
 				{
 					case CVAR_BOOL:
-						fprintf(cvarfile, "%s \"%d\"\n", cvar->name, cvar->value.b);
+						fprintf(cvarfile, "setb %s \"%d\"\n", cvar->name, cvar->value.b);
 						break;
 
 					case CVAR_INT:
-						fprintf(cvarfile, "%s \"%d\"\n", cvar->name, cvar->value.i);
+						fprintf(cvarfile, "seti %s \"%d\"\n", cvar->name, cvar->value.i);
 						break;
 
 					case CVAR_FLOAT:
-						fprintf(cvarfile, "%s \"%f\"\n", cvar->name, cvar->value.f);
+						fprintf(cvarfile, "setf %s \"%f\"\n", cvar->name, cvar->value.f);
 						break;
 
 					case CVAR_STRING:
-						fprintf(cvarfile, "%s \"%s\"\n", cvar->name, cvar->value.s);
+						fprintf(cvarfile, "seta %s \"%s\"\n", cvar->name, cvar->value.s);
 						break;
 				}
 			}
@@ -491,7 +483,7 @@ cvar_t *CVar_Register(const char *name, const cvarvalue_t value, const cvartype_
 		return(NULL);
 	}
 
-	cvar_t *existing = CVar_Find(name);
+	cvar_t *existing = CVar_Find(name);	// check if the cvar already exists and update its params if it does
 	if (existing)
 	{
 		Log_Write(LOG_INFO, "CVar already exists: (%s): updating new parameters", name);
@@ -502,54 +494,6 @@ cvar_t *CVar_Register(const char *name, const cvarvalue_t value, const cvartype_
 			existing->value = value;
 		}
 
-		switch (type)
-		{
-			case CVAR_STRING:
-				snprintf(existing->value.s, sizeof(existing->value.s), "%s", value.s);
-				break;
-
-			case CVAR_INT:
-			{
-				errno = 0;
-				char *end = NULL;
-
-				int castval = strtol(existing->value.s, &end, 10);
-				HandleConversionErrors(value.s, end);
-
-				existing->value.i = castval;
-				break;
-			}
-
-			case CVAR_FLOAT:
-			{
-				errno = 0;
-				char *end = NULL;
-
-				float castval = strtof(existing->value.s, &end);
-				HandleConversionErrors(existing->value.s, end);
-
-				existing->value.f = castval;
-				break;
-			}
-
-			case CVAR_BOOL:
-			{
-				errno = 0;
-				char *end = NULL;
-
-				bool castval = strtol(existing->value.s, &end, 10);
-				HandleConversionErrors(existing->value.s, end);
-
-				existing->value.b = castval;
-				break;
-			}
-
-			default:
-				Sys_Error("Invalid cvar type: %d", type);
-				break;
-		}
-
-		existing->type = type;
 		existing->flags = flags;
 		existing->description = description;
 

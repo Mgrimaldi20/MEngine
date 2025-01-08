@@ -9,12 +9,6 @@ glstate_t glstate;
 void Render_StartFrame(void)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the screen and depth buffer
-
-	if (glstate.viewportsized)
-	{
-		glstate.viewportsized = false;
-		glViewport(0, 0, (GLsizei)glstate.width, (GLsizei)glstate.height);
-	}
 }
 
 void Render_Frame(void)
