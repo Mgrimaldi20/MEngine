@@ -120,7 +120,7 @@ static void ListAllCVars(void)
 *
 * Returns: A boolean if it's acceptable or not
 */
-static bool GetNameValue(char *line, const int length, char *name, char *value)
+static bool GetNameValue(char *line, const size_t length, char *name, char *value)
 {
 	bool acceptable = true;
 	bool readingvalue = false;	// this changes to true when we are inside quotes
