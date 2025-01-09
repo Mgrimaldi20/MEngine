@@ -97,11 +97,12 @@ static void Sizeviewport_Cmd(const cmdargs_t *args)
 {
 	if (args->argc != 1)
 	{
-		Log_Write(LOG_INFO, "Usage: %s", args->argv[0]);
+		Common_Printf("%s : Invalid command usage\n");
 		return;
 	}
 
 	glViewport(0, 0, (GLsizei)glstate.width, (GLsizei)glstate.height);
+	Common_Printf("Resized viewport to %dx%d\n", glstate.width, glstate.height);
 }
 
 bool Render_Init(void)

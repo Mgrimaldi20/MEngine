@@ -281,7 +281,7 @@ static void Bind_Cmd(const cmdargs_t *args)
 {
 	if (args->argc != 3)
 	{
-		Log_Write(LOG_INFO, "Usage: %s <keyname> <action>", args->argv[0], args->argc);
+		Log_Write(LOG_INFO, "Usage: %s <keyname> <action>", args->argv[0]);
 		return;
 	}
 
