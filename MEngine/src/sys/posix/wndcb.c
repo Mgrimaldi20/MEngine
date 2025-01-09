@@ -151,9 +151,6 @@ static void MouseScrollCallback(GLFWwindow *window, double xoffset, double yoffs
 
 	while (delta-- > 0)
 	{
-		Common_Printf("Mouse wheel delta: %d\n", delta);	// TODO: remove later, just for testing
-		Common_Printf("Mouse wheel key: %d\n", key);
-
 		Event_QueueEvent(EVENT_KEY, key, EVENT_TYPE_KEYDOWN);
 		Event_QueueEvent(EVENT_KEY, key, EVENT_TYPE_KEYUP);
 	}
