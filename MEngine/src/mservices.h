@@ -41,8 +41,33 @@ typedef struct		// memory cache allocator and manager
 	void *(*Alloc)(size_t size);
 	void (*Free)(void *ptr);
 	void (*Reset)(void);			// reset memory cache, will free all allocated memory and NULL all pointers
-	size_t(*GetMemUsed)(void);
+	size_t (*GetMemUsed)(void);
 } memcache_t;
+
+#define CMD_MAX_ARGS 32
+#define CMD_MAX_STR_LEN 1024
+
+typedef struct
+{
+	int argc;
+	char *argv[CMD_MAX_ARGS];			// points into the command string cmdstr
+	char cmdstr[CMD_MAX_STR_LEN];
+} cmdargs_t;
+
+typedef void (*cmdfunction_t)(const cmdargs_t *args);
+
+typedef enum
+{
+	CMD_EXEC_NOW = 0,
+	CMD_EXEC_APPEND
+} cmdexecution_t;
+
+typedef struct		// command system
+{
+	void (*RegisterCommand)(const char *name, cmdfunction_t function, const char *description);
+	void (*RemoveCommand)(const char *name);
+	void (*BufferCommand)(const cmdexecution_t exec, const char *cmd);
+} cmdsystem_t;
 
 typedef struct		// cvar system
 {
@@ -69,7 +94,7 @@ typedef struct		// system services
 	bool (*Mkdir)(const char *path);
 	void (*Stat)(const char *filepath, filedata_t *filedata);
 	char *(*Strtok)(char *string, const char *delimiter, char **context);
-	size_t(*Strlen)(const char *string, size_t maxlen);
+	size_t (*Strlen)(const char *string, size_t maxlen);
 	void (*Sleep)(unsigned long milliseconds);
 	void (*Localtime)(struct tm *buf, const time_t *timer);
 
@@ -108,6 +133,7 @@ typedef struct
 	int version;
 	log_t *log;
 	memcache_t *memcache;
+	cmdsystem_t *cmdsystem;
 	cvarsystem_t *cvarsystem;
 	sys_t *sys;
 } mservices_t;
