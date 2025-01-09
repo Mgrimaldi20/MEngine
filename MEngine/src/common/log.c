@@ -228,8 +228,6 @@ void Log_Shutdown(void)
 
 	Log_WriteSeq(LOG_INFO, "Shutting down logging service...");
 
-	Sys_Sleep(1000);	// wait for log thread to finish, make sure all logs are written, not really required
-
 	stopthreads = true;
 
 	Sys_SignalCondVar(logcond);

@@ -217,15 +217,25 @@ static void ReadCVarsFromFile(FILE *infile, const char *filename)
 		if (line[0] == '\n' || line[0] == '\r' || line[0] == '#')
 			continue;
 
-		char *saveptr = NULL;
+		char *args = NULL;
+		char *cmdname = Sys_Strtok(line, " ", &args);
 
-		char *cmdname = Sys_Strtok(line, " ", &saveptr);
-		char *args = Sys_Strtok(NULL, "\n\r", &saveptr);
+		if (!cmdname)
+		{
+			Log_Write(LOG_ERROR, "Failed to read the command name from file: %s", filename);
+			continue;
+		}
+
+		if (!args)
+		{
+			Log_Write(LOG_ERROR, "Failed to read the arguments from file: %s", filename);
+			continue;
+		}
 
 		char name[CVAR_MAX_STR_LEN] = { 0 };
 		char value[CVAR_MAX_STR_LEN] = { 0 };
 
-		if (!GetNameValue(args, strnlen(args, sizeof(args)), name, value))
+		if (!GetNameValue(args, strnlen(args, sizeof(line) - (cmdname - line)), name, value))
 		{
 			Log_Write(LOG_ERROR, "Failed to read cvar from file: %s", filename);
 			continue;
@@ -241,7 +251,7 @@ static void Seta_Cmd(const cmdargs_t *args)
 {
 	if (args->argc != 3)
 	{
-		Log_Write(LOG_INFO, "Usage: %s <cvarname> \"<value>\"", args->argv[0], args->argc);
+		Log_Write(LOG_INFO, "Usage: %s <cvarname> \"<value>\"", args->argv[0]);
 		return;
 	}
 
@@ -253,7 +263,7 @@ static void Seti_Cmd(const cmdargs_t *args)
 {
 	if (args->argc != 3)
 	{
-		Log_Write(LOG_INFO, "Usage: %s <cvarname> \"<value>\"", args->argv[0], args->argc);
+		Log_Write(LOG_INFO, "Usage: %s <cvarname> \"<value>\"", args->argv[0]);
 		return;
 	}
 
@@ -271,7 +281,7 @@ static void Setf_Cmd(const cmdargs_t *args)
 {
 	if (args->argc != 3)
 	{
-		Log_Write(LOG_INFO, "Usage: %s <cvarname> \"<value>\"", args->argv[0], args->argc);
+		Log_Write(LOG_INFO, "Usage: %s <cvarname> \"<value>\"", args->argv[0]);
 		return;
 	}
 
@@ -289,7 +299,7 @@ static void Setb_Cmd(const cmdargs_t *args)
 {
 	if (args->argc != 3)
 	{
-		Log_Write(LOG_INFO, "Usage: %s <cvarname> \"<value>\"", args->argv[0], args->argc);
+		Log_Write(LOG_INFO, "Usage: %s <cvarname> \"<value>\"", args->argv[0]);
 		return;
 	}
 
@@ -487,12 +497,6 @@ cvar_t *CVar_Register(const char *name, const cvarvalue_t value, const cvartype_
 	if (existing)
 	{
 		Log_Write(LOG_INFO, "CVar already exists: (%s): updating new parameters", name);
-
-		if (strcmp(existing->value.s, "") == 0)		// if the value is empty, overwrite it with the default value supplied by the function call
-		{
-			Log_Write(LOG_WARN, "CVar value is empty, overwriting with default value");
-			existing->value = value;
-		}
 
 		existing->flags = flags;
 		existing->description = description;
