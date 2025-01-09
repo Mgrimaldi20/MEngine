@@ -4,7 +4,7 @@
 #include "common.h"
 
 #define DEF_CMD_MAP_CAPACITY 256
-#define DEF_CMD_BUFFER_SIZE CMD_MAX_STR_LEN
+#define DEF_CMD_BUFFER_SIZE 0xffff
 
 typedef struct
 {
@@ -35,7 +35,7 @@ static bool initialized;
 static size_t HashFunction(const char *name)	// hash the name, same as the cvar hash function
 {
 	size_t hash = 0;
-	size_t len = strnlen(name, CVAR_MAX_STR_LEN);
+	size_t len = Sys_Strlen(name, CVAR_MAX_STR_LEN);
 
 	for (size_t i=0; i<len; i++)
 		hash = (hash * 31) + name[i];
@@ -106,7 +106,7 @@ static void ExecuteCommand(const char *cmdstr)	// tokenizes and executes
 			}
 
 			strncat(argbuffer, token, CMD_MAX_STR_LEN - argbufferlen - 1);
-			argbufferlen += strlen(token);
+			argbufferlen += Sys_Strlen(token, CMD_MAX_STR_LEN);
 
 			if (!inquotes)
 			{
@@ -209,14 +209,14 @@ void Cmd_RegisterCommand(const char *name, cmdfunction_t function, const char *d
 
 	if (FindCommand(name))		// if the command already exists, dont register it
 	{
-		Log_WriteSeq(LOG_WARN, "Failed to register command, command already exists: %s", name);
+		Log_Write(LOG_WARN, "Failed to register command, command already exists: %s", name);
 		return;
 	}
 
 	cmd_t *cmd = MemCache_Alloc(sizeof(*cmd));
 	if (!cmd)
 	{
-		Log_WriteSeq(LOG_ERROR, "Failed to allocate memory for command: %s", name);
+		Log_Write(LOG_ERROR, "Failed to allocate memory for command: %s", name);
 		return;
 	}
 
@@ -227,7 +227,7 @@ void Cmd_RegisterCommand(const char *name, cmdfunction_t function, const char *d
 	cmdentry_t *entry = MemCache_Alloc(sizeof(*entry));
 	if (!entry)
 	{
-		Log_WriteSeq(LOG_ERROR, "Failed to allocate memory for command entry: %s", name);
+		Log_Write(LOG_ERROR, "Failed to allocate memory for command entry: %s", name);
 		MemCache_Free(cmd);
 		return;
 	}
@@ -256,7 +256,7 @@ void Cmd_RegisterCommand(const char *name, cmdfunction_t function, const char *d
 		cmdentry_t **newcmds = MemCache_Alloc(sizeof(*newcmds) * cmdmap->capacity);
 		if (!newcmds)
 		{
-			Log_WriteSeq(LOG_ERROR, "Failed to allocate memory for new command map");
+			Log_Write(LOG_ERROR, "Failed to allocate memory for new command map");
 			MemCache_Free(cmdmap->cmds);
 			MemCache_Free(cmdmap);
 			return;
@@ -332,7 +332,7 @@ void Cmd_BufferCommand(const cmdexecution_t exec, const char *cmd)
 		return;
 	}
 
-	size_t len = strnlen(cmd, CMD_MAX_STR_LEN);
+	size_t len = Sys_Strlen(cmd, CMD_MAX_STR_LEN);
 	if ((len + cmdbufferlen) >= DEF_CMD_BUFFER_SIZE)
 	{
 		Log_Write(LOG_WARN, "Failed to buffer command, command buffer overflow");
@@ -353,7 +353,7 @@ void Cmd_BufferCommand(const cmdexecution_t exec, const char *cmd)
 			break;
 
 		default:
-			Log_Write(LOG_ERROR, "Failed to buffer command, invalid command execution type: %d", exec);
+			Log_Write(LOG_WARN, "Failed to buffer command, invalid command execution type: %d", exec);
 			break;
 	}
 }

@@ -108,6 +108,14 @@ char *Sys_Strtok(char *string, const char *delimiter, char **context)
 	return(strtok_r(string, delimiter, context));
 }
 
+size_t Sys_Strlen(const char *string, size_t maxlen)
+{
+	if (!string)
+		return(0);
+
+	return(strnlen(string, maxlen));
+}
+
 void Sys_Sleep(unsigned long milliseconds)
 {
 	usleep(milliseconds * 1000);

@@ -37,7 +37,7 @@ size_t MemCahce_GetMemUsed(void);
 size_t MemCache_GetTotalMemory(void);
 bool MemCache_UseCache(void);
 
-#define CMD_MAX_ARGS 16
+#define CMD_MAX_ARGS 32
 #define CMD_MAX_STR_LEN 1024
 
 typedef struct

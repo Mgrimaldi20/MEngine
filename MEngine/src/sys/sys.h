@@ -30,6 +30,7 @@ void Sys_ProcessCommandLine(cmdline_t *cmdline);
 bool Sys_Mkdir(const char *path);
 void Sys_Stat(const char *filepath, filedata_t *filedata);
 char *Sys_Strtok(char *string, const char *delimiter, char **context);
+size_t Sys_Strlen(const char *string, size_t maxlen);
 void Sys_Sleep(unsigned long milliseconds);
 void Sys_Localtime(struct tm *buf, const time_t *timer);
 

@@ -67,8 +67,9 @@ typedef struct		// cvar system
 typedef struct		// system services
 {
 	bool (*Mkdir)(const char *path);
-	void (*Sys_Stat)(const char *filepath, filedata_t *filedata);
+	void (*Stat)(const char *filepath, filedata_t *filedata);
 	char *(*Strtok)(char *string, const char *delimiter, char **context);
+	size_t(*Strlen)(const char *string, size_t maxlen);
 	void (*Sleep)(unsigned long milliseconds);
 	void (*Localtime)(struct tm *buf, const time_t *timer);
 
