@@ -25,6 +25,7 @@ gameservices_t gameservices;
 
 static mservices_t mservices;
 static log_t logsystem;
+static cmdsystem_t cmdsystem;
 static memcache_t memcache;
 static cvarsystem_t cvarsystem;
 static sys_t sys;
@@ -136,6 +137,13 @@ static void CreateMServices(void)
 		.Free = MemCache_Free,
 		.Reset = MemCache_Reset,
 		.GetMemUsed = MemCache_GetTotalMemory,
+	};
+
+	cmdsystem = (cmdsystem_t)
+	{
+		.RegisterCommand = Cmd_RegisterCommand,
+		.RemoveCommand = Cmd_RemoveCommand,
+		.BufferCommand = Cmd_BufferCommand
 	};
 
 	cvarsystem = (cvarsystem_t)

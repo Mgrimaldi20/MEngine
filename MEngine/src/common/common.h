@@ -37,24 +37,6 @@ size_t MemCahce_GetMemUsed(void);
 size_t MemCache_GetTotalMemory(void);
 bool MemCache_UseCache(void);
 
-#define CMD_MAX_ARGS 32
-#define CMD_MAX_STR_LEN 1024
-
-typedef struct
-{
-	int argc;
-	char *argv[CMD_MAX_ARGS];			// points into the command string cmdstr
-	char cmdstr[CMD_MAX_STR_LEN];
-} cmdargs_t;
-
-typedef void (*cmdfunction_t)(const cmdargs_t *args);
-
-typedef enum
-{
-	CMD_EXEC_NOW = 0,
-	CMD_EXEC_APPEND
-} cmdexecution_t;
-
 bool Cmd_Init(void);
 void Cmd_Shutdown(void);
 void Cmd_RegisterCommand(const char *name, cmdfunction_t function, const char *description);
