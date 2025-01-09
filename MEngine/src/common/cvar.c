@@ -625,7 +625,7 @@ cvar_t *CVar_RegisterBool(const char *name, const bool value, const unsigned lon
 	return(CVar_Register(name, cvarvalue, CVAR_BOOL, flags, description));
 }
 
-bool CVar_GetString(cvar_t *cvar, char *out)
+bool CVar_GetString(const cvar_t *cvar, char *out)
 {
 	if ((!cvar) || (cvar->type != CVAR_STRING))
 		return(false);
@@ -634,7 +634,7 @@ bool CVar_GetString(cvar_t *cvar, char *out)
 	return(true);
 }
 
-bool CVar_GetInt(cvar_t *cvar, int *out)
+bool CVar_GetInt(const cvar_t *cvar, int *out)
 {
 	if ((!cvar) || (cvar->type != CVAR_INT))
 		return(false);
@@ -643,7 +643,7 @@ bool CVar_GetInt(cvar_t *cvar, int *out)
 	return(true);
 }
 
-bool CVar_GetFloat(cvar_t *cvar, float *out)
+bool CVar_GetFloat(const cvar_t *cvar, float *out)
 {
 	if ((!cvar) || (cvar->type != CVAR_FLOAT))
 		return(false);
@@ -652,7 +652,7 @@ bool CVar_GetFloat(cvar_t *cvar, float *out)
 	return(true);
 }
 
-bool CVar_GetBool(cvar_t *cvar, bool *out)
+bool CVar_GetBool(const cvar_t *cvar, bool *out)
 {
 	if ((!cvar) || (cvar->type != CVAR_BOOL))
 		return(false);

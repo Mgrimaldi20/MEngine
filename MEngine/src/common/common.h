@@ -97,10 +97,10 @@ cvar_t *CVar_RegisterString(const char *name, const char *value, const unsigned 
 cvar_t *CVar_RegisterInt(const char *name, const int value, const unsigned long long flags, const char *description);
 cvar_t *CVar_RegisterFloat(const char *name, const float value, const unsigned long long flags, const char *description);
 cvar_t *CVar_RegisterBool(const char *name, const bool value, const unsigned long long flags, const char *description);
-bool CVar_GetString(cvar_t *cvar, char *out);
-bool CVar_GetInt(cvar_t *cvar, int *out);
-bool CVar_GetFloat(cvar_t *cvar, float *out);
-bool CVar_GetBool(cvar_t *cvar, bool *out);
+bool CVar_GetString(const cvar_t *cvar, char *out);
+bool CVar_GetInt(const cvar_t *cvar, int *out);
+bool CVar_GetFloat(const cvar_t *cvar, float *out);
+bool CVar_GetBool(const cvar_t *cvar, bool *out);
 void CVar_SetString(cvar_t *cvar, const char *value);
 void CVar_SetInt(cvar_t *cvar, const int value);
 void CVar_SetFloat(cvar_t *cvar, const float value);
