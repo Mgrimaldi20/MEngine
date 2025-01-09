@@ -74,10 +74,7 @@ void Event_QueueEvent(const eventtype_t type, int var1, int var2)
 	event_t *event = &eventqueue[eventcount++];
 
 	if (eventcount >= MAX_EVENTS)
-	{
-		Log_Write(LOG_WARN, "Event queue is full, dropping event");		// TODO: remove this
 		return;
-	}
 
 	event->type = type;
 	event->evar1 = var1;

@@ -13,7 +13,7 @@ typedef long long (*glwndproc_t)(void);
 static const wchar_t *wndclassname = L"MEngine";
 static const wchar_t *fakewndclassname = L"Fake_MEngine";
 
-static bool initialized;	// TODO: might need to be more fine grained for InitOpenGL
+static bool initialized;
 
 PFNWGLGETEXTENSIONSSTRINGARBPROC wglGetExtensionsStringARB;
 

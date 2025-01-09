@@ -348,7 +348,7 @@ void Cmd_BufferCommand(const cmdexecution_t exec, const char *cmd)
 		case CMD_EXEC_APPEND:
 			memcpy(cmdbuffer + cmdbufferlen, cmd, len);
 			cmdbufferlen += len;
-			cmdbuffer[cmdbufferlen] = '\n';		// TODO: I think this might cause an issue later down the road
+			cmdbuffer[cmdbufferlen] = '\n';
 			cmdbufferlen++;
 			break;
 
