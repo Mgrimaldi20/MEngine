@@ -202,8 +202,8 @@ static bool InitGame(void)
 		return(false);
 	}
 
-	char *gamedllname = CVar_GetString(gamedll);
-	if (!gamedllname)
+	char gamedllname[CVAR_MAX_STR_LEN] = { 0 };
+	if (!CVar_GetString(gamedll, gamedllname))
 	{
 		Log_WriteSeq(LOG_ERROR, "Failed to get game DLL name from CVar system");
 		return(false);

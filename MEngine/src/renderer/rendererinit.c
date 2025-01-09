@@ -48,25 +48,22 @@ static bool GetVideoModeInfo(int *width, int *height, int mode)
 	{
 		Log_WriteSeq(LOG_WARN, "Using a custom video mode, might not render correctly if aspect ratio is non standard");
 
-		int *w = CVar_GetInt(rwidth);
-		if (!w)
+		int w = 0;
+		if (!CVar_GetInt(rwidth, &w))
 		{
 			Log_WriteSeq(LOG_WARN, "Failed to get r_width cvar, using the default width: %d", R_DEF_WIN_WIDTH);
 			*width = R_DEF_WIN_WIDTH;
 		}
 
-		int *h = CVar_GetInt(rheight);
-		if (!h)
+		int h = 0;
+		if (!CVar_GetInt(rheight, &h))
 		{
 			Log_WriteSeq(LOG_WARN, "Failed to get r_height cvar, using the default height: %d", R_DEF_WIN_HEIGHT);
 			*height = R_DEF_WIN_HEIGHT;
 		}
 
-		if (w)
-			*width = *w;
-
-		if (h)
-			*height = *h;
+		*width = w;
+		*height = h;
 
 		Log_WriteSeq(LOG_INFO, "Using custom video mode: %dx%d", *width, *height);
 
@@ -130,37 +127,25 @@ bool Render_Init(void)
 		return(false);
 
 	bool fullscreen = false;
-	bool *fs = CVar_GetBool(rfullscreen);
-	if (!fs)
+	if (!CVar_GetBool(rfullscreen, &fullscreen))
 	{
 		Log_WriteSeq(LOG_WARN, "Failed to get r_fullscreen cvar, using the default value: %d", R_DEF_FULLSCREEN);
 		fullscreen = R_DEF_FULLSCREEN;
 	}
 
-	else
-		fullscreen = *fs;
-
 	int multisamples = 0;
-	int *ms = CVar_GetInt(rmultisamples);
-	if (!ms)
+	if (!CVar_GetInt(rmultisamples, &multisamples))
 	{
 		Log_WriteSeq(LOG_WARN, "Failed to get r_multisamples cvar, using the default value: %d", R_DEF_MULTISAMPLES);
 		multisamples = R_DEF_MULTISAMPLES;
 	}
 
-	else
-		multisamples = *ms;
-
 	int refreshrate = 0;
-	int *rr = CVar_GetInt(rrefresh);
-	if (!rr)
+	if (!CVar_GetInt(rrefresh, &refreshrate))
 	{
 		Log_WriteSeq(LOG_WARN, "Failed to get r_refresh cvar, using the default value: %d", R_DEF_REFRESH_RATE);
 		refreshrate = R_DEF_REFRESH_RATE;
 	}
-
-	else
-		refreshrate = *rr;
 
 	glwndparams_t params =
 	{
@@ -176,15 +161,11 @@ bool Render_Init(void)
 		return(false);
 
 	int vsync = 0;
-	int *vs = CVar_GetInt(rvsync);
-	if (!vs)
+	if (!CVar_GetInt(rvsync, &vsync))
 	{
 		Log_WriteSeq(LOG_WARN, "Failed to get r_vsync cvar, using the default value: %d", 0);
 		vsync = 0;
 	}
-
-	else
-		vsync = *vs;
 
 	GLWnd_SetVSync(vsync);
 	Log_WriteSeq(LOG_INFO, "Using VSync, value set: %ld", vsync);
