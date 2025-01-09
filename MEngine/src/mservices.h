@@ -53,10 +53,10 @@ typedef struct		// cvar system
 	cvar_t *(*RegisterFloat)(const char *name, const float value, const unsigned long long flags, const char *description);
 	cvar_t *(*RegisterBool)(const char *name, const bool value, const unsigned long long flags, const char *description);
 
-	char *(*GetString)(cvar_t *cvar);
-	int *(*GetInt)(cvar_t *cvar);
-	float *(*GetFloat)(cvar_t *cvar);
-	bool *(*GetBool)(cvar_t *cvar);
+	bool (*GetString)(cvar_t *cvar, char *out);
+	bool (*GetInt)(cvar_t *cvar, int *out);
+	bool (*GetFloat)(cvar_t *cvar, float *out);
+	bool (*GetBool)(cvar_t *cvar, bool *out);
 
 	void (*SetString)(cvar_t *cvar, const char *value);
 	void (*SetInt)(cvar_t *cvar, const int value);
