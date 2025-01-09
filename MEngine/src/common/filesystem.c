@@ -133,8 +133,8 @@ filedata_t *FileSys_ListFiles(unsigned int *numfiles, const char *directory, con
 	{
 		if (PathMatchSpec(filename, filter))
 		{
-			size_t dirlen = strnlen(directory, SYS_MAX_PATH) + 1;
-			size_t filelen = strnlen(filename, SYS_MAX_PATH) + 1;
+			size_t dirlen = Sys_Strlen(directory, SYS_MAX_PATH) + 1;
+			size_t filelen = Sys_Strlen(filename, SYS_MAX_PATH) + 1;
 
 			if ((dirlen + filelen) > SYS_MAX_PATH)
 			{

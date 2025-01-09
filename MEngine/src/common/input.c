@@ -199,12 +199,12 @@ static void SetBinding(const keycode_t key, const char *binding)
 	if (key == KEY_UNKNOWN)
 		return;
 
-	size_t len = strnlen(binding, CMD_MAX_STR_LEN);
+	size_t len = Sys_Strlen(binding, CMD_MAX_STR_LEN);
 	size_t currentlen = 0;
 
 	if (keys[key].binding)
 	{
-		currentlen = strnlen(keys[key].binding, CMD_MAX_STR_LEN);
+		currentlen = Sys_Strlen(keys[key].binding, CMD_MAX_STR_LEN);
 
 		if (strcmp(keys[key].binding, binding) == 0)
 			return;

@@ -158,7 +158,9 @@ static void CreateMServices(void)
 	sys = (sys_t)
 	{
 		.Mkdir = Sys_Mkdir,
+		.Stat = Sys_Stat,
 		.Strtok = Sys_Strtok,
+		.Strlen = Sys_Strlen,
 		.Sleep = Sys_Sleep,
 		.Localtime = Sys_Localtime,
 		.CreateThread = Sys_CreateThread,

@@ -205,6 +205,11 @@ char *Sys_Strtok(char *string, const char *delimiter, char **context)
 	return(strtok_s(string, delimiter, context));
 }
 
+size_t Sys_Strlen(const char *string, size_t maxlen)
+{
+	return(strnlen_s(string, maxlen));
+}
+
 void Sys_Sleep(unsigned long milliseconds)
 {
 	Sleep(milliseconds);

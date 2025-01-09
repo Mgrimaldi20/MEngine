@@ -34,7 +34,7 @@ static bool initialized;
 static size_t HashFunction(const char *name)	// this function is actually okay for resizing, a new hash is generated for the new map size
 {
 	size_t hash = 0;
-	size_t len = strnlen(name, CVAR_MAX_STR_LEN);
+	size_t len = Sys_Strlen(name, CVAR_MAX_STR_LEN);
 
 	for (size_t i=0; i<len; i++)
 		hash = (hash * 31) + name[i];
@@ -235,7 +235,7 @@ static void ReadCVarsFromFile(FILE *infile, const char *filename)
 		char name[CVAR_MAX_STR_LEN] = { 0 };
 		char value[CVAR_MAX_STR_LEN] = { 0 };
 
-		if (!GetNameValue(args, strnlen(args, sizeof(line) - (cmdname - line)), name, value))
+		if (!GetNameValue(args, Sys_Strlen(args, sizeof(line) - (cmdname - line)), name, value))
 		{
 			Log_Write(LOG_ERROR, "Failed to read cvar from file: %s", filename);
 			continue;
