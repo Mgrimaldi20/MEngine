@@ -205,10 +205,10 @@ void Render_Shutdown(void)
 
 int Render_GetMinWidth(void)
 {
-	return(videomodes[sizeof(videomodes) / sizeof(videomodes[0])].width);
+	return(videomodes[sizeof(videomodes) / sizeof(videomodes[0]) - 1].width);
 }
 
 int Render_GetMinHeight(void)
 {
-	return(videomodes[sizeof(videomodes) / sizeof(videomodes[0])].height);
+	return(videomodes[sizeof(videomodes) / sizeof(videomodes[0]) - 1].height);
 }
