@@ -24,7 +24,11 @@ void Render_EndFrame(void);
 #define R_DEF_MULTISAMPLES 4
 #define R_DEF_REFRESH_RATE 60
 #define R_DEF_VSYNC 1
+#define R_DEF_FOV 60.0
 #define R_DEF_WIN_NAME "MEngine"
+
+int Render_GetMinWidth(void);
+int Render_GetMinHeight(void);
 
 #define MAX_WIN_NAME 256
 
