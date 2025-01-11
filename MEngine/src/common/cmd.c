@@ -27,7 +27,7 @@ typedef struct
 } cmdmap_t;
 
 static cmdmap_t *cmdmap;
-static char cmdbuffer[DEF_CMD_BUFFER_SIZE];		// TODO: might make this dynamic in the future again, just make it fixed len for now
+static char cmdbuffer[DEF_CMD_BUFFER_SIZE];
 static size_t cmdbufferlen;
 
 static bool initialized;
