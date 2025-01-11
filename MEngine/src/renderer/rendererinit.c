@@ -17,6 +17,7 @@ static cvar_t *rfullscreen;
 static cvar_t *rmultisamples;
 static cvar_t *rrefresh;
 static cvar_t *rvsync;
+static cvar_t *rfov;
 
 static bool initialized;
 
@@ -34,8 +35,7 @@ static const videomode_t videomodes[] =
 	{ "960x540", 960, 540 },
 	{ "854x480", 854, 480 },
 	{ "640x360", 640, 360 },
-	{ "640x480", 640, 480 },
-	{ "320x240", 320, 240 }
+	{ "640x480", 640, 480 }
 };
 
 static bool GetVideoModeInfo(int *width, int *height, int mode)
@@ -111,7 +111,7 @@ bool Render_Init(void)
 	{
 		.width = 0,
 		.height = 0,
-		.fov = 60.0
+		.fov = R_DEF_FOV
 	};
 
 	Cmd_RegisterCommand("sizeviewport", Sizeviewport_Cmd, "Resizes the viewport to the window size, happens on screen size change");
@@ -122,6 +122,7 @@ bool Render_Init(void)
 	rmultisamples = CVar_RegisterInt("r_multisamples", R_DEF_MULTISAMPLES, CVAR_ARCHIVE | CVAR_RENDERER, "Multisample anti-aliasing");
 	rrefresh = CVar_RegisterInt("r_refresh", R_DEF_REFRESH_RATE, CVAR_ARCHIVE | CVAR_RENDERER, "Refresh rate of the monitor");
 	rvsync = CVar_RegisterInt("r_vsync", R_DEF_VSYNC, CVAR_ARCHIVE | CVAR_RENDERER, "Vertical sync");
+	rfov = CVar_RegisterFloat("r_fov", R_DEF_FOV, CVAR_ARCHIVE | CVAR_RENDERER, "Field of view");
 
 	if (!GetVideoModeInfo(&glstate.width, &glstate.height, -1))
 		return(false);
@@ -163,9 +164,18 @@ bool Render_Init(void)
 	int vsync = 0;
 	if (!CVar_GetInt(rvsync, &vsync))
 	{
-		Log_WriteSeq(LOG_WARN, "Failed to get r_vsync cvar, using the default value: %d", 0);
-		vsync = 0;
+		Log_WriteSeq(LOG_WARN, "Failed to get r_vsync cvar, using the default value: %d", R_DEF_VSYNC);
+		vsync = R_DEF_VSYNC;
 	}
+
+	float fov = 0.0f;
+	if (!CVar_GetFloat(rfov, &fov))
+	{
+		Log_WriteSeq(LOG_WARN, "Failed to get r_fov cvar, using the default value: %f", R_DEF_FOV);
+		fov = R_DEF_FOV;
+	}
+
+	glstate.fov = (double)fov;
 
 	GLWnd_SetVSync(vsync);
 	Log_WriteSeq(LOG_INFO, "Using VSync, value set: %ld", vsync);
@@ -191,4 +201,14 @@ void Render_Shutdown(void)
 
 	initialized = false;
 	glstate.initialized = initialized;
+}
+
+int Render_GetMinWidth(void)
+{
+	return(videomodes[sizeof(videomodes) / sizeof(videomodes[0])].width);
+}
+
+int Render_GetMinHeight(void)
+{
+	return(videomodes[sizeof(videomodes) / sizeof(videomodes[0])].height);
 }
