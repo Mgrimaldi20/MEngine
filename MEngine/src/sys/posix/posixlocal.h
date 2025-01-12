@@ -6,6 +6,7 @@
 
 #include <stdbool.h>
 #include <sys/utsname.h>
+#include <sys/resource.h>
 #include "GLFW/glfw3.h"
 
 #include "common/keycodes.h"
@@ -27,5 +28,7 @@ typedef struct
 extern posixvars_t posixstate;
 
 void RegisterCallbacks(GLFWwindow *window);
+
+bool SysInitCommon(void);
 
 keycode_t MapGLFWKey(int key);

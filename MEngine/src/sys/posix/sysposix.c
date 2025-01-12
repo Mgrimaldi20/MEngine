@@ -37,6 +37,42 @@ static mutex_t mutexes[SYS_MAX_MUTEXES];
 static condvar_t condvars[SYS_MAX_CONDVARS];
 
 /*
+* Function: SysInitCommon
+* Initializes the common system services between MacOS and Linux
+* 
+* Returns: A boolean if the initialization was successful or not
+*/
+bool SysInitCommon(void)
+{
+	if (uname(&posixstate.osinfo) == -1) 	// get the OS version information, only run if the OS version is high enough
+	{
+		Log_WriteSeq(LOG_ERROR, "Failed to get OS version information");
+		return(false);
+	}
+
+	Log_WriteSeq(LOG_INFO, "OS: %s %s %s %s",
+		posixstate.osinfo.sysname,
+		posixstate.osinfo.nodename,
+		posixstate.osinfo.release,
+		posixstate.osinfo.version
+	);
+
+	Log_WriteSeq(LOG_INFO, "System memory: %lluMB", Sys_GetSystemMemory());
+	Log_WriteSeq(LOG_INFO, "System supports max threads: %lu", Sys_GetMaxThreads());
+
+	struct rlimit rl;
+	if (getrlimit(RLIMIT_STACK, &rl) != 0)
+	{
+		Log_WriteSeq(LOG_ERROR, "Failed to get the stack size");
+		return(false);
+	}
+
+	Log_WriteSeq(LOG_INFO, "Stack size: %juMB", (uintmax_t)(rl.rlim_cur / (1024 * 1024)));
+
+	return(true);
+}
+
+/*
 * Function: Sys_Shutdown
 * Shuts down the system services
 */
