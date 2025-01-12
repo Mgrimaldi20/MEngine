@@ -165,8 +165,8 @@ static void WindowSizeCallback(GLFWwindow *window, int width, int height)
 	if (!glstate.initialized || width <= 0 || height <= 0)
 		return;
 
-	int minwidth = 320;
-	int minheight = 240;
+	int minwidth = Render_GetMinWidth();
+	int minheight = Render_GetMinHeight();
 
 	if (width < minwidth)
 		width = minwidth;

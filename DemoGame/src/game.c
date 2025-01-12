@@ -5,7 +5,7 @@ mservices_t mservices;
 gameservices_t gameservices;
 
 static bool Init(void)
-{	
+{
 	return(true);
 }
 
