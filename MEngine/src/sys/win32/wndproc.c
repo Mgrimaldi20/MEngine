@@ -24,8 +24,8 @@ static void WindowSizing(WPARAM wparam, RECT *rect)
 	if (!glstate.initialized || glstate.width <=0 || glstate.height <= 0)
 		return;
 
-	int minwidth = 320;
-	int minheight = 240;
+	int minwidth = Render_GetMinWidth();
+	int minheight = Render_GetMinHeight();
 
 	if (rect->right - rect->left < minwidth)
 	{

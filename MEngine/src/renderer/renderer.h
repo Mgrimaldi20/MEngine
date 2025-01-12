@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdbool.h>
+#include "mservices.h"
 
 typedef struct
 {
@@ -30,7 +31,7 @@ void Render_EndFrame(void);
 int Render_GetMinWidth(void);
 int Render_GetMinHeight(void);
 
-#define MAX_WIN_NAME 256
+#define MAX_WIN_NAME SYS_MAX_PATH
 
 typedef struct
 {
