@@ -356,6 +356,14 @@ static int scancodes[] =
 	KEY_FINAL
 };
 
+/*
+* Function: MapGLFWKey
+* Maps a GLFW key to a common key code
+* 
+* 	key: The GLFW key code
+* 
+* Returns: The common key code
+*/
 keycode_t MapGLFWKey(int key)
 {
 	if (key < 0 || key >= (sizeof(scancodes) / sizeof(scancodes[0])) || key == GLFW_KEY_UNKNOWN)

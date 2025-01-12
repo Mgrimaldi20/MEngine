@@ -4,6 +4,14 @@
 
 static bool initialized;
 
+/*
+* Function: GLWnd_Init
+* Initializes the OpenGL window and context using GLFW for POSIX systems, also registers the window callbacks
+* 
+* 	params: The parameters to use for the window creation
+* 
+* Returns: A boolean if the initialization was successful or not
+*/
 bool GLWnd_Init(glwndparams_t params)
 {
 	if (initialized)
@@ -83,6 +91,10 @@ bool GLWnd_Init(glwndparams_t params)
 	return(true);
 }
 
+/*
+* Function: GLWnd_Shutdown
+* Shuts down the windowing system
+*/
 void GLWnd_Shutdown(void)
 {
 	if (!initialized)
@@ -102,6 +114,14 @@ void GLWnd_Shutdown(void)
 	initialized = false;
 }
 
+/*
+* Function: GLWnd_ChangeScreenParams
+* Changes the screen parameters of the window, for example resolution, refresh rate, and fullscreen modes
+* 
+* 	params: The parameters to change the screen to
+* 
+* Returns: A boolean if the operation was successful or not
+*/
 bool GLWnd_ChangeScreenParams(glwndparams_t params)
 {
 	if (!posixstate.window)
@@ -133,17 +153,33 @@ bool GLWnd_ChangeScreenParams(glwndparams_t params)
 	return(true);
 }
 
+/*
+* Function: GLWnd_SwapBuffers
+* Swaps the front and back buffers of the window
+*/
 void GLWnd_SwapBuffers(void)
 {
 	glfwSwapBuffers(posixstate.window);
 }
 
+/*
+* Function: GLWnd_SetVSync
+* Sets the vertical sync of the window
+* 
+* 	vsync: The vertical sync value to set, 1 for on, 0 for off, as numbers increase a factor of the refresh rate is used
+*/
 void GLWnd_SetVSync(int vsync)
 {
 	glfwSwapInterval(vsync);
 	posixstate.swapinterval = vsync;
 }
 
+/*
+* Function: GLWnd_GetVSync
+* Gets the vertical sync value of the window
+* 
+* Returns: The vertical sync value of the window
+*/
 int GLWnd_GetVSync(void)
 {
 	return(posixstate.swapinterval);

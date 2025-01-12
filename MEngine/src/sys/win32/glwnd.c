@@ -34,6 +34,14 @@ PFNWGLBINDTEXIMAGEARBPROC wglBindTexImageARB;
 PFNWGLRELEASETEXIMAGEARBPROC wglReleaseTexImageARB;
 PFNWGLSETPBUFFERATTRIBARBPROC wglSetPbufferAttribARB;
 
+/*
+* Function: GetWGLProcAddress
+* Gets the WGL proc address for a given extension
+* 
+* 	extension: The extension name to get the proc address for
+* 
+* Returns: The proc address for the extension
+*/
 static glwndproc_t GetWGLProcAddress(const char *extension)
 {
 	glwndproc_t proc = (glwndproc_t)wglGetProcAddress(extension);
@@ -46,7 +54,17 @@ static glwndproc_t GetWGLProcAddress(const char *extension)
 	return(proc);
 }
 
-// done to get Windows OpenGL extensions, need to create a dummy context to do this
+/*
+* Function: FakeWndProc
+* The window procedure for the fake window, need to create a fake window first to get WGL extension function addresses, dummy context is created
+* 
+* 	hwnd: The window handle
+* 	msg: The message code from Windows
+* 	wparam: The high order word of the Windows message
+* 	lparam: The low order word of the Windows message
+* 
+* Returns: The result of the default window procedure given the message contents
+*/
 static LRESULT CALLBACK FakeWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
 	if (msg == WM_DESTROY)
@@ -100,6 +118,12 @@ static LRESULT CALLBACK FakeWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM l
 	return(DefWindowProc(hwnd, msg, wparam, lparam));
 }
 
+/*
+* Function: GetWGLExtensions
+* Gets the WGL extensions for the current device context
+* 
+* 	hdc: The device context to get the extensions for
+*/
 static void GetWGLExtensions(HDC hdc)
 {
 	wglGetExtensionsStringARB = (PFNWGLGETEXTENSIONSSTRINGARBPROC)GetWGLProcAddress("wglGetExtensionsStringARB");
@@ -137,6 +161,12 @@ static void GetWGLExtensions(HDC hdc)
 	wglSetPbufferAttribARB = (PFNWGLSETPBUFFERATTRIBARBPROC)GetWGLProcAddress("wglSetPbufferAttribARB");
 }
 
+/*
+* Function: CreateFakeWindowExt
+* Creates a fake window to get WGL extensions
+* 
+* Returns: A boolean if the fake window was created successfully or not
+*/
 static bool CreateFakeWindowExt(void)
 {
 	HWND hwnd = CreateWindowEx(
@@ -178,6 +208,14 @@ static bool CreateFakeWindowExt(void)
 	return(true);
 }
 
+/*
+* Function: InitOpenGL
+* Initializes the real OpenGL state and options, sets the pixel format, creates the OpenGL context, etc...
+* 
+* 	params: The parameters for the OpenGL window, width, height, multisamples, etc...
+* 
+* Returns: A boolean if the OpenGL window was created successfully or not
+*/
 static bool InitOpenGL(glwndparams_t params)
 {
 	if (win32state.hdc != NULL)
@@ -293,6 +331,10 @@ static bool InitOpenGL(glwndparams_t params)
 	return(true);
 }
 
+/*
+* Function: CreateWndClasses
+* Creates the window classes for the main window and the fake window
+*/
 static void CreateWndClasses(void)
 {
 	if (win32state.wndclassregistered)
@@ -348,6 +390,14 @@ static void CreateWndClasses(void)
 	win32state.wndclassregistered = true;
 }
 
+/*
+* Function: GLCreateWindow
+* Creates the OpenGL window based on the parameters passed, same params passed to InitOpenGL
+* 
+* 	params: The parameters for the OpenGL window, width, height, multisamples, etc...
+* 
+* Returns: A boolean if the OpenGL window was created successfully or not
+*/
 static bool GLCreateWindow(glwndparams_t params)
 {
 	long x, y, w, h;
@@ -438,6 +488,14 @@ static bool GLCreateWindow(glwndparams_t params)
 	return(true);
 }
 
+/*
+* Function: SetFullScreen
+* Sets the display to fullscreen mode
+* 
+* 	params: The new parameters for the OpenGL window, width, height, multisamples, etc...
+* 
+* Returns: A boolean if the display was set to fullscreen mode successfully or not
+*/
 static bool SetFullScreen(glwndparams_t params)
 {
 	// check first if the selected mode is even valid
@@ -510,6 +568,14 @@ static bool SetFullScreen(glwndparams_t params)
 	return(false);
 }
 
+/*
+* Function: GLWnd_Init
+* Initializes the OpenGL window and system and also creates the window at this stage calling all the window creation functions
+* 
+* 	params: The parameters for the OpenGL window, width, height, multisamples, etc... Params are passed through to the window creation functions
+* 
+* Returns: A boolean if the OpenGL window was created successfully or not
+*/
 bool GLWnd_Init(glwndparams_t params)
 {
 	if (initialized)
@@ -581,6 +647,10 @@ bool GLWnd_Init(glwndparams_t params)
 	return(true);
 }
 
+/*
+* Function: GLWnd_Shutdown
+* Shuts down the OpenGL system
+*/
 void GLWnd_Shutdown(void)
 {
 	if (!initialized)
@@ -615,6 +685,14 @@ void GLWnd_Shutdown(void)
 	initialized = false;
 }
 
+/*
+* Function: GLWnd_ChangeScreenParams
+* Changes the screen parameters for the OpenGL window
+* 
+* 	params: The new parameters for the OpenGL window, width, height, multisamples, etc...
+* 
+* Returns: A boolean if the screen parameters were changed successfully or not
+*/
 bool GLWnd_ChangeScreenParams(glwndparams_t params)
 {
 	long x, y, w, h;
@@ -710,21 +788,37 @@ bool GLWnd_ChangeScreenParams(glwndparams_t params)
 	return(ret);
 }
 
+/*
+* Function: GLWnd_SwapBuffers
+* Swaps the OpenGL forward and back buffers
+*/
 void GLWnd_SwapBuffers(void)
 {
 	SwapBuffers(win32state.hdc);
 }
 
+/*
+* Function: GLWnd_SetVSync
+* Sets the VSync for the OpenGL window if the extension is available otherwise default sync is used from Win32
+* 
+* 	vsync: The VSync value to set, 0 for off, 1 for on, higher values for adaptive VSync
+*/
 void GLWnd_SetVSync(int vsync)
 {
 	if (wglSwapIntervalEXT)
 		wglSwapIntervalEXT(vsync);
 }
 
+/*
+* Function: GLWnd_GetVSync
+* Gets the VSync value for the OpenGL window
+* 
+* Returns: The VSync value for the OpenGL window, -1 if the extension is not available
+*/
 int GLWnd_GetVSync(void)
 {
 	if (wglGetSwapIntervalEXT)
 		return(wglGetSwapIntervalEXT());
 
-	return(-1);	// if the extension is not available
+	return(-1);
 }

@@ -5,6 +5,12 @@
 #include "winlocal.h"
 #include "renderer/renderer.h"
 
+/*
+* Function: ResizeWindow
+* Resizes the window viewport to match the new window size, gets the new client region dimensions
+* 
+*	hwnd: The window handle to resize
+*/
 static void ResizeWindow(HWND hwnd)
 {
 	RECT rect;
@@ -19,6 +25,12 @@ static void ResizeWindow(HWND hwnd)
 	Cmd_BufferCommand(CMD_EXEC_NOW, "sizeviewport");
 }
 
+/*
+* Function: WindowSizing
+* Resizes the window to the minimum size if the window is too small, handles the window sizing messages
+* 
+*	wparam: The window message parameter
+*/
 static void WindowSizing(WPARAM wparam, RECT *rect)
 {
 	if (!glstate.initialized || glstate.width <=0 || glstate.height <= 0)
@@ -53,6 +65,17 @@ static void WindowSizing(WPARAM wparam, RECT *rect)
 	win32state.fullwinheight = newheight;
 }
 
+/*
+* Function: MainWndProc
+* The main window procedure for the engine, handles all the window messages including native events, uses the default window procedure for unhandled messages
+* 
+*	hwnd: The window handle
+*	umsg: The message
+*	wparam: The high word of the message parameter
+*	lparam: The low word of the message parameter
+* 
+* Returns: The result of the message processing
+*/
 LRESULT CALLBACK MainWndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 {
 	keycode_t key = KEY_UNKNOWN;

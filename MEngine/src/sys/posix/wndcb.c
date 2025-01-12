@@ -4,6 +4,16 @@
 #include "renderer/renderer.h"
 #include "posixlocal.h"
 
+/*
+* Function: KeyCallback
+* Callback for key events, queues the key event to the event system
+* 
+* 	window: The window that received the event
+* 	key: The key that was pressed
+* 	scancode: The system-specific scancode of the key
+* 	action: The action that was taken
+* 	mods: Any modifier keys that were pressed
+*/
 static void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
 	keycode_t keycode = KEY_UNKNOWN;
@@ -39,6 +49,14 @@ static void KeyCallback(GLFWwindow *window, int key, int scancode, int action, i
 	}
 }
 
+/*
+* Function: MouseMoveCallback
+* Callback for mouse move events, queues the mouse event to the event system with the mouse position
+* 
+* 	window: The window that received the event
+* 	xpos: The new x-coordinate of the cursor
+* 	ypos: The new y-coordinate of the cursor
+*/
 static void MouseMoveCallback(GLFWwindow *window, double xpos, double ypos)
 {
 	int posx = (int)xpos;
@@ -48,6 +66,15 @@ static void MouseMoveCallback(GLFWwindow *window, double xpos, double ypos)
 		Event_QueueEvent(EVENT_MOUSE, posx, posy);
 }
 
+/*
+* Function: MouseButtonCallback
+* Callback for mouse button events, queues the mouse event to the event system
+* 
+* 	window: The window that received the event
+* 	button: The button that was pressed
+* 	action: The action that was taken
+* 	mods: Any modifier keys that were pressed
+*/
 static void MouseButtonCallback(GLFWwindow *window, int button, int action, int mods)
 {
 	keycode_t keycode = KEY_UNKNOWN;
@@ -144,6 +171,14 @@ static void MouseButtonCallback(GLFWwindow *window, int button, int action, int 
 	}
 }
 
+/*
+* Function: MouseScrollCallback
+* Callback for mouse scroll events, queues the mouse event to the event system
+* 
+* 	window: The window that received the event
+* 	xoffset: The scroll offset along the x-axis, unused at the moment
+* 	yoffset: The scroll offset along the y-axis, this is the value that is used for the mouse wheel
+*/
 static void MouseScrollCallback(GLFWwindow *window, double xoffset, double yoffset)
 {
 	keycode_t key = yoffset < 0 ? MOUSE_WHEELDOWN : MOUSE_WHEELUP;
@@ -160,6 +195,14 @@ static void CharCallback(GLFWwindow *window, unsigned int codepoint)
 {
 }
 
+/*
+* Function: WindowSizeCallback
+* Callback for window size events, resizes the window to the minimum size if the window is too small
+* 
+* 	window: The window that received the event
+* 	width: The new width of the window
+* 	height: The new height of the window
+*/
 static void WindowSizeCallback(GLFWwindow *window, int width, int height)
 {
 	if (!glstate.initialized || width <= 0 || height <= 0)
@@ -177,14 +220,28 @@ static void WindowSizeCallback(GLFWwindow *window, int width, int height)
 	glfwSetWindowSize(window, width, height);
 }
 
+/*
+* Function: FramebufferSizeCallback
+* Callback for framebuffer size events, resizes the viewport to the new size, all controlled by GLFW
+* 
+* 	window: The window that received the event
+* 	width: The new width of the framebuffer
+* 	height: The new height of the framebuffer
+*/
 static void FramebufferSizeCallback(GLFWwindow *window, int width, int height)
 {
-	glstate.width = width;		// let GLFW control the framebuffer size
+	glstate.width = width;
 	glstate.height = height;
 
 	Cmd_BufferCommand(CMD_EXEC_NOW, "sizeviewport");
 }
 
+/*
+* Function: WindowCloseCallback
+* Callback for window close events, sets the window to close
+* 
+* 	window: The window that received the event
+*/
 static void WindowCloseCallback(GLFWwindow *window)
 {
 	glfwSetWindowShouldClose(window, GLFW_TRUE);
@@ -198,6 +255,12 @@ static void WindowIconifyCallback(GLFWwindow *window, int iconified)
 {
 }
 
+/*
+* Function: RegisterCallbacks
+* Registers all the callbacks for the window
+* 
+* 	window: The window to register the callbacks to
+*/
 void RegisterCallbacks(GLFWwindow *window)
 {
 	glfwSetKeyCallback(window, KeyCallback);
