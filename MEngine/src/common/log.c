@@ -36,11 +36,28 @@ static logentry_t logqueue[MAX_LOG_ENTRIES];
 
 static bool initialized;
 
+/*
+* Function: CompareFileData
+* Compares two filedata_t structs by their modification time
+* 
+*	a: The first filedata_t struct
+*	b: The second filedata_t struct
+* 
+* Returns: The difference in time between the two times
+*/
 static int CompareFileData(const void *a, const void *b)
 {
 	return((int)difftime(((filedata_t *)b)->mtime, ((filedata_t *)a)->mtime));
 }
 
+/*
+* Function: RemoveOldLogFiles
+* Removes old log files from the logs directory based on the MAX_LOG_FILES define and the file filter
+* 
+*	dir: The directory to search for log files
+* 
+* Returns: A boolean if the operation was successful or not
+*/
 static bool RemoveOldLogFiles(const char *dir)
 {
 	const char *logfilter = "logs.*.log";
@@ -69,6 +86,15 @@ static bool RemoveOldLogFiles(const char *dir)
 	return(true);
 }
 
+/*
+* Function: GenLogFileName
+* Generates a log file name based on the current date
+* 
+*	dir: The directory to store the log files
+*	outfilename: The output filename
+* 
+* Returns: A boolean if the operation was successful or not
+*/
 static bool GenLogFileName(const char *dir, char *outfilename)
 {
 	if (!dir || !outfilename)
@@ -85,6 +111,12 @@ static bool GenLogFileName(const char *dir, char *outfilename)
 	return(true);
 }
 
+/*
+* Function: FormatSessionEntry
+* Formats a session entry in the log file with the current date and time, log header
+* 
+*	logfullname: The full path to the log file
+*/
 static void FormatSessionEntry(const char *logfullname)
 {
 	FILE *temp = fopen(logfullname, "r+");
@@ -109,6 +141,12 @@ static void FormatSessionEntry(const char *logfullname)
 	}
 }
 
+/*
+* Function: ProcessLogQueue
+* Processes the log queue and writes the log entries to the log file in another thread
+* 
+*	args: The arguments to the thread function
+*/
 static void *ProcessLogQueue(void *args)
 {
 	(void)args;
@@ -169,6 +207,12 @@ static void *ProcessLogQueue(void *args)
 	return(NULL);
 }
 
+/*
+* Function: Log_Init
+* Initializes the logging service
+* 
+* Returns: A boolean if initialization was successful or not
+*/
 bool Log_Init(void)
 {
 	if (initialized)
@@ -221,6 +265,10 @@ bool Log_Init(void)
 	return(true);
 }
 
+/*
+* Function: Log_Shutdown
+* Shuts down the logging service
+*/
 void Log_Shutdown(void)
 {
 	if (!initialized)
@@ -253,6 +301,13 @@ void Log_Shutdown(void)
 	initialized = false;
 }
 
+/*
+* Function: Log_Write
+* Writes a log message to the log queue for processing by the log thread
+* 
+* 	type: The type of log message
+* 	msg: The message to log, the log message format is the same as printf
+*/
 void Log_Write(const logtype_t type, const char *msg, ...)
 {
 	if ((logcount >= MAX_LOG_ENTRIES) || (!initialized))
@@ -277,6 +332,13 @@ void Log_Write(const logtype_t type, const char *msg, ...)
 	Sys_SignalCondVar(logcond);
 }
 
+/*
+* Function: Log_WriteSeq
+* Writes a log message to the log file sequentially
+* 
+* 	type: The type of log message
+* 	msg: The message to log, the log message format is the same as printf
+*/
 void Log_WriteSeq(const logtype_t type, const char *msg, ...)
 {
 	if (!initialized)
@@ -305,6 +367,13 @@ void Log_WriteSeq(const logtype_t type, const char *msg, ...)
 	Sys_UnlockMutex(loglock);
 }
 
+/*
+* Function: Log_WriteLargeSeq
+* Writes a log message to the log file sequentially, will allocate heap memory for large log messages that are over the max log length
+* 
+* 	type: The type of log message
+* 	msg: The message to log, the log message format is the same as printf
+*/
 void Log_WriteLargeSeq(const logtype_t type, const char *msg, ...)
 {
 	if (!initialized)

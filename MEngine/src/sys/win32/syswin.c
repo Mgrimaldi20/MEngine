@@ -34,6 +34,12 @@ static condvar_t condvars[SYS_MAX_CONDVARS];
 
 static bool initialized;
 
+/*
+* Function: Sys_Init
+* Initializes the system services and gets the OS system information for Windows systems
+* 
+* Returns: A boolean if the initialization was successful or not
+*/
 bool Sys_Init(void)
 {
 	if (initialized)
@@ -89,6 +95,10 @@ bool Sys_Init(void)
 	return(true);
 }
 
+/*
+* Function: Sys_Shutdown
+* Shuts down the system services
+*/
 void Sys_Shutdown(void)
 {
 	if (!initialized)
@@ -99,6 +109,12 @@ void Sys_Shutdown(void)
 	initialized = false;
 }
 
+/*
+* Function: Sys_Error
+* Displays an error message popup window and shuts down the engine, used for fatal errors and exceptions
+* 
+* 	error: The error message to display
+*/
 void Sys_Error(const char *error, ...)
 {
 	va_list argptr;
@@ -122,6 +138,12 @@ void Sys_Error(const char *error, ...)
 	exit(1);
 }
 
+/*
+* Function: Sys_ProcessCommandLine
+* Processes the command line arguments and stores them in a command line struct, turns the wide char command line into argc and argv
+* 
+*	cmdline: The command line struct to store the arguments in
+*/
 void Sys_ProcessCommandLine(cmdline_t *cmdline)
 {
 	if (!cmdline)
@@ -170,6 +192,14 @@ void Sys_ProcessCommandLine(cmdline_t *cmdline)
 	cmdline->allocated = true;
 }
 
+/*
+* Function: Sys_Mkdir
+* Creates a directory
+* 
+*	path: The path of the directory to create
+* 
+* Returns: A boolean if the directory was created or not, also returns true if the directory already exists
+*/
 bool Sys_Mkdir(const char *path)
 {
 	if (_mkdir(path) != 0)
@@ -181,6 +211,13 @@ bool Sys_Mkdir(const char *path)
 	return(true);
 }
 
+/*
+* Function: Sys_Stat
+* Gets the file information for a file
+* 
+*	filepath: The path of the file to get the information for
+*	filedata: The filedata struct to store the file information in
+*/
 void Sys_Stat(const char *filepath, filedata_t *filedata)
 {
 	if (!filedata)
@@ -200,26 +237,66 @@ void Sys_Stat(const char *filepath, filedata_t *filedata)
 	filedata->ctime = st.st_ctime;
 }
 
+/*
+* Function: Sys_Strtok
+* Portable version of strtok_s and thread safe
+* 
+*	string: The string to tokenize
+*	delimiter: The delimiter to tokenize the string with
+*	context: The context to store the current position in the string
+* 
+* Returns: A pointer to the next token in the string
+*/
 char *Sys_Strtok(char *string, const char *delimiter, char **context)
 {
 	return(strtok_s(string, delimiter, context));
 }
 
+/*
+* Function: Sys_Strlen
+* Portable version of strnlen_s
+* 
+*	string: The string to get the length of
+*	maxlen: The maximum length of the string
+* 
+* Returns: The length of the string
+*/
 size_t Sys_Strlen(const char *string, size_t maxlen)
 {
 	return(strnlen_s(string, maxlen));
 }
 
+/*
+* Function: Sys_Sleep
+* Sleeps the current thread for a specified amount of time
+* 
+*	milliseconds: The amount of time to sleep in milliseconds
+*/
 void Sys_Sleep(unsigned long milliseconds)
 {
 	Sleep(milliseconds);
 }
 
+/*
+* Function: Sys_Localtime
+* Portable version of localtime_s, thread safe
+* 
+*	buf: The buffer to store the time information in
+*	timer: The time to get the local time from
+*/
 void Sys_Localtime(struct tm *buf, const time_t *timer)
 {
 	localtime_s(buf, timer);
 }
 
+/*
+* Function: Sys_OpenDir
+* Opens a directory for reading
+* 
+*	directory: The directory path to open
+* 
+* Returns: A pointer to the directory handle
+*/
 void *Sys_OpenDir(const char *directory)
 {
 	WIN32_FIND_DATA findfiledata = { 0 };
@@ -238,6 +315,16 @@ void *Sys_OpenDir(const char *directory)
 	return(handle);
 }
 
+/*
+* Function: Sys_ReadDir
+* Reads a directory and gets the next file in the directory
+* 
+*	directory: The directory handle to read from
+*	filename: The buffer to store the filename in
+*	filenamelen: The length of the filename buffer
+* 
+* Returns: A boolean if the file was read or not
+*/
 bool Sys_ReadDir(void *directory, char *filename, size_t filenamelen)
 {
 	HANDLE handle = (HANDLE)directory;
@@ -252,11 +339,23 @@ bool Sys_ReadDir(void *directory, char *filename, size_t filenamelen)
 	return(true);
 }
 
+/*
+* Function: Sys_CloseDir
+* Closes a directory handle
+* 
+*	directory: The directory handle to close
+*/
 void Sys_CloseDir(void *directory)
 {
 	FindClose((HANDLE)directory);
 }
 
+/*
+* Function: Sys_GetSystemMemory
+* Gets the total system memory in MB
+* 
+* Returns: The total system memory in MB
+*/
 size_t Sys_GetSystemMemory(void)
 {
 	MEMORYSTATUSEX meminfo;
@@ -265,6 +364,12 @@ size_t Sys_GetSystemMemory(void)
 	return((size_t)(meminfo.ullTotalPhys / 1024 / 1024));
 }
 
+/*
+* Function: Sys_GetMaxThreads
+* Gets the maximum number of threads the system supports
+* 
+* Returns: The maximum number of threads the system supports
+*/
 unsigned long Sys_GetMaxThreads(void)
 {
 	static unsigned long maxthreads;
@@ -279,6 +384,15 @@ unsigned long Sys_GetMaxThreads(void)
 	return(maxthreads);
 }
 
+/*
+* Function: Sys_CreateThread
+* Creates a new thread
+* 
+*	func: The function to run in the new thread
+*	arg: The arguments to pass to the function
+* 
+* Returns: A pointer to the new thread handle
+*/
 thread_t *Sys_CreateThread(void *(*func)(void *), void *arg)
 {
 	thread_t *handle = NULL;
@@ -305,6 +419,12 @@ thread_t *Sys_CreateThread(void *(*func)(void *), void *arg)
 	return(handle);
 }
 
+/*
+* Function: Sys_JoinThread
+* Joins a thread
+* 
+*	thread: The thread to join
+*/
 void Sys_JoinThread(thread_t *thread)
 {
 	if (thread)
@@ -314,6 +434,12 @@ void Sys_JoinThread(thread_t *thread)
 	}
 }
 
+/*
+* Function: Sys_CreateMutex
+* Creates a new mutex
+* 
+* Returns: A pointer to the new mutex handle
+*/
 mutex_t *Sys_CreateMutex(void)
 {
 	mutex_t *handle = NULL;
@@ -340,6 +466,12 @@ mutex_t *Sys_CreateMutex(void)
 	return(handle);
 }
 
+/*
+* Function: Sys_DestroyMutex
+* Destroys a mutex
+* 
+*	mutex: The mutex to destroy
+*/
 void Sys_DestroyMutex(mutex_t *mutex)
 {
 	if (mutex)
@@ -349,11 +481,23 @@ void Sys_DestroyMutex(mutex_t *mutex)
 	}
 }
 
+/*
+* Function: Sys_LockMutex
+* Locks a mutex
+* 
+*	mutex: The mutex to lock
+*/
 void Sys_LockMutex(mutex_t *mutex)
 {
 	mtx_lock(&mutex->mutex);
 }
 
+/*
+* Function: Sys_UnlockMutex
+* Unlocks a mutex, ignores some warnings about not acquiring the lock before unlocking, this is expected behavior
+* 
+*	mutex: The mutex to unlock
+*/
 void Sys_UnlockMutex(mutex_t *mutex)
 {
 #pragma warning(push)
@@ -362,6 +506,12 @@ void Sys_UnlockMutex(mutex_t *mutex)
 #pragma warning(pop)
 }
 
+/*
+* Function: Sys_CreateCondVar
+* Creates a new condition variable
+* 
+*	Returns: A pointer to the new condition variable handle
+*/
 condvar_t *Sys_CreateCondVar(void)
 {
 	condvar_t *handle = NULL;
@@ -388,6 +538,12 @@ condvar_t *Sys_CreateCondVar(void)
 	return(handle);
 }
 
+/*
+* Function: Sys_DestroyCondVar
+* Destroys a condition variable
+* 
+*	condvar: The condition variable to destroy
+*/
 void Sys_DestroyCondVar(condvar_t *condvar)
 {
 	if (condvar)
@@ -397,16 +553,37 @@ void Sys_DestroyCondVar(condvar_t *condvar)
 	}
 }
 
+/*
+* Function: Sys_WaitCondVar
+* Waits on a condition variable
+* 
+*	condvar: The condition variable to wait on
+*	mutex: The mutex to lock
+*/
 void Sys_WaitCondVar(condvar_t *condvar, mutex_t *mutex)
 {
 	cnd_wait(&condvar->cond, &mutex->mutex);
 }
 
+/*
+* Function: Sys_SignalCondVar
+* Signals a condition variable
+* 
+*	condvar: The condition variable to signal
+*/
 void Sys_SignalCondVar(condvar_t *condvar)
 {
 	cnd_signal(&condvar->cond);
 }
 
+/*
+* Function: Sys_LoadDLL
+* Loads a DLL
+* 
+*	dllname: The name of the DLL to load
+* 
+* Returns: A pointer to the DLL handle
+*/
 void *Sys_LoadDLL(const char *dllname)
 {
 	wchar_t wdllname[SYS_MAX_PATH] = { 0 };
@@ -420,6 +597,12 @@ void *Sys_LoadDLL(const char *dllname)
 	return(libhandle);
 }
 
+/*
+* Function: Sys_UnloadDLL
+* Unloads a DLL
+* 
+*	handle: The DLL handle to unload
+*/
 void Sys_UnloadDLL(void *handle)
 {
 	if (handle)
@@ -429,6 +612,15 @@ void Sys_UnloadDLL(void *handle)
 	}
 }
 
+/*
+* Function: Sys_GetProcAddress
+* Gets a procedure address from a DLL that has been loaded
+* 
+*	handle: The DLL handle to get the procedure address from
+*	procname: The name of the procedure to get the address of
+* 
+* Returns: A pointer to the procedure address
+*/
 void *Sys_GetProcAddress(void *handle, const char *procname)
 {
 #pragma warning(push)

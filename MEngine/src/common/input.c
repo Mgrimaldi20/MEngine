@@ -172,6 +172,14 @@ static char bindingsfullname[SYS_MAX_PATH];
 
 static bool initialized;
 
+/*
+* Function: GetKeyName
+* Gets the name of a key from its keycode
+* 
+* 	key: The keycode to get the name of
+* 
+* Returns: The text name of the key
+*/
 static const char *GetKeyName(const keycode_t key)
 {
 	for (int i=0; i<KEY_FINAL; i++)
@@ -183,6 +191,14 @@ static const char *GetKeyName(const keycode_t key)
 	return(NULL);
 }
 
+/*
+* Function: GetKeyFromName
+* Gets the keycode from the name of a key
+* 
+* 	name: The name of the key
+* 
+* Returns: The keycode of the key name
+*/
 static keycode_t GetKeyFromName(const char *name)
 {
 	for (int i=0; i<KEY_FINAL; i++)
@@ -194,6 +210,13 @@ static keycode_t GetKeyFromName(const char *name)
 	return(KEY_UNKNOWN);
 }
 
+/*
+* Function: SetBinding
+* Sets a binding for a key, the binding is a command string that is executed by the command system
+* 
+* 	key: The keycode of the key to bind
+* 	binding: The command string to bind to the key
+*/
 static void SetBinding(const keycode_t key, const char *binding)
 {
 	if (key == KEY_UNKNOWN)
@@ -241,6 +264,12 @@ static void SetBinding(const keycode_t key, const char *binding)
 	}
 }
 
+/*
+* Function: WriteBindings
+* Writes the key bindings to a file
+* 
+* 	bindings: The file to write the bindings to
+*/
 void WriteBindings(FILE *bindings)
 {
 	if (!bindings)
@@ -253,6 +282,12 @@ void WriteBindings(FILE *bindings)
 	}
 }
 
+/*
+* Function: ReadBindings
+* Reads the key bindings from a file
+* 
+* 	bindings: The file to read the bindings from
+*/
 static void ReadBindings(FILE *bindings)
 {
 	if (!bindings)
@@ -277,6 +312,12 @@ static void ReadBindings(FILE *bindings)
 	}
 }
 
+/*
+* Function: Bind_Cmd
+* Binds a command to a key from the command line
+* 
+* 	args: The command arguments
+*/
 static void Bind_Cmd(const cmdargs_t *args)
 {
 	if (args->argc != 3)
@@ -295,6 +336,12 @@ static void Bind_Cmd(const cmdargs_t *args)
 	SetBinding(key, args->argv[2]);
 }
 
+/*
+* Function: Input_Init
+* Initializes the input system
+* 
+* Returns: A boolean if initialization was successful or not
+*/
 bool Input_Init(void)
 {
 	if (initialized)
@@ -353,6 +400,10 @@ bool Input_Init(void)
 	return(true);
 }
 
+/*
+* Function: Input_Shutdown
+* Shuts down the input system
+*/
 void Input_Shutdown(void)
 {
 	if (!initialized)
@@ -384,6 +435,13 @@ void Input_Shutdown(void)
 	initialized = false;
 }
 
+/*
+* Function: Input_ProcessKeyInput
+* Processes key input
+* 
+* 	key: The key that was pressed
+* 	down: A boolean if the key was pressed or released
+*/
 void Input_ProcessKeyInput(const int key, bool down)
 {
 	if (key <= KEY_UNKNOWN || key >= KEY_FINAL)

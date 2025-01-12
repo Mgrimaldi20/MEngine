@@ -77,6 +77,10 @@ int WINAPI wWinMain(HINSTANCE hinst, HINSTANCE hprevinst, PWSTR pcmdline, int nc
 	return(1);
 }
 
+/*
+* Function: WindowsError
+* Displays a message box with the last windows error, used for Win32 API functions, used for fatal Windows errors
+*/
 void WindowsError(void)
 {
 	LPVOID wlpmsgbuf;
@@ -102,6 +106,10 @@ void WindowsError(void)
 	exit(1);
 }
 
+/*
+* Function: InitConsole
+* Initializes the debugging console
+*/
 void InitConsole(void)
 {
 	if (!AllocConsole())
@@ -131,6 +139,10 @@ void InitConsole(void)
 	Common_Printf("Opening debugging console\n");
 }
 
+/*
+* Function: ShutdownConsole
+* Shuts down the debugging console
+*/
 void ShutdownConsole(void)
 {
 	Common_Printf("\nClosing debugging console\n");
@@ -151,11 +163,19 @@ void ShutdownConsole(void)
 	}
 }
 
+/*
+* Function: ShowConsole
+* Shows the debugging console
+*/
 void ShowConsole(void)
 {
 	ShowWindow(GetConsoleWindow(), SW_SHOW);
 }
 
+/*
+* Function: HideConsole
+* Hides the debugging console from view, but still allows output
+*/
 void HideConsole(void)
 {
 	ShowWindow(GetConsoleWindow(), SW_HIDE);

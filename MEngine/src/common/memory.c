@@ -44,6 +44,12 @@ static allocator_t allocator;		// if system memory is less than 4GB or the nocac
 
 static bool initialized;
 
+/*
+* Function: GetFreeBlock
+* Gets a free block from the pool or allocates a new one
+* 
+* Returns: A free block, either from the pool or a new allocation
+*/
 static freeblock_t *GetFreeBlock(void)
 {
 	freeblock_t *block;
@@ -68,12 +74,26 @@ static freeblock_t *GetFreeBlock(void)
 	return(block);
 }
 
+/*
+* Function: ReturnFreeBlock
+* Returns a free block to the pool
+* 
+* 	block: The block to return
+*/
 static void ReturnFreeBlock(freeblock_t *block)
 {
 	block->next = pool;
 	pool = block;
 }
 
+/*
+* Function: DefaultAlloc
+* Default memory allocator using malloc instead of the cache
+* 
+* 	size: The size of the memory to allocate
+* 
+* Returns: A pointer to the allocated memory
+*/
 static void *DefaultAlloc(size_t size)
 {
 	assert(size > 0);
@@ -107,6 +127,12 @@ static void *DefaultAlloc(size_t size)
 	return(ptr);
 }
 
+/*
+* Function: DefaultFree
+* Default memory deallocator using free instead of the cache
+* 
+* 	ptr: The pointer to the memory to deallocate
+*/
 static void DefaultFree(void *ptr)
 {
 	assert(ptr);
@@ -136,6 +162,10 @@ static void DefaultFree(void *ptr)
 	}
 }
 
+/*
+* Function: DefaultReset
+* Resets all memory allocated by the default allocator, freeing all memory
+*/
 static void DefaultReset(void)
 {
 	Log_Write(LOG_INFO, "Resetting default allocator [last allocation: %zu bytes]", memcacheused);
@@ -154,6 +184,10 @@ static void DefaultReset(void)
 	lastreported = 0;
 }
 
+/*
+* Function: DefaultDump
+* Dumps all memory information allocated by the default allocator
+*/
 static void DefaultDump(void)
 {
 	Log_WriteSeq(LOG_INFO, "\t\tDefault Allocator Dump [bytes used by the default allocator: %zu]:", memcacheused);
@@ -170,11 +204,25 @@ static void DefaultDump(void)
 	Log_WriteSeq(LOG_INFO, "\t\tEnd of Default Allocator Dump");
 }
 
+/*
+* Function: DefaultTotalMemory
+* Returns the total memory used by the default allocator
+* 
+* Returns: The total memory used by the default allocator
+*/
 static size_t DefaultTotalMemory(void)
 {
 	return(memcacheused);
 }
 
+/*
+* Function: CacheAlloc
+* Allocates memory from the pre-allocated cache
+* 
+* 	size: The size of the memory to allocate
+* 
+* Returns: A pointer to the allocated memory
+*/
 static void *CacheAlloc(size_t size)
 {
 	assert(size > 0);
@@ -233,6 +281,12 @@ static void *CacheAlloc(size_t size)
 	return(NULL);
 }
 
+/*
+* Function: CacheFree
+* Frees memory allocated from the cache
+* 
+* 	ptr: The pointer to the memory to deallocate
+*/
 static void CacheFree(void *ptr)
 {
 	assert(ptr);
@@ -298,6 +352,10 @@ static void CacheFree(void *ptr)
 #endif
 }
 
+/*
+* Function: CacheReset
+* Resets the memory cache, freeing all memory and resetting the cache back to 0
+*/
 static void CacheReset(void)
 {
 	Log_Write(LOG_INFO, "Resetting memory cache [last allocation: %zu bytes]", memcacheused);
@@ -337,6 +395,10 @@ static void CacheReset(void)
 	lastreported = 0;
 }
 
+/*
+* Function: CacheDump
+* Dumps all memory information allocated by the cache allocator
+*/
 static void CacheDump(void)
 {
 	Log_WriteSeq(LOG_INFO, "\t\tMemory Cache Dump [bytes used by the memory cache: %zu]:", memcacheused);
@@ -351,16 +413,32 @@ static void CacheDump(void)
 	Log_WriteSeq(LOG_INFO, "\t\tEnd of Memory Cache Dump");
 }
 
+/*
+* Function: CacheTotalMemory
+* Returns the total memory remaining in the cache
+* 
+* Returns: The total memory remaining in the cache
+*/
 static size_t CacheTotalMemory(void)
 {
 	return(freeblocks->size);
 }
 
+/*
+* Function: DumpAllocData
+* Dumps all allocation data, polymorphic function to call the appropriate allocator dump function, used for debugging
+*/
 void DumpAllocData(void)
 {
 	allocator.Dump();
 }
 
+/*
+* Function: MemCache_Init
+* Initializes the memory cache system and picks the appropriate allocator to use based on system memory conditions
+* 
+* Returns: A boolean if the initialization was successful or not
+*/
 bool MemCache_Init(void)
 {
 	if (initialized)
@@ -441,6 +519,10 @@ bool MemCache_Init(void)
 	return(true);
 }
 
+/*
+* Function: MemCache_Shutdown
+* Shuts down the memory cache system
+*/
 void MemCache_Shutdown(void)
 {
 	if (!initialized)
@@ -481,31 +563,61 @@ void MemCache_Shutdown(void)
 	initialized = false;
 }
 
+/*
+* Function: MemCache_Alloc
+* Allocates memory polymorphically using the appropriate allocator
+*/
 void *MemCache_Alloc(size_t size)
 {
 	return(allocator.Allocate(size));
 }
 
+/*
+* Function: MemCache_Free
+* Frees memory polymorphically using the appropriate allocator
+*/
 void MemCache_Free(void *ptr)
 {
 	allocator.Deallocate(ptr);
 }
 
+/*
+* Function: MemCache_Reset
+* Resets the memory cache or taglist depending on the allocator used
+*/
 void MemCache_Reset(void)
 {
 	allocator.Reset();
 }
 
+/*
+* Function: MemCache_GetMemUsed
+* Gets the total memory used by the allocator
+* 
+* Returns: The total memory used by the allocator
+*/
 size_t MemCahce_GetMemUsed(void)
 {
 	return(memcacheused);
 }
 
+/*
+* Function: MemCache_GetTotalMemory
+* Gets the total memory remaining in the cache
+* 
+* Returns: The total memory remaining in the cache
+*/
 size_t MemCache_GetTotalMemory(void)
 {
 	return(freeblocks->size);
 }
 
+/*
+* Function: MemCache_UseCache
+* Returns if the memory cache is being used or not
+* 
+* Returns: A boolean if the memory cache is being used or not
+*/
 bool MemCache_UseCache(void)
 {
 	return(allocator.usecache);

@@ -3,6 +3,12 @@
 #include "sys/sys.h"
 #include "posixlocal.h"
 
+/*
+* Function: Sys_Init
+* Initializes the system services and gets the OS system information for Linux systems
+* 
+* Returns: A boolean if the initialization was successful or not
+*/
 bool Sys_Init(void)
 {
 	if (posixstate.initialized)

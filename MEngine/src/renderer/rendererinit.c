@@ -38,6 +38,16 @@ static const videomode_t videomodes[] =
 	{ "640x480", 640, 480 }
 };
 
+/*
+* Function: GetVideoModeInfo
+* Gets the width and height of the window based on the video mode, or custom mode if -1 is passed
+* 
+* 	width: A pointer to the width of the window
+* 	height: A pointer to the height of the window
+* 	mode: The video mode to use, -1 for custom width and height, otherwise the index of the predefined video mode, all modes are 16:9 aspect ratio
+* 
+* Returns: A boolean if the operation was successful or not
+*/
 static bool GetVideoModeInfo(int *width, int *height, int mode)
 {
 	int modesize = (sizeof(videomodes) / sizeof(videomodes[0]));
@@ -78,6 +88,10 @@ static bool GetVideoModeInfo(int *width, int *height, int mode)
 	return(true);
 }
 
+/*
+* Function: InitOpenGL
+* Initializes the OpenGL state and options
+*/
 static void InitOpenGL(void)
 {
 	glViewport(0, 0, (GLsizei)glstate.width, (GLsizei)glstate.height);
@@ -90,6 +104,12 @@ static void InitOpenGL(void)
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);	// better perspective correction
 }
 
+/*
+* Function: Sizeviewport_Cmd
+* Resizes the rendering viewport on window size change, this is just the client region
+* 
+*	args: The command arguments, this function takes no arguments
+*/
 static void Sizeviewport_Cmd(const cmdargs_t *args)
 {
 	if (args->argc != 1)
@@ -102,6 +122,12 @@ static void Sizeviewport_Cmd(const cmdargs_t *args)
 	Common_Printf("Resized viewport to %dx%d\n", glstate.width, glstate.height);
 }
 
+/*
+* Function: Render_Init
+* Initializes the rendering system and sets up the window
+* 
+* Returns: A boolean if the initialization was successful or not
+*/
 bool Render_Init(void)
 {
 	if (initialized)
@@ -190,6 +216,10 @@ bool Render_Init(void)
 	return(true);
 }
 
+/*
+* Function: Render_Shutdown
+* Shuts down the rendering system
+*/
 void Render_Shutdown(void)
 {
 	if (!initialized)
@@ -203,11 +233,23 @@ void Render_Shutdown(void)
 	glstate.initialized = initialized;
 }
 
+/*
+* Function: Render_GetMinWidth
+* Gets the minimum width of the window, this is the smallest width a window can be
+* 
+* Returns: The minimum width of the window from the predefined video modes
+*/
 int Render_GetMinWidth(void)
 {
 	return(videomodes[sizeof(videomodes) / sizeof(videomodes[0]) - 1].width);
 }
 
+/*
+* Function: Render_GetMinHeight
+* Gets the minimum height of the window, this is the smallest height a window can be
+* 
+* Returns: The minimum height of the window from the predefined video modes
+*/
 int Render_GetMinHeight(void)
 {
 	return(videomodes[sizeof(videomodes) / sizeof(videomodes[0]) - 1].height);

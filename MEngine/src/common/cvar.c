@@ -31,6 +31,14 @@ static char cvarfullname[SYS_MAX_PATH];
 
 static bool initialized;
 
+/*
+* Function: HashFunction
+* Hashes the name of the cvar to generate a hash value
+* 
+*	name: The name of the cvar
+* 
+* Returns: The hash value
+*/
 static size_t HashFunction(const char *name)	// this function is actually okay for resizing, a new hash is generated for the new map size
 {
 	size_t hash = 0;
@@ -42,6 +50,15 @@ static size_t HashFunction(const char *name)	// this function is actually okay f
 	return(hash % cvarmap->capacity);
 }
 
+/*
+* Function: HandleConversionErrors
+* Handles errors that occur during string to numeric type conversion
+* 
+*	value: The string to convert for logging purposes
+*	end: If the conversion failed, this will point to the first invalid character
+* 
+* Returns: A boolean if the conversion was successful or not
+*/
 static bool HandleConversionErrors(const char *value, const char *end)
 {
 	if (value == end)
@@ -71,6 +88,10 @@ static bool HandleConversionErrors(const char *value, const char *end)
 	return(true);
 }
 
+/*
+* Function: ListAllCVars
+* Lists all the cvars in the hashmap
+*/
 static void ListAllCVars(void)
 {
 	Log_WriteSeq(LOG_INFO, "\t\tCVar Dump [number of cvars: %zu, cvar map capacity: %zu]", cvarmap->numcvars, cvarmap->capacity);
@@ -247,245 +268,19 @@ static void ReadCVarsFromFile(FILE *infile, const char *filename)
 	}
 }
 
-static void Seta_Cmd(const cmdargs_t *args)
-{
-	if (args->argc != 3)
-	{
-		Log_Write(LOG_INFO, "Usage: %s <cvarname> \"<value>\"", args->argv[0]);
-		return;
-	}
-
-	if (!CVar_RegisterString(args->argv[1], args->argv[2], CVAR_NONE, ""))
-		Log_Write(LOG_ERROR, "Failed to set cvar: %s", args->argv[1]);
-}
-
-static void Seti_Cmd(const cmdargs_t *args)
-{
-	if (args->argc != 3)
-	{
-		Log_Write(LOG_INFO, "Usage: %s <cvarname> \"<value>\"", args->argv[0]);
-		return;
-	}
-
-	errno = 0;
-	char *end = NULL;
-
-	int castval = strtol(args->argv[2], &end, 10);
-	HandleConversionErrors(args->argv[2], end);
-
-	if (!CVar_RegisterInt(args->argv[1], castval, CVAR_NONE, ""))
-		Log_Write(LOG_ERROR, "Failed to set cvar: %s", args->argv[1]);
-}
-
-static void Setf_Cmd(const cmdargs_t *args)
-{
-	if (args->argc != 3)
-	{
-		Log_Write(LOG_INFO, "Usage: %s <cvarname> \"<value>\"", args->argv[0]);
-		return;
-	}
-
-	errno = 0;
-	char *end = NULL;
-
-	float castval = strtof(args->argv[2], &end);
-	HandleConversionErrors(args->argv[2], end);
-
-	if (!CVar_RegisterFloat(args->argv[1], castval, CVAR_NONE, ""))
-		Log_Write(LOG_ERROR, "Failed to set cvar: %s", args->argv[1]);
-}
-
-static void Setb_Cmd(const cmdargs_t *args)
-{
-	if (args->argc != 3)
-	{
-		Log_Write(LOG_INFO, "Usage: %s <cvarname> \"<value>\"", args->argv[0]);
-		return;
-	}
-
-	errno = 0;
-	char *end = NULL;
-
-	bool castval = strtol(args->argv[2], &end, 10);
-	HandleConversionErrors(args->argv[2], end);
-
-	if (!CVar_RegisterBool(args->argv[1], castval, CVAR_NONE, ""))
-		Log_Write(LOG_ERROR, "Failed to set cvar: %s", args->argv[1]);
-}
-
-bool CVar_Init(void)
-{
-	if (initialized)
-		return(true);
-
-	Cmd_RegisterCommand("seta", Seta_Cmd, "Sets a cvar to a string value");
-	Cmd_RegisterCommand("seti", Seti_Cmd, "Sets a cvar to an integer value");
-	Cmd_RegisterCommand("setf", Setf_Cmd, "Sets a cvar to a float value");
-	Cmd_RegisterCommand("setb", Setb_Cmd, "Sets a cvar to a boolean value");
-
-	cvarmap = MemCache_Alloc(sizeof(*cvarmap));
-	if (!cvarmap)
-	{
-		Log_WriteSeq(LOG_ERROR, "Failed to allocate memory for cvar map");
-		fclose(cvarfile);
-		return(false);
-	}
-
-	cvarmap->capacity = DEF_CVAR_MAP_CAPACITY;
-	cvarmap->numcvars = 0;
-
-	cvarmap->cvars = MemCache_Alloc(sizeof(*cvarmap->cvars) * cvarmap->capacity);
-	if (!cvarmap->cvars)
-	{
-		Log_WriteSeq(LOG_ERROR, "Failed to allocate memory for cvar map entries");
-		MemCache_Free(cvarmap);
-		fclose(cvarfile);
-		return(false);
-	}
-
-	for (size_t i=0; i<cvarmap->capacity; i++)
-		cvarmap->cvars[i] = NULL;
-
-	if (!Sys_Mkdir(cvardir))
-		return(false);
-
-	snprintf(cvarfullname, sizeof(cvarfullname), "%s/%s", cvardir, cvarfilename);
-
-	// read the cvar file and populate the cvar list if cvars exist
-	if (!FileSys_FileExists(cvarfullname))
-	{
-		cvarfile = fopen(cvarfullname, "w+");	// try to just recreate file, will lose cvars if file cant be read properly
-		if (!cvarfile)
-		{
-			Log_WriteSeq(LOG_ERROR, "CVar file does not exist and cannot be recreated: %s", cvarfullname);
-			return(false);
-		}
-
-		fclose(cvarfile);	// close the opened file if created
-		cvarfile = NULL;
-	}
-
-	cvarfile = fopen(cvarfullname, "r");
-	if (!cvarfile)
-	{
-		Log_WriteSeq(LOG_ERROR, "Failed to open cvar file: %s", cvarfullname);
-		return(false);
-	}
-
-	ReadCVarsFromFile(cvarfile, cvarfullname);
-
-	fclose(cvarfile);
-	cvarfile = NULL;
-
-	// read the overrides file and populate the cvar list if cvars exist and if the file exists
-	if (FileSys_FileExists(overridefilename))
-	{
-		FILE *overridesfile = fopen(overridefilename, "r");
-		if (!overridesfile)
-		{
-			Log_WriteSeq(LOG_ERROR, "Failed to open overrides file: %s", overridefilename);
-			return(false);
-		}
-
-		Log_WriteSeq(LOG_INFO, "Reading data from the overrides file: %s", overridefilename);
-
-		ReadCVarsFromFile(overridesfile, overridefilename);
-
-		fclose(overridesfile);
-		overridesfile = NULL;
-	}
-
-	initialized = true;
-
-	return(true);
-}
-
-void CVar_Shutdown(void)
-{
-	if (!initialized)
-		return;
-
-	Log_WriteSeq(LOG_INFO, "Shutting down cvar system");
-
-#if defined(MENGINE_DEBUG)
-	ListAllCVars();
-#endif
-
-	(void)ListAllCVars;		// gets rid of unused function warning
-
-	cvarfile = fopen(cvarfullname, "w");
-	if (!cvarfile)
-	{
-		Log_WriteSeq(LOG_ERROR, "Failed to open cvar file: %s", cvarfullname);
-		return;
-	}
-
-	// go through the map and write all the cvars to the file and free the memory
-	for (size_t i=0; i<cvarmap->capacity; i++)
-	{
-		cvarentry_t *current = cvarmap->cvars[i];
-		while (current)
-		{
-			cvar_t *cvar = current->value;
-
-			if (cvar->flags & CVAR_ARCHIVE)
-			{
-				switch (cvar->type)
-				{
-					case CVAR_BOOL:
-						fprintf(cvarfile, "setb %s \"%d\"\n", cvar->name, cvar->value.b);
-						break;
-
-					case CVAR_INT:
-						fprintf(cvarfile, "seti %s \"%d\"\n", cvar->name, cvar->value.i);
-						break;
-
-					case CVAR_FLOAT:
-						fprintf(cvarfile, "setf %s \"%f\"\n", cvar->name, cvar->value.f);
-						break;
-
-					case CVAR_STRING:
-						fprintf(cvarfile, "seta %s \"%s\"\n", cvar->name, cvar->value.s);
-						break;
-				}
-			}
-
-			cvarentry_t *next = current->next;
-			MemCache_Free(current->value->name);
-			MemCache_Free(current->value);
-			MemCache_Free(current);
-			current = next;
-		}
-	}
-
-	fclose(cvarfile);
-	cvarfile = NULL;
-
-	MemCache_Free(cvarmap->cvars);
-	MemCache_Free(cvarmap);
-
-	initialized = false;
-}
-
-cvar_t *CVar_Find(const char *name)
-{
-	if (!name || !name[0])
-		return(NULL);
-
-	size_t index = HashFunction(name);
-	cvarentry_t *current = cvarmap->cvars[index];
-	while (current)
-	{
-		if (strcmp(current->value->name, name) == 0)
-			return(current->value);
-
-		current = current->next;
-	}
-
-	return(NULL);
-}
-
-cvar_t *CVar_Register(const char *name, const cvarvalue_t value, const cvartype_t type, const unsigned long long flags, const char *description)
+/*
+* Function: RegisterCVar
+* Registers a cvar with the cvar system and adds it to the cvar hash map.
+* 
+*	name: The name of the cvar
+*	value: The value struct of the cvar
+*	type: The enum type of the cvar
+*	flags: Bitfield to define the cvars properties
+*	description: A short description of the cvar
+* 
+* Returns: A pointer to the newly registered cvar
+*/
+static cvar_t *RegisterCVar(const char *name, const cvarvalue_t value, const cvartype_t type, const unsigned long long flags, const char *description)
 {
 	if (!name || !name[0])
 	{
@@ -597,34 +392,332 @@ cvar_t *CVar_Register(const char *name, const cvarvalue_t value, const cvartype_
 	return(cvar);
 }
 
+/*
+* Function: Seta_Cmd
+* Sets a cvar to a string value from the command line
+* 
+*	args: The command arguments
+*/
+static void Seta_Cmd(const cmdargs_t *args)
+{
+	if (args->argc != 3)
+	{
+		Log_Write(LOG_INFO, "Usage: %s <cvarname> \"<value>\"", args->argv[0]);
+		return;
+	}
+
+	if (!CVar_RegisterString(args->argv[1], args->argv[2], CVAR_NONE, ""))
+		Log_Write(LOG_ERROR, "Failed to set cvar: %s", args->argv[1]);
+}
+
+/*
+* Function: Seti_Cmd
+* Sets a cvar to an integer value from the command line
+* 
+* 	args: The command arguments
+*/
+static void Seti_Cmd(const cmdargs_t *args)
+{
+	if (args->argc != 3)
+	{
+		Log_Write(LOG_INFO, "Usage: %s <cvarname> \"<value>\"", args->argv[0]);
+		return;
+	}
+
+	errno = 0;
+	char *end = NULL;
+
+	int castval = strtol(args->argv[2], &end, 10);
+	HandleConversionErrors(args->argv[2], end);
+
+	if (!CVar_RegisterInt(args->argv[1], castval, CVAR_NONE, ""))
+		Log_Write(LOG_ERROR, "Failed to set cvar: %s", args->argv[1]);
+}
+
+/*
+* Function: Setf_Cmd
+* Sets a cvar to a float value from the command line
+* 
+* 	args: The command arguments
+*/
+static void Setf_Cmd(const cmdargs_t *args)
+{
+	if (args->argc != 3)
+	{
+		Log_Write(LOG_INFO, "Usage: %s <cvarname> \"<value>\"", args->argv[0]);
+		return;
+	}
+
+	errno = 0;
+	char *end = NULL;
+
+	float castval = strtof(args->argv[2], &end);
+	HandleConversionErrors(args->argv[2], end);
+
+	if (!CVar_RegisterFloat(args->argv[1], castval, CVAR_NONE, ""))
+		Log_Write(LOG_ERROR, "Failed to set cvar: %s", args->argv[1]);
+}
+
+/*
+* Function: Setb_Cmd
+* Sets a cvar to a boolean value from the command line
+* 
+* 	args: The command arguments
+*/
+static void Setb_Cmd(const cmdargs_t *args)
+{
+	if (args->argc != 3)
+	{
+		Log_Write(LOG_INFO, "Usage: %s <cvarname> \"<value>\"", args->argv[0]);
+		return;
+	}
+
+	errno = 0;
+	char *end = NULL;
+
+	bool castval = strtol(args->argv[2], &end, 10);
+	HandleConversionErrors(args->argv[2], end);
+
+	if (!CVar_RegisterBool(args->argv[1], castval, CVAR_NONE, ""))
+		Log_Write(LOG_ERROR, "Failed to set cvar: %s", args->argv[1]);
+}
+
+/*
+* Function: CVar_Init
+* Initializes the cvar system
+* 
+* Returns: A boolean if the initialization was successful or not
+*/
+bool CVar_Init(void)
+{
+	if (initialized)
+		return(true);
+
+	Cmd_RegisterCommand("seta", Seta_Cmd, "Sets a cvar to a string value");
+	Cmd_RegisterCommand("seti", Seti_Cmd, "Sets a cvar to an integer value");
+	Cmd_RegisterCommand("setf", Setf_Cmd, "Sets a cvar to a float value");
+	Cmd_RegisterCommand("setb", Setb_Cmd, "Sets a cvar to a boolean value");
+
+	cvarmap = MemCache_Alloc(sizeof(*cvarmap));
+	if (!cvarmap)
+	{
+		Log_WriteSeq(LOG_ERROR, "Failed to allocate memory for cvar map");
+		fclose(cvarfile);
+		return(false);
+	}
+
+	cvarmap->capacity = DEF_CVAR_MAP_CAPACITY;
+	cvarmap->numcvars = 0;
+
+	cvarmap->cvars = MemCache_Alloc(sizeof(*cvarmap->cvars) * cvarmap->capacity);
+	if (!cvarmap->cvars)
+	{
+		Log_WriteSeq(LOG_ERROR, "Failed to allocate memory for cvar map entries");
+		MemCache_Free(cvarmap);
+		fclose(cvarfile);
+		return(false);
+	}
+
+	for (size_t i=0; i<cvarmap->capacity; i++)
+		cvarmap->cvars[i] = NULL;
+
+	if (!Sys_Mkdir(cvardir))
+		return(false);
+
+	snprintf(cvarfullname, sizeof(cvarfullname), "%s/%s", cvardir, cvarfilename);
+
+	// read the cvar file and populate the cvar list if cvars exist
+	if (!FileSys_FileExists(cvarfullname))
+	{
+		cvarfile = fopen(cvarfullname, "w+");	// try to just recreate file, will lose cvars if file cant be read properly
+		if (!cvarfile)
+		{
+			Log_WriteSeq(LOG_ERROR, "CVar file does not exist and cannot be recreated: %s", cvarfullname);
+			return(false);
+		}
+
+		fclose(cvarfile);	// close the opened file if created
+		cvarfile = NULL;
+	}
+
+	cvarfile = fopen(cvarfullname, "r");
+	if (!cvarfile)
+	{
+		Log_WriteSeq(LOG_ERROR, "Failed to open cvar file: %s", cvarfullname);
+		return(false);
+	}
+
+	ReadCVarsFromFile(cvarfile, cvarfullname);
+
+	fclose(cvarfile);
+	cvarfile = NULL;
+
+	// read the overrides file and populate the cvar list if cvars exist and if the file exists
+	if (FileSys_FileExists(overridefilename))
+	{
+		FILE *overridesfile = fopen(overridefilename, "r");
+		if (!overridesfile)
+		{
+			Log_WriteSeq(LOG_ERROR, "Failed to open overrides file: %s", overridefilename);
+			return(false);
+		}
+
+		Log_WriteSeq(LOG_INFO, "Reading data from the overrides file: %s", overridefilename);
+
+		ReadCVarsFromFile(overridesfile, overridefilename);
+
+		fclose(overridesfile);
+		overridesfile = NULL;
+	}
+
+	initialized = true;
+
+	return(true);
+}
+
+/*
+* Function: CVar_Shutdown
+* Shuts down the cvar system
+*/
+void CVar_Shutdown(void)
+{
+	if (!initialized)
+		return;
+
+	Log_WriteSeq(LOG_INFO, "Shutting down cvar system");
+
+#if defined(MENGINE_DEBUG)
+	ListAllCVars();
+#endif
+
+	(void)ListAllCVars;		// gets rid of unused function warning
+
+	cvarfile = fopen(cvarfullname, "w");
+	if (!cvarfile)
+	{
+		Log_WriteSeq(LOG_ERROR, "Failed to open cvar file: %s", cvarfullname);
+		return;
+	}
+
+	// go through the map and write all the cvars to the file and free the memory
+	for (size_t i=0; i<cvarmap->capacity; i++)
+	{
+		cvarentry_t *current = cvarmap->cvars[i];
+		while (current)
+		{
+			cvar_t *cvar = current->value;
+
+			if (cvar->flags & CVAR_ARCHIVE)
+			{
+				switch (cvar->type)
+				{
+					case CVAR_BOOL:
+						fprintf(cvarfile, "setb %s \"%d\"\n", cvar->name, cvar->value.b);
+						break;
+
+					case CVAR_INT:
+						fprintf(cvarfile, "seti %s \"%d\"\n", cvar->name, cvar->value.i);
+						break;
+
+					case CVAR_FLOAT:
+						fprintf(cvarfile, "setf %s \"%f\"\n", cvar->name, cvar->value.f);
+						break;
+
+					case CVAR_STRING:
+						fprintf(cvarfile, "seta %s \"%s\"\n", cvar->name, cvar->value.s);
+						break;
+				}
+			}
+
+			cvarentry_t *next = current->next;
+			MemCache_Free(current->value->name);
+			MemCache_Free(current->value);
+			MemCache_Free(current);
+			current = next;
+		}
+	}
+
+	fclose(cvarfile);
+	cvarfile = NULL;
+
+	MemCache_Free(cvarmap->cvars);
+	MemCache_Free(cvarmap);
+
+	initialized = false;
+}
+
+/*
+* Function: CVar_Find
+* Finds a cvar in the hashmap
+* 
+*	name: The name of the cvar
+*/
+cvar_t *CVar_Find(const char *name)
+{
+	if (!name || !name[0])
+		return(NULL);
+
+	size_t index = HashFunction(name);
+	cvarentry_t *current = cvarmap->cvars[index];
+	while (current)
+	{
+		if (strcmp(current->value->name, name) == 0)
+			return(current->value);
+
+		current = current->next;
+	}
+
+	return(NULL);
+}
+
+/*
+* Function: CVar_RegisterString
+* Registers a string cvar
+*/
 cvar_t *CVar_RegisterString(const char *name, const char *value, const unsigned long long flags, const char *description)
 {
 	cvarvalue_t cvarvalue = { 0 };
 	snprintf(cvarvalue.s, sizeof(cvarvalue.s), "%s", value);
-	return(CVar_Register(name, cvarvalue, CVAR_STRING, flags, description));
+	return(RegisterCVar(name, cvarvalue, CVAR_STRING, flags, description));
 }
 
+/*
+* Function: CVar_RegisterInt
+* Registers an integer cvar
+*/
 cvar_t *CVar_RegisterInt(const char *name, const int value, const unsigned long long flags, const char *description)
 {
 	cvarvalue_t cvarvalue = { 0 };
 	cvarvalue.i = value;
-	return(CVar_Register(name, cvarvalue, CVAR_INT, flags, description));
+	return(RegisterCVar(name, cvarvalue, CVAR_INT, flags, description));
 }
 
+/*
+* Function: CVar_RegisterFloat
+* Registers a float cvar
+*/
 cvar_t *CVar_RegisterFloat(const char *name, const float value, const unsigned long long flags, const char *description)
 {
 	cvarvalue_t cvarvalue = { 0 };
 	cvarvalue.f = value;
-	return(CVar_Register(name, cvarvalue, CVAR_FLOAT, flags, description));
+	return(RegisterCVar(name, cvarvalue, CVAR_FLOAT, flags, description));
 }
 
+/*
+* Function: CVar_RegisterBool
+* Registers a boolean cvar
+*/
 cvar_t *CVar_RegisterBool(const char *name, const bool value, const unsigned long long flags, const char *description)
 {
 	cvarvalue_t cvarvalue = { 0 };
 	cvarvalue.b = value;
-	return(CVar_Register(name, cvarvalue, CVAR_BOOL, flags, description));
+	return(RegisterCVar(name, cvarvalue, CVAR_BOOL, flags, description));
 }
 
+/*
+* Function: CVar_GetString
+* Gets the string value of a cvar
+*/
 bool CVar_GetString(const cvar_t *cvar, char *out)
 {
 	if ((!cvar) || (cvar->type != CVAR_STRING))
@@ -634,6 +727,10 @@ bool CVar_GetString(const cvar_t *cvar, char *out)
 	return(true);
 }
 
+/*
+* Function: CVar_GetInt
+* Gets the integer value of a cvar
+*/
 bool CVar_GetInt(const cvar_t *cvar, int *out)
 {
 	if ((!cvar) || (cvar->type != CVAR_INT))
@@ -643,6 +740,10 @@ bool CVar_GetInt(const cvar_t *cvar, int *out)
 	return(true);
 }
 
+/*
+* Function: CVar_GetFloat
+* Gets the float value of a cvar
+*/
 bool CVar_GetFloat(const cvar_t *cvar, float *out)
 {
 	if ((!cvar) || (cvar->type != CVAR_FLOAT))
@@ -652,6 +753,10 @@ bool CVar_GetFloat(const cvar_t *cvar, float *out)
 	return(true);
 }
 
+/*
+* Function: CVar_GetBool
+* Gets the boolean value of a cvar
+*/
 bool CVar_GetBool(const cvar_t *cvar, bool *out)
 {
 	if ((!cvar) || (cvar->type != CVAR_BOOL))
@@ -661,6 +766,10 @@ bool CVar_GetBool(const cvar_t *cvar, bool *out)
 	return(true);
 }
 
+/*
+* Function: CVar_SetString
+* Sets the string value of a cvar
+*/
 void CVar_SetString(cvar_t *cvar, const char *value)
 {
 	if ((!cvar) || (cvar->type != CVAR_STRING) || (cvar->flags & CVAR_READONLY))
@@ -669,6 +778,10 @@ void CVar_SetString(cvar_t *cvar, const char *value)
 	snprintf(cvar->value.s, sizeof(cvar->value.s), "%s", value);
 }
 
+/*
+* Function: CVar_SetInt
+* Sets the integer value of a cvar
+*/
 void CVar_SetInt(cvar_t *cvar, const int value)
 {
 	if ((!cvar) || (cvar->type != CVAR_INT) || (cvar->flags & CVAR_READONLY))
@@ -677,6 +790,10 @@ void CVar_SetInt(cvar_t *cvar, const int value)
 	cvar->value.i = value;
 }
 
+/*
+* Function: CVar_SetFloat
+* Sets the float value of a cvar
+*/
 void CVar_SetFloat(cvar_t *cvar, const float value)
 {
 	if ((!cvar) || (cvar->type != CVAR_FLOAT) || (cvar->flags & CVAR_READONLY))
@@ -685,6 +802,10 @@ void CVar_SetFloat(cvar_t *cvar, const float value)
 	cvar->value.f = value;
 }
 
+/*
+* Function: CVar_SetBool
+* Sets the boolean value of a cvar
+*/
 void CVar_SetBool(cvar_t *cvar, const bool value)
 {
 	if ((!cvar) || (cvar->type != CVAR_BOOL) || (cvar->flags & CVAR_READONLY))

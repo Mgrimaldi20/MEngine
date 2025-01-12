@@ -6,11 +6,19 @@
 
 glstate_t glstate;
 
+/*
+* Function: Render_StartFrame
+* Clears the screen and depth buffer, ready for rendering
+*/
 void Render_StartFrame(void)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the screen and depth buffer
 }
 
+/*
+* Function: Render_Frame
+* Renders the scene and all components both 2D and 3D
+*/
 void Render_Frame(void)
 {
 	// set up for 3D rendering
@@ -50,6 +58,10 @@ void Render_Frame(void)
 	glPopMatrix();
 }
 
+/*
+* Function: Render_EndFrame
+* Swaps the buffers to display the rendered frame
+*/
 void Render_EndFrame(void)
 {
 	GLWnd_SwapBuffers();

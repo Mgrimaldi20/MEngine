@@ -74,7 +74,6 @@ struct cvar
 bool CVar_Init(void);
 void CVar_Shutdown(void);
 cvar_t *CVar_Find(const char *name);
-cvar_t *CVar_Register(const char *name, const cvarvalue_t value, const cvartype_t type, const unsigned long long flags, const char *description);
 cvar_t *CVar_RegisterString(const char *name, const char *value, const unsigned long long flags, const char *description);
 cvar_t *CVar_RegisterInt(const char *name, const int value, const unsigned long long flags, const char *description);
 cvar_t *CVar_RegisterFloat(const char *name, const float value, const unsigned long long flags, const char *description);

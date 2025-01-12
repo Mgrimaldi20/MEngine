@@ -38,6 +38,12 @@ static FILE *errfp;
 
 static bool gameinitialized;
 
+/*
+* Function: CreateCommandLine
+* Creates a command line structure to store the command line arguments
+* 
+* Returns: A pointer to the new command line structure
+*/
 static cmdline_t *CreateCommandLine(void)
 {
 	cmdline_t *cmdline = malloc(sizeof(*cmdline));
@@ -53,6 +59,12 @@ static cmdline_t *CreateCommandLine(void)
 	return(cmdline);
 }
 
+/*
+* Function: DestroyCommandLine
+* Frees the memory allocated for the command line structure
+* 
+*	cmdline: The command line structure to free
+*/
 static void DestroyCommandLine(cmdline_t *cmdline)
 {
 	if (!cmdline)
@@ -68,6 +80,12 @@ static void DestroyCommandLine(cmdline_t *cmdline)
 	free(cmdline);
 }
 
+/*
+* Function: ParseCommandLine
+* Parses the command line arguments and sets the appropriate flags, can also call command line functions here
+* 
+* Returns: A boolean if the command line was parsed successfully or not
+*/
 static bool ParseCommandLine(void)
 {
 	cmdline_t *cmdline = CreateCommandLine();
@@ -122,6 +140,10 @@ static bool ParseCommandLine(void)
 	return(true);
 }
 
+/*
+* Function: CreateMServices
+* Creates the mservices struct and populates it with the function pointers
+*/
 static void CreateMServices(void)
 {
 	logsystem = (log_t)
@@ -191,11 +213,18 @@ static void CreateMServices(void)
 		.version = MENGINE_VERSION,
 		.log = &logsystem,
 		.memcache = &memcache,
+		.cmdsystem = &cmdsystem,
 		.cvarsystem = &cvarsystem,
 		.sys = &sys
 	};
 }
 
+/*
+* Function: InitGame
+* Initializes the game DLL and runs the games startup code
+* 
+* Returns: A boolean if the game was initialized successfully or not
+*/
 static bool InitGame(void)
 {
 	cvar_t *gamedll = NULL;
@@ -267,6 +296,10 @@ static bool InitGame(void)
 	return(true);
 }
 
+/*
+* Function: ShutdownGame
+* Shuts down the game DLL and runs the games shutdown code
+*/
 static void ShutdownGame(void)
 {
 	if (!gameinitialized)
@@ -285,6 +318,12 @@ static void ShutdownGame(void)
 	gameinitialized = false;
 }
 
+/*
+* Function: Common_Init
+* Initializes the engine and all the subsystems
+* 
+* Returns: A boolean if the engine was initialized successfully or not
+*/
 bool Common_Init(void)
 {
 	outfp = NULL;
@@ -345,6 +384,10 @@ bool Common_Init(void)
 	return(true);
 }
 
+/*
+* Function: Common_Shutdown
+* Shuts down the engine and all the subsystems
+*/
 void Common_Shutdown(void)
 {
 	Log_WriteSeq(LOG_INFO, "Engine shutting down...");
@@ -366,7 +409,11 @@ void Common_Shutdown(void)
 		fclose(errfp);
 }
 
-void Common_Frame(void)		// happens every frame
+/*
+* Function: Common_Frame
+* Happens every frame, runs the engine loop and game loop
+*/
+void Common_Frame(void)
 {
 	Event_RunEventLoop();
 
@@ -377,6 +424,14 @@ void Common_Frame(void)		// happens every frame
 	Render_EndFrame();
 }
 
+/*
+* Function: Common_Printf
+* Prints a message to the console and to the log file
+* 
+*	msg: The message to print
+* 
+* Returns: The number of characters printed
+*/
 int Common_Printf(const char *msg, ...)
 {
 	va_list argptr;
@@ -394,6 +449,14 @@ int Common_Printf(const char *msg, ...)
 	return(res);
 }
 
+/*
+* Function: Common_Errorf
+* Prints an error message to the console and to the log file
+* 
+*	msg: The message to print
+* 
+* Returns: The number of characters printed
+*/
 int Common_Errorf(const char *msg, ...)
 {
 	va_list argptr;
@@ -411,26 +474,46 @@ int Common_Errorf(const char *msg, ...)
 	return(res);
 }
 
+/*
+* Function: Common_EditorMode
+* Returns if the engine is in editor mode
+*/
 bool Common_EditorMode(void)
 {
 	return((cmdlineflags & CMD_MODE_EDITOR));
 }
 
+/*
+* Function: Common_DebugMode
+* Returns if the engine is in debug mode
+*/
 bool Common_DebugMode(void)
 {
 	return((cmdlineflags & CMD_MODE_DEBUG));
 }
 
+/*
+* Function: Common_IgnoreOSVer
+* Returns if the engine is ignoring the OS version, used by the system
+*/
 bool Common_IgnoreOSVer(void)
 {
 	return((cmdlineflags & CMD_IGNORE_OSVER));
 }
 
+/*
+* Function: Common_RunDemoGame
+* Returns if the engine is running the demo game
+*/
 bool Common_RunDemoGame(void)
 {
 	return((cmdlineflags & CMD_RUN_DEMO_GAME));
 }
 
+/*
+* Function: Common_UseDefaultAlloc
+* Returns if the engine is using the default allocator instead of the memory cache
+*/
 bool Common_UseDefaultAlloc(void)
 {
 	return((cmdlineflags & CMD_USE_DEF_ALLOC));

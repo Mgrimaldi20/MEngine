@@ -32,6 +32,12 @@ static size_t cmdbufferlen;
 
 static bool initialized;
 
+/*
+* Function: HashFunction
+* Hashes the name of the command to generate a hash value
+* 
+* 	name: The name of the command
+*/
 static size_t HashFunction(const char *name)	// hash the name, same as the cvar hash function
 {
 	size_t hash = 0;
@@ -43,6 +49,14 @@ static size_t HashFunction(const char *name)	// hash the name, same as the cvar 
 	return(hash % cmdmap->capacity);
 }
 
+/*
+* Function: FindCommand
+* Finds a command in the hashmap
+* 
+* 	name: The name of the command
+* 
+* Returns: The command if found, NULL otherwise
+*/
 static cmd_t *FindCommand(const char *name)
 {
 	if (!name || !name[0])
@@ -61,6 +75,12 @@ static cmd_t *FindCommand(const char *name)
 	return(NULL);
 }
 
+/*
+* Function: ExecuteCommand
+* Tokenizes and executes a command
+* 
+* 	cmdstr: The command string to execute
+*/
 static void ExecuteCommand(const char *cmdstr)	// tokenizes and executes
 {
 	cmdargs_t args = { 0 };
@@ -137,6 +157,12 @@ static void ExecuteCommand(const char *cmdstr)	// tokenizes and executes
 	cmd->function(&args);
 }
 
+/*
+* Function: Cmd_Init
+* Initializes the command system
+* 
+* Returns: A boolean if initialization was successful or not
+*/
 bool Cmd_Init(void)
 {
 	if (initialized)
@@ -168,6 +194,10 @@ bool Cmd_Init(void)
 	return(true);
 }
 
+/*
+* Function: Cmd_Shutdown
+* Shuts down the command system
+*/
 void Cmd_Shutdown(void)
 {
 	if (!initialized)
@@ -193,6 +223,14 @@ void Cmd_Shutdown(void)
 	initialized = false;
 }
 
+/*
+* Function: Cmd_RegisterCommand
+* Registers a command with the command system and adds it to the hashmap
+* 
+* 	name: The name of the command
+* 	function: The function to execute when the command is called
+* 	description: The description of the command
+*/
 void Cmd_RegisterCommand(const char *name, cmdfunction_t function, const char *description)
 {
 	if (!name || !name[0])
@@ -291,6 +329,12 @@ void Cmd_RegisterCommand(const char *name, cmdfunction_t function, const char *d
 	}
 }
 
+/*
+* Function: Cmd_RemoveCommand
+* Removes a command from the command system and the hashmap
+* 
+* 	name: The name of the command
+*/
 void Cmd_RemoveCommand(const char *name)
 {
 	if (!name || !name[0])
@@ -324,6 +368,13 @@ void Cmd_RemoveCommand(const char *name)
 	}
 }
 
+/*
+* Function: Cmd_BufferCommand
+* Buffers a command to be executed, appends the command to the buffer or executes it immediately depending on the execution type
+* 
+* 	exec: The execution type of the command, immediate or buffered
+* 	cmd: The command string to buffer including arguments, already terminated with \n
+*/
 void Cmd_BufferCommand(const cmdexecution_t exec, const char *cmd)
 {
 	if (!cmd || !cmd[0])
@@ -358,6 +409,10 @@ void Cmd_BufferCommand(const cmdexecution_t exec, const char *cmd)
 	}
 }
 
+/*
+* Function: Cmd_ExecuteCommandBuffer
+* Tokenizes and executes the commands in the buffer
+*/
 void Cmd_ExecuteCommandBuffer(void)
 {
 	char *cmd = cmdbuffer;

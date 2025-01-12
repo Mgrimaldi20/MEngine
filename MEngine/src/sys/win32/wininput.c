@@ -262,6 +262,14 @@ static int scancodes[] =
 	KEY_FINAL
 };
 
+/*
+* Function: MapWin32Key
+* Maps a Win32 key to a common key code
+* 
+* 	key: The Win32 key code, stored in the WPARAM of the Windows message
+* 
+* Returns: The common key code
+*/
 keycode_t MapWin32Key(WPARAM key)
 {
 	if (key < 0 || key >= (sizeof(scancodes) / sizeof(scancodes[0])))
