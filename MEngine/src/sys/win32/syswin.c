@@ -87,6 +87,16 @@ bool Sys_Init(void)
 	Log_WriteSeq(LOG_INFO, "System memory: %lluMB", Sys_GetSystemMemory());
 	Log_WriteSeq(LOG_INFO, "System supports max threads: %lu", Sys_GetMaxThreads());
 
+	ULONG_PTR lowlimit = 0;
+	ULONG_PTR highlimit = 0;
+
+	GetCurrentThreadStackLimits(&lowlimit, &highlimit);
+
+	uintmax_t stacksize = (uintmax_t)(highlimit - lowlimit);
+
+	Log_WriteSeq(LOG_INFO, "Thread stack limits: Low: %llu, High: %llu", lowlimit, highlimit);
+	Log_WriteSeq(LOG_INFO, "Stack size: %juMB", stacksize / (1024 * 1024));
+
 	CVar_RegisterString("g_gamedll", "DemoGame.dll", CVAR_GAME, "The name of the game DLL for Windows systems");
 	CVar_RegisterString("g_demogamedll", "DemoGame.dll", CVAR_GAME | CVAR_READONLY, "The name of the game DLL for Windows systems");
 

@@ -210,3 +210,15 @@ if(MENGINE_CHECK_MEMORY)
 target_compile_definitions(MEngine PRIVATE MemCache_Alloc=malloc)
 target_compile_definitions(MEngine PRIVATE MemCache_Free=free)
 endif()
+
+# Windows stack limit
+if (WIN32)
+	if (MSVC)
+		set(STACK_SIZE_FLAG "/STACK:10485760")
+
+	elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+		set(STACK_SIZE_FLAG "-Wl,--stack,10485760")
+	endif()
+
+	target_link_options(MEngine PRIVATE ${STACK_SIZE_FLAG})
+endif()

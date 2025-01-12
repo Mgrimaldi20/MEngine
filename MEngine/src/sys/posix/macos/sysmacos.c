@@ -14,18 +14,8 @@ bool Sys_Init(void)
 	if (posixstate.initialized)
 		return(true);
 
-	if (uname(&posixstate.osinfo) == -1) 	// get the OS version information, only run if the OS version is high enough
-	{
-		Log_WriteSeq(LOG_ERROR, "Failed to get OS version information");
+	if (!SysInitCommon())
 		return(false);
-	}
-
-	Log_WriteSeq(LOG_INFO, "OS: %s %s %s %s",
-		posixstate.osinfo.sysname,
-		posixstate.osinfo.nodename,
-		posixstate.osinfo.release,
-		posixstate.osinfo.version
-	);
 
 	if (Common_IgnoreOSVer())
 		Log_WriteSeq(LOG_WARN, "Ignoring OS version check... "
@@ -38,9 +28,6 @@ bool Sys_Init(void)
 		Sys_Error("Requires MacOS to run, you are using: %s", posixstate.osinfo.sysname);
 		return(false);
 	}
-
-	Log_WriteSeq(LOG_INFO, "System memory: %lluMB", Sys_GetSystemMemory());
-	Log_WriteSeq(LOG_INFO, "System supports max threads: %lu", Sys_GetMaxThreads());
 
 	CVar_RegisterString("g_gamedll", "DemoGame.dylib", CVAR_GAME, "The name of the game DLL for MacOS systems");
 	CVar_RegisterString("g_demogamedll", "DemoGame.dylib", CVAR_GAME | CVAR_READONLY, "The name of the demo game DLL for MacOS systems");
