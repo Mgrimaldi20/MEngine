@@ -1,8 +1,7 @@
 #pragma once
 
 #if defined(MENGINE_PLATFORM_WINDOWS)
-#define WIN32_LEAN_AND_MEAN		// stupidly needed for GLU on Windows
-#include <Windows.h>
+#include "sys/win32/winlocal.h"
 #include <gl/GLU.h>
 #elif defined(MENGINE_PLATFORM_LINUX)
 #include <GL/glu.h>
