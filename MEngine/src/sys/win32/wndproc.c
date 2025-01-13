@@ -134,12 +134,7 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 			int posy = pt.y;
 
 			if (posx >= 0 && posx < glstate.width && posy >= 0 && posy < glstate.height)	// only update if the mouse is inside the framebuffer
-			{
-				Common_Printf("Mouse moved X: %d\n", posx);	// just do this for now TODO: change later to do something with this
-				Common_Printf("Mouse moved Y: %d\n", posy);
-
 				Event_QueueEvent(EVENT_MOUSE, posx, posy);	// event vars 1 and 2 become the x and y pos of the mouse
-			}
 
 			break;
 		}
