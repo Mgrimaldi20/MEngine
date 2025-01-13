@@ -25,7 +25,7 @@ static cvarmap_t *cvarmap;
 static FILE *cvarfile;
 
 static const char *cvardir = "configs";
-static const char *cvarfilename = "MEngine.cfg";
+static const char *cvarfilename = "mengine.cfg";
 static const char *overridefilename = "overrides.cfg";
 static char cvarfullname[SYS_MAX_PATH];
 
