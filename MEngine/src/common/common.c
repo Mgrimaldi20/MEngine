@@ -441,10 +441,10 @@ int Common_Printf(const char *msg, ...)
 	vsnprintf(buffer, sizeof(buffer), msg, argptr);
 	va_end(argptr);
 
-	int res = printf("%s", buffer);
+	int res = printf("%s\n", buffer);
 
 	if (outfp)
-		fprintf(outfp, "%s", buffer);
+		fprintf(outfp, "%s\n", buffer);
 
 	return(res);
 }
@@ -466,10 +466,10 @@ int Common_Errorf(const char *msg, ...)
 	vsnprintf(buffer, sizeof(buffer), msg, argptr);
 	va_end(argptr);
 
-	int res = fprintf(stderr, "%s", buffer);
+	int res = fprintf(stderr, "%s\n", buffer);
 
 	if (errfp)
-		fprintf(errfp, "%s", buffer);
+		fprintf(errfp, "%s\n", buffer);
 
 	return(res);
 }
