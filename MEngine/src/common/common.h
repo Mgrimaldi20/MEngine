@@ -107,6 +107,7 @@ void FileSys_FreeFileList(filedata_t *filelist);
 bool Input_Init(void);
 void Input_Shutdown(void);
 void Input_ProcessKeyInput(const int key, bool down);
+void Input_ClearKeyStates(void);
 
 typedef enum
 {
@@ -118,8 +119,8 @@ typedef enum
 
 typedef enum
 {
-	EVENT_TYPE_KEYUP = 0,
-	EVENT_TYPE_KEYDOWN,
+	EVENT_STATE_KEYUP = 0,
+	EVENT_STATE_KEYDOWN,
 } eventstate_t;
 
 bool Event_Init(void);
