@@ -33,7 +33,7 @@ static event_t GetEvent(void)
 	{
 		event = eventqueue[0];
 
-		for (unsigned int i=0; i<eventcount; i++)
+		for (unsigned int i=0; i<eventcount-1; i++)
 			eventqueue[i] = eventqueue[i + 1];
 
 		eventcount--;
@@ -101,10 +101,10 @@ void Event_Shutdown(void)
 */
 void Event_QueueEvent(const eventtype_t type, int var1, int var2)
 {
-	event_t *event = &eventqueue[eventcount++];
-
 	if (eventcount >= MAX_EVENTS)
 		return;
+
+	event_t *event = &eventqueue[eventcount++];
 
 	event->type = type;
 	event->evar1 = var1;

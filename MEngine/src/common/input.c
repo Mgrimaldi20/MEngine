@@ -437,7 +437,7 @@ void Input_Shutdown(void)
 
 /*
 * Function: Input_ProcessKeyInput
-* Processes key input
+* Processes key input and adds the bound command to the buffer if the key is pressed
 * 
 * 	key: The key that was pressed
 * 	down: A boolean if the key was pressed or released
@@ -466,5 +466,17 @@ void Input_ProcessKeyInput(const int key, bool down)
 		const char *binding = keys[key].binding;
 		if (binding && binding[0])
 			Cmd_BufferCommand(CMD_EXEC_APPEND, binding);
+	}
+}
+
+void Input_ClearKeyStates(void)
+{
+	if (keys)
+	{
+		for (int i=0; i<KEY_FINAL; i++)
+		{
+			keys[i].down = false;
+			keys[i].repeats = 0;
+		}
 	}
 }

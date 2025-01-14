@@ -247,12 +247,28 @@ static void WindowCloseCallback(GLFWwindow *window)
 	glfwSetWindowShouldClose(window, GLFW_TRUE);
 }
 
+/*
+* Function: WindowFocusCallback
+* Callback for window focus events, clears the key states when losing focus or regaining focus
+* 
+* 	window: The window that received the event
+* 	focused: A boolean if the window is focused or not
+*/
 static void WindowFocusCallback(GLFWwindow *window, int focused)
 {
+	Input_ClearKeyStates();
 }
 
+/*
+* Function: WindowIconifyCallback
+* Callback for window iconification events, clears the key states when the window is iconified
+* 
+* 	window: The window that received the event
+* 	iconified: A boolean if the window is iconified or not
+*/
 static void WindowIconifyCallback(GLFWwindow *window, int iconified)
 {
+	Input_ClearKeyStates();
 }
 
 /*
