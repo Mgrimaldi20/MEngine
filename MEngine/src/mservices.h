@@ -42,6 +42,7 @@ typedef struct		// memory cache allocator and manager
 	void (*Free)(void *ptr);
 	void (*Reset)(void);			// reset memory cache, will free all allocated memory and NULL all pointers
 	size_t (*GetMemUsed)(void);
+	size_t (*GetTotalMemory)(void);
 } memcache_t;
 
 #define CMD_MAX_ARGS 32
@@ -89,6 +90,15 @@ typedef struct		// cvar system
 	void (*SetBool)(cvar_t *cvar, const bool value);
 } cvarsystem_t;
 
+typedef struct
+{
+	bool (*FileExistsInPAK)(const char *filename);
+	filedata_t *(*ListFilesInPAK)(unsigned int *numfiles, const char *filter);
+	bool (*FileExists)(const char *filename);
+	filedata_t *(*ListFiles)(unsigned int *numfiles, const char *directory, const char *filter);
+	void (*FreeFileList)(filedata_t *filelist);
+} filesystem_t;
+
 typedef struct		// system services
 {
 	bool (*Mkdir)(const char *path);
@@ -135,5 +145,6 @@ typedef struct
 	memcache_t *memcache;
 	cmdsystem_t *cmdsystem;
 	cvarsystem_t *cvarsystem;
+	filesystem_t *filesystem;
 	sys_t *sys;
 } mservices_t;

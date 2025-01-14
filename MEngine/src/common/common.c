@@ -28,6 +28,7 @@ static log_t logsystem;
 static cmdsystem_t cmdsystem;
 static memcache_t memcache;
 static cvarsystem_t cvarsystem;
+static filesystem_t filesystem;
 static sys_t sys;
 
 static unsigned long long cmdlineflags;
@@ -82,7 +83,7 @@ static void DestroyCommandLine(cmdline_t *cmdline)
 
 /*
 * Function: ParseCommandLine
-* Parses the command line arguments and sets the appropriate flags, can also call command line functions here
+* Parses the command line arguments and sets the appropriate flags, can also call command line functions here, different from the command system
 * 
 * Returns: A boolean if the command line was parsed successfully or not
 */
@@ -111,7 +112,7 @@ static bool ParseCommandLine(void)
 				"\t-ignoreosver\tIgnore OS version check\n"
 				"\t-nocache\tDo not use the memory cache allocator\n";
 
-			Common_Printf("%s", helpmsg);
+			printf("%s", helpmsg);	// this is the standard printf because its run on the command line
 			fflush(stdout);
 
 			DestroyCommandLine(cmdline);
@@ -159,6 +160,7 @@ static void CreateMServices(void)
 		.Free = MemCache_Free,
 		.Reset = MemCache_Reset,
 		.GetMemUsed = MemCache_GetTotalMemory,
+		.GetTotalMemory = MemCache_GetTotalMemory
 	};
 
 	cmdsystem = (cmdsystem_t)
@@ -183,6 +185,15 @@ static void CreateMServices(void)
 		.SetInt = CVar_SetInt,
 		.SetFloat = CVar_SetFloat,
 		.SetBool = CVar_SetBool
+	};
+
+	filesystem = (filesystem_t)
+	{
+		.FileExists = FileSys_FileExists,
+		.FileExistsInPAK = FileSys_FileExistsInPAK,
+		.ListFiles = FileSys_ListFiles,
+		.ListFilesInPAK = FileSys_ListFilesInPAK,
+		.FreeFileList = FileSys_FreeFileList
 	};
 
 	sys = (sys_t)
@@ -215,6 +226,7 @@ static void CreateMServices(void)
 		.memcache = &memcache,
 		.cmdsystem = &cmdsystem,
 		.cvarsystem = &cvarsystem,
+		.filesystem = &filesystem,
 		.sys = &sys
 	};
 }
@@ -433,6 +445,31 @@ void Common_Frame(void)
 * Returns: The number of characters printed
 */
 int Common_Printf(const char *msg, ...)
+{
+	va_list argptr;
+	char buffer[LOG_MAX_LEN] = { 0 };
+
+	va_start(argptr, msg);
+	vsnprintf(buffer, sizeof(buffer), msg, argptr);
+	va_end(argptr);
+
+	int res = printf("%s\n", buffer);
+
+	if (outfp)
+		fprintf(outfp, "%s\n", buffer);
+
+	return(res);
+}
+
+/*
+* Function: Common_Warnf
+* Prints a warning message to the console and to the log file
+* 
+*	msg: The message to print
+* 
+* Returns: The number of characters printed
+*/
+int Common_Warnf(const char *msg, ...)
 {
 	va_list argptr;
 	char buffer[LOG_MAX_LEN] = { 0 };
