@@ -102,7 +102,7 @@ void Sys_Error(const char *error, ...)
 	va_end(argptr);
 
 	Log_WriteSeq(LOG_ERROR, buffer);
-	Common_Errorf("Error: %s\n", buffer);
+	Common_Errorf("Error: %s", buffer);
 
 	Common_Shutdown();
 

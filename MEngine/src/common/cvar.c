@@ -402,7 +402,7 @@ static void Seta_Cmd(const cmdargs_t *args)
 {
 	if (args->argc != 3)
 	{
-		Log_Write(LOG_INFO, "Usage: %s <cvarname> \"<value>\"", args->argv[0]);
+		Log_Write(LOG_INFO, "Usage: %s [cvarname] \"[value]\"", args->argv[0]);
 		return;
 	}
 
@@ -420,7 +420,7 @@ static void Seti_Cmd(const cmdargs_t *args)
 {
 	if (args->argc != 3)
 	{
-		Log_Write(LOG_INFO, "Usage: %s <cvarname> \"<value>\"", args->argv[0]);
+		Log_Write(LOG_INFO, "Usage: %s [cvarname] \"[value]\"", args->argv[0]);
 		return;
 	}
 
@@ -444,7 +444,7 @@ static void Setf_Cmd(const cmdargs_t *args)
 {
 	if (args->argc != 3)
 	{
-		Log_Write(LOG_INFO, "Usage: %s <cvarname> \"<value>\"", args->argv[0]);
+		Log_Write(LOG_INFO, "Usage: %s [cvarname] \"[value]\"", args->argv[0]);
 		return;
 	}
 
@@ -468,7 +468,7 @@ static void Setb_Cmd(const cmdargs_t *args)
 {
 	if (args->argc != 3)
 	{
-		Log_Write(LOG_INFO, "Usage: %s <cvarname> \"<value>\"", args->argv[0]);
+		Log_Write(LOG_INFO, "Usage: %s [cvarname] \"[value]\"", args->argv[0]);
 		return;
 	}
 

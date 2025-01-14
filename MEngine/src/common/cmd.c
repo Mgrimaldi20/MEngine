@@ -157,6 +157,30 @@ static void ExecuteCommand(const char *cmdstr)	// tokenizes and executes
 	cmd->function(&args);
 }
 
+static void Help_Cmd(const cmdargs_t *args)
+{
+	if (args->argc == 1)
+	{
+		// print out the default help message
+		return;
+	}
+
+	if (args->argc == 2)
+	{
+		cmd_t *cmd = FindCommand(args->argv[1]);
+		if (!cmd)
+		{
+			Common_Warnf("Failed to execute \"%s\" command, command not found: %s", args->argv[0], args->argv[1]);
+			return;
+		}
+
+		Common_Printf("Command: %s, Description: %s", cmd->name, cmd->description);
+		return;
+	}
+
+	Common_Printf("Usage: %s | %s [command]", args->argv[0], args->argv[0]);
+}
+
 /*
 * Function: Cmd_Init
 * Initializes the command system

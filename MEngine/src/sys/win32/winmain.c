@@ -136,7 +136,7 @@ void InitConsole(void)
 		return;
 	}
 
-	Common_Printf("Opening debugging console\n");
+	Common_Printf("Opening debugging console");
 }
 
 /*
@@ -145,7 +145,7 @@ void InitConsole(void)
 */
 void ShutdownConsole(void)
 {
-	Common_Printf("\nClosing debugging console\n");
+	Common_Printf("\nClosing debugging console");
 
 	if (outfp)
 		fclose(outfp);

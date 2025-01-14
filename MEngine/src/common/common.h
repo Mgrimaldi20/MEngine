@@ -12,6 +12,7 @@ bool Common_Init(void);
 void Common_Shutdown(void);
 void Common_Frame(void);
 int Common_Printf(const char *msg, ...);
+int Common_Warnf(const char *msg, ...);
 int Common_Errorf(const char *msg, ...);
 
 bool Common_EditorMode(void);
