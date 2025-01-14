@@ -1,6 +1,8 @@
+#include <limits.h>
 #include "common.h"
 
 #define MAX_EVENTS 256
+#define DEF_LOG_FRAME_INTERVAL 300		// log any overflow messages every DEF_LOG_FRAME_INTERVAL num frames
 
 typedef struct
 {
@@ -10,7 +12,12 @@ typedef struct
 } event_t;
 
 static unsigned int eventcount;
+static unsigned int queuehead;
+static unsigned int queuetail;
 static event_t eventqueue[MAX_EVENTS];
+
+static unsigned int lastlogframe;
+static unsigned int currentframe;
 
 static bool initialized;
 
@@ -31,11 +38,8 @@ static event_t GetEvent(void)
 
 	if (eventcount > 0)
 	{
-		event = eventqueue[0];
-
-		for (unsigned int i=0; i<eventcount-1; i++)
-			eventqueue[i] = eventqueue[i + 1];
-
+		event = eventqueue[queuehead];
+		queuehead = (queuehead + 1) % MAX_EVENTS;
 		eventcount--;
 	}
 
@@ -102,13 +106,21 @@ void Event_Shutdown(void)
 void Event_QueueEvent(const eventtype_t type, int var1, int var2)
 {
 	if (eventcount >= MAX_EVENTS)
+	{
+		if ((currentframe - lastlogframe + UINT_MAX) % UINT_MAX >= DEF_LOG_FRAME_INTERVAL)
+		{
+			Log_Write(LOG_WARN, "Event queue overflow, discarding events: type: %d, evars: %d, %d", type, var1, var2);
+			lastlogframe = currentframe;
+		}
+
 		return;
+	}
 
-	event_t *event = &eventqueue[eventcount++];
-
-	event->type = type;
-	event->evar1 = var1;
-	event->evar2 = var2;
+	eventqueue[queuetail].type = type;
+	eventqueue[queuetail].evar1 = var1;
+	eventqueue[queuetail].evar2 = var2;
+	queuetail = (queuetail + 1) % MAX_EVENTS;
+	eventcount++;
 }
 
 /*
@@ -135,4 +147,6 @@ void Event_RunEventLoop(void)
 
 		ProcessEvent(event);
 	}
+
+	currentframe = (currentframe + 1) % UINT_MAX;
 }

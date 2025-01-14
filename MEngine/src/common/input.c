@@ -469,6 +469,10 @@ void Input_ProcessKeyInput(const int key, bool down)
 	}
 }
 
+/*
+* Function: Input_ClearKeyStates
+* Clears the key states for all keys, sets them to up and resets the repeat count
+*/
 void Input_ClearKeyStates(void)
 {
 	if (keys)
