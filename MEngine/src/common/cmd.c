@@ -81,7 +81,7 @@ static cmd_t *FindCommand(const char *name)
 * 
 * 	cmdstr: The command string to execute
 */
-static void ExecuteCommand(const char *cmdstr)	// tokenizes and executes
+static void ExecuteCommand(const char *cmdstr)
 {
 	cmdargs_t args = { 0 };
 
@@ -157,6 +157,12 @@ static void ExecuteCommand(const char *cmdstr)	// tokenizes and executes
 	cmd->function(&args);
 }
 
+/*
+* Function: Help_Cmd
+* The help command function, prints out the standard help message, or the description of a specific command
+* 
+* 	args: The command arguments
+*/
 static void Help_Cmd(const cmdargs_t *args)
 {
 	if (args->argc == 1)
@@ -212,6 +218,8 @@ bool Cmd_Init(void)
 
 	for (size_t i=0; i<cmdmap->capacity; i++)
 		cmdmap->cmds[i] = NULL;
+
+	Cmd_RegisterCommand("help", Help_Cmd, "Prints out the help message or the description of a specific command");
 
 	initialized = true;
 

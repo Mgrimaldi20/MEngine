@@ -110,19 +110,18 @@ void Sys_Error(const char *error, ...)
 }
 
 /*
-* Function: Sys_ProcessCommandLine
+* Function: Sys_ParseCommandLine
 * Processes the command line arguments and turns the arguments into a command line structure, argc and argv
 * 
 *	cmdline: The command line structure to fill
 */
-void Sys_ProcessCommandLine(cmdline_t *cmdline)
+void Sys_ParseCommandLine(cmdline_t *cmdline)
 {
 	if (!cmdline)
 		return;
 
 	cmdline->count = posixstate.argc;
 	cmdline->args = posixstate.argv;
-	cmdline->allocated = false;
 }
 
 /*

@@ -40,67 +40,23 @@ static FILE *errfp;
 static bool gameinitialized;
 
 /*
-* Function: CreateCommandLine
-* Creates a command line structure to store the command line arguments
-* 
-* Returns: A pointer to the new command line structure
-*/
-static cmdline_t *CreateCommandLine(void)
-{
-	cmdline_t *cmdline = malloc(sizeof(*cmdline));
-	if (!cmdline)
-	{
-		Sys_Error("Failed to allocate memory for command line");
-		return(NULL);
-	}
-
-	cmdline->args = NULL;
-	cmdline->count = 0;
-
-	return(cmdline);
-}
-
-/*
-* Function: DestroyCommandLine
-* Frees the memory allocated for the command line structure
-* 
-*	cmdline: The command line structure to free
-*/
-static void DestroyCommandLine(cmdline_t *cmdline)
-{
-	if (!cmdline)
-		return;
-
-	if (!cmdline->allocated)
-		return;
-
-	for (int i=0; i<cmdline->count; i++)
-		free(cmdline->args[i]);
-
-	free(cmdline->args);
-	free(cmdline);
-}
-
-/*
-* Function: ParseCommandLine
+* Function: ProcessCommandLine
 * Parses the command line arguments and sets the appropriate flags, can also call command line functions here, different from the command system
 * 
 * Returns: A boolean if the command line was parsed successfully or not
 */
-static bool ParseCommandLine(void)
+static bool ProcessCommandLine(void)
 {
-	cmdline_t *cmdline = CreateCommandLine();
-	if (!cmdline)
-		return(false);
+	cmdline_t cmdline = { 0 };
 
-	Sys_ProcessCommandLine(cmdline);
+	Sys_ParseCommandLine(&cmdline);
 
-	for (int i=0; i<cmdline->count; i++)
+	for (int i=0; i<cmdline.count; i++)
 	{
-		if (!cmdline->args[i][0])
+		if (!cmdline.args[i][0])
 			break;
 
-		if (strcmp(cmdline->args[i], "-help") == 0)
+		if (strcmp(cmdline.args[i], "-help") == 0)
 		{
 			static const char *helpmsg = "MEngine\n"
 				"Usage: MEngine [options]\n"
@@ -115,28 +71,24 @@ static bool ParseCommandLine(void)
 			printf("%s", helpmsg);	// this is the standard printf because its run on the command line
 			fflush(stdout);
 
-			DestroyCommandLine(cmdline);
-
 			return(false);
 		}
 
-		else if (strcmp(cmdline->args[i], "-editor") == 0)
+		else if (strcmp(cmdline.args[i], "-editor") == 0)
 			cmdlineflags |= CMD_MODE_EDITOR;
 
-		else if (strcmp(cmdline->args[i], "-debug") == 0)
+		else if (strcmp(cmdline.args[i], "-debug") == 0)
 			cmdlineflags |= CMD_MODE_DEBUG;
 
-		else if (strcmp(cmdline->args[i], "-ignoreosver") == 0)
+		else if (strcmp(cmdline.args[i], "-ignoreosver") == 0)
 			cmdlineflags |= CMD_IGNORE_OSVER;
 
-		else if (strcmp(cmdline->args[i], "-demo") == 0)
+		else if (strcmp(cmdline.args[i], "-demo") == 0)
 			cmdlineflags |= CMD_RUN_DEMO_GAME;
 
-		else if (strcmp(cmdline->args[i], "-nocache") == 0)
+		else if (strcmp(cmdline.args[i], "-nocache") == 0)
 			cmdlineflags |= CMD_USE_DEF_ALLOC;
 	}
-
-	DestroyCommandLine(cmdline);
 
 	return(true);
 }
@@ -355,7 +307,7 @@ bool Common_Init(void)
 	}
 #endif
 
-	if (!ParseCommandLine())
+	if (!ProcessCommandLine())
 		return(false);
 
 	if (!MemCache_Init())
