@@ -16,7 +16,6 @@
 
 typedef struct
 {
-	bool allocated;
 	char **args;
 	int count;
 } cmdline_t;
@@ -24,7 +23,7 @@ typedef struct
 bool Sys_Init(void);
 void Sys_Shutdown(void);
 void Sys_Error(const char *error, ...);
-void Sys_ProcessCommandLine(cmdline_t *cmdline);
+void Sys_ParseCommandLine(cmdline_t *cmdline);
 
 bool Sys_Mkdir(const char *path);
 void Sys_Stat(const char *filepath, filedata_t *filedata);

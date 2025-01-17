@@ -149,12 +149,12 @@ void Sys_Error(const char *error, ...)
 }
 
 /*
-* Function: Sys_ProcessCommandLine
+* Function: Sys_ParseCommandLine
 * Processes the command line arguments and stores them in a command line struct, turns the wide char command line into argc and argv
 * 
 *	cmdline: The command line struct to store the arguments in
 */
-void Sys_ProcessCommandLine(cmdline_t *cmdline)
+void Sys_ParseCommandLine(cmdline_t *cmdline)
 {
 	if (!cmdline)
 		return;
