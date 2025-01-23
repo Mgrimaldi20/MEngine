@@ -191,7 +191,7 @@ char *Sys_Strtok(char *string, const char *delimiter, char **context)
 *	string: The string to get the length of
 *	maxlen: The maximum length of the string to be checked
 * 
-* Returns: The length of the string
+* Returns: The length of the string or 0 if the string is NULL
 */
 size_t Sys_Strlen(const char *string, size_t maxlen)
 {
