@@ -37,7 +37,6 @@ void *Sys_OpenDir(const char *directory);
 bool Sys_ReadDir(void *directory, char *filename, size_t filenamelen);
 void Sys_CloseDir(void *directory);
 
-
 size_t Sys_GetSystemMemory(void);
 
 #define SYS_MAX_THREADS 64

@@ -51,7 +51,7 @@ static void KeyCallback(GLFWwindow *window, int key, int scancode, int action, i
 
 /*
 * Function: MouseMoveCallback
-* Callback for mouse move events, queues the mouse event to the event system with the mouse position
+* Callback for mouse move events, queues the mouse event to the event system with the mouse position, relative to top-left corner
 * 
 * 	window: The window that received the event
 * 	xpos: The new x-coordinate of the cursor

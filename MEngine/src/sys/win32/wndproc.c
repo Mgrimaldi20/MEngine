@@ -137,7 +137,7 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 			break;
 		}
 
-		case WM_MOUSEMOVE:
+		case WM_MOUSEMOVE:		// relative to the top-left corner of the client region
 		{
 			POINTS pt = MAKEPOINTS(lparam);
 			int posx = pt.x;

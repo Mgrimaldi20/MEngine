@@ -43,7 +43,7 @@ typedef struct
 	char *wndname;		// propogated from gamename in gameservices, so always 256 chars/wchars
 } glwndparams_t;
 
-// systems specific to the renderer
+// system specific renderer functions
 bool GLWnd_Init(glwndparams_t params);
 void GLWnd_Shutdown(void);
 bool GLWnd_ChangeScreenParams(glwndparams_t params);
