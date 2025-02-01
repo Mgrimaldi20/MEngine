@@ -6,10 +6,65 @@
 #include "unzip.h"
 #include "zip.h"
 
+#define DEF_FILE_MAP_CAPACITY 256
+
+typedef enum
+{
+	FILE_FROM_PAK,
+	FILE_FROM_DISK
+} filesource_t;
+
+typedef struct
+{
+	filesource_t source;
+	char filename[SYS_MAX_PATH];
+	union
+	{
+		unzFile pakfile;
+		FILE *diskfile;
+	} handle;
+} vfile_t;
+
+typedef struct fileentry
+{
+	char filename[SYS_MAX_PATH];
+	char pakfile[SYS_MAX_PATH];
+	unsigned int priority;
+	struct fileentry *next;
+} fileentry_t;
+
+typedef struct
+{
+	size_t numfiles;
+	size_t capacity;
+	fileentry_t **files;
+} filemap_t;
+
+static filemap_t *filemap;
+
 static cvar_t *fs_basepath;
 static cvar_t *fs_savepath;
 
 static bool initialized;
+
+/*
+* Function: HashFileName
+* Hashes the name of the file to generate an index
+* 
+* 	name: The name of the file
+* 
+* Returns: The hash value
+*/
+static size_t HashFileName(const char *name)
+{
+	size_t hash = 0;
+	size_t len = Sys_Strlen(name, SYS_MAX_PATH);
+
+	for (size_t i=0; i<len; i++)
+		hash = (hash * 31) + name[i];
+
+	return(hash % filemap->capacity);
+}
 
 /*
 * Function: PathMatchSpec
@@ -60,8 +115,29 @@ bool FileSys_Init(void)
 	if (initialized)
 		return(true);
 
-	fs_basepath = CVar_RegisterString("fs_basepath", ".", CVAR_FILESYSTEM | CVAR_READONLY, "The base path for the engine. Path to the installation");
-	fs_savepath = CVar_RegisterString("fs_savepath", "save", CVAR_FILESYSTEM, "The path to the games save files");
+	filemap = Mem_Alloc(sizeof(*filemap));
+	if (!filemap)
+	{
+		Log_WriteSeq(LOG_ERROR, "Failed to allocate memory for file map");
+		return(false);
+	}
+
+	filemap->capacity = DEF_FILE_MAP_CAPACITY;
+	filemap->numfiles = 0;
+
+	filemap->files = Mem_Alloc(sizeof(*filemap->files) * filemap->capacity);
+	if (!filemap->files)
+	{
+		Log_WriteSeq(LOG_ERROR, "Failed to allocate memory for file map entries");
+		Mem_Free(filemap);
+		return(false);
+	}
+
+	for (size_t i=0; i<filemap->capacity; i++)
+		filemap->files[i] = NULL;
+
+	fs_basepath = CVar_RegisterString("fs_basepath", "", CVAR_FILESYSTEM | CVAR_READONLY, "The base path for the engine. Path to the installation");
+	fs_savepath = CVar_RegisterString("fs_savepath", "save", CVAR_FILESYSTEM, "The path to the games save files, relative to the base path");
 
 	initialized = true;
 
@@ -78,6 +154,20 @@ void FileSys_Shutdown(void)
 		return;
 
 	Log_WriteSeq(LOG_INFO, "Shutting down filesystem");
+
+	for (size_t i=0; i<filemap->capacity; i++)
+	{
+		fileentry_t *current = filemap->files[i];
+		while (current)
+		{
+			fileentry_t *next = current->next;
+			Mem_Free(current);
+			current = next;
+		}
+	}
+
+	Mem_Free(filemap->files);
+	Mem_Free(filemap);
 
 	initialized = false;
 }

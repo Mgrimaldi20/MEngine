@@ -32,14 +32,14 @@ static char cvarfullname[SYS_MAX_PATH];
 static bool initialized;
 
 /*
-* Function: HashFunction
-* Hashes the name of the cvar to generate a hash value
+* Function: HashCVarName
+* Hashes the name of the cvar to generate an index
 * 
 *	name: The name of the cvar
 * 
 * Returns: The hash value
 */
-static size_t HashFunction(const char *name)	// this function is actually okay for resizing, a new hash is generated for the new map size
+static size_t HashCVarName(const char *name)
 {
 	size_t hash = 0;
 	size_t len = Sys_Strlen(name, CVAR_MAX_STR_LEN);
@@ -334,7 +334,7 @@ static cvar_t *RegisterCVar(const char *name, const cvarvalue_t value, const cva
 	entry->value = cvar;
 	entry->next = NULL;
 
-	size_t index = HashFunction(name);
+	size_t index = HashCVarName(name);
 
 	if (!cvarmap->cvars[index])
 		cvarmap->cvars[index] = entry;
@@ -370,7 +370,7 @@ static cvar_t *RegisterCVar(const char *name, const cvarvalue_t value, const cva
 			while (current)
 			{
 				cvarentry_t *next = current->next;
-				size_t newindex = HashFunction(current->value->name);
+				size_t newindex = HashCVarName(current->value->name);
 
 				if (!newcvars[newindex])
 					newcvars[newindex] = current;
@@ -657,7 +657,7 @@ cvar_t *CVar_Find(const char *name)
 	if (!name || !name[0])
 		return(NULL);
 
-	size_t index = HashFunction(name);
+	size_t index = HashCVarName(name);
 	cvarentry_t *current = cvarmap->cvars[index];
 	while (current)
 	{
