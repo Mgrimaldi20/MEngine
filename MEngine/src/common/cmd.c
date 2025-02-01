@@ -33,12 +33,14 @@ static size_t cmdbufferlen;
 static bool initialized;
 
 /*
-* Function: HashFunction
-* Hashes the name of the command to generate a hash value
+* Function: HashCmdName
+* Hashes the name of the command to generate an index
 * 
 * 	name: The name of the command
+* 
+* Returns: The hash value
 */
-static size_t HashFunction(const char *name)	// hash the name, same as the cvar hash function
+static size_t HashCmdName(const char *name)
 {
 	size_t hash = 0;
 	size_t len = Sys_Strlen(name, CVAR_MAX_STR_LEN);
@@ -62,7 +64,7 @@ static cmd_t *FindCommand(const char *name)
 	if (!name || !name[0])
 		return(NULL);
 
-	size_t index = HashFunction(name);
+	size_t index = HashCmdName(name);
 	cmdentry_t *current = cmdmap->cmds[index];
 	while (current)
 	{
@@ -305,7 +307,7 @@ void Cmd_RegisterCommand(const char *name, cmdfunction_t function, const char *d
 	entry->value = cmd;
 	entry->next = NULL;
 
-	size_t index = HashFunction(name);
+	size_t index = HashCmdName(name);
 
 	if (!cmdmap->cmds[index])
 		cmdmap->cmds[index] = entry;
@@ -341,7 +343,7 @@ void Cmd_RegisterCommand(const char *name, cmdfunction_t function, const char *d
 			while (current)
 			{
 				cmdentry_t *next = current->next;
-				size_t newindex = HashFunction(current->value->name);
+				size_t newindex = HashCmdName(current->value->name);
 
 				if (!newcmds[newindex])
 					newcmds[newindex] = current;
@@ -375,7 +377,7 @@ void Cmd_RemoveCommand(const char *name)
 		return;
 	}
 
-	size_t index = HashFunction(name);
+	size_t index = HashCmdName(name);
 
 	cmdentry_t *prev = NULL;
 	cmdentry_t *current = cmdmap->cmds[index];
