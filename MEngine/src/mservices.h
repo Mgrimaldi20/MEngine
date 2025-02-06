@@ -23,11 +23,20 @@ typedef enum
 	CVAR_GAME = 1 << 6
 } cvarflags_t;
 
+typedef enum
+{
+	CMD_EXEC_NOW = 0,
+	CMD_EXEC_APPEND
+} cmdexecution_t;
+
+typedef void (*cmdfunction_t)(const cmdargs_t *args);
+
 typedef struct cvar cvar_t;			// opaque type to cvar struct, only access through CVar_ functions
 typedef struct thread thread_t;		// opaque type to thread struct, only access through Sys_ thread functions
 typedef struct mutex mutex_t;		// opaque type to mutex struct, only access through Sys_ mutex functions
 typedef struct condvar condvar_t;	// opaque type to condvar struct, only access through Sys_ condvar functions
 typedef struct filedata filedata_t;	// opaque type to filedata struct, only access through Sys_ file functions
+typedef struct cmdargs cmdargs_t;	// opaque type to cmdargs struct, only access through Cmd_ functions
 
 typedef struct		// logging service
 {
@@ -44,24 +53,6 @@ typedef struct		// memory cache allocator and manager
 	size_t (*GetMemUsed)(void);
 	size_t (*GetTotalMemory)(void);
 } memcache_t;
-
-#define CMD_MAX_ARGS 32
-#define CMD_MAX_STR_LEN 1024
-
-typedef struct
-{
-	int argc;
-	char *argv[CMD_MAX_ARGS];			// points into the command string cmdstr
-	char cmdstr[CMD_MAX_STR_LEN];
-} cmdargs_t;
-
-typedef void (*cmdfunction_t)(const cmdargs_t *args);
-
-typedef enum
-{
-	CMD_EXEC_NOW = 0,
-	CMD_EXEC_APPEND
-} cmdexecution_t;
 
 typedef struct		// command system
 {
