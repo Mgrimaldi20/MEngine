@@ -6,7 +6,7 @@
 #include "unzip.h"
 #include "zip.h"
 
-#define DEF_FILE_MAP_CAPACITY 256
+#define DEF_FILE_MAP_CAPACITY 512
 
 typedef enum
 {
@@ -17,7 +17,7 @@ typedef enum
 typedef struct
 {
 	filesource_t source;
-	char filename[SYS_MAX_PATH];
+	char *filename;
 	union
 	{
 		unzFile pakfile;
@@ -29,7 +29,6 @@ typedef struct fileentry
 {
 	char filename[SYS_MAX_PATH];
 	char pakfile[SYS_MAX_PATH];
-	unsigned int priority;
 	struct fileentry *next;
 } fileentry_t;
 
@@ -63,7 +62,7 @@ static size_t HashFileName(const char *name)
 	for (size_t i=0; i<len; i++)
 		hash = (hash * 31) + name[i];
 
-	return(hash % filemap->capacity);
+	return(hash & (filemap->capacity - 1));
 }
 
 /*
@@ -102,6 +101,39 @@ static bool PathMatchSpec(const char *path, const char *filter)
 	}
 
 	return(!*filter && !*path);
+}
+
+/*
+* Function: MapFiles
+* Maps files from the all the pak files to the file map
+* Files in the paks have priority over files on disk
+* Files in higher numbered paks have priority over lower numbered paks
+* Eg. pak.1.pk has priority over pak.0.pk, etc...
+* 
+* 	filename: The name of the file to map
+* 	pakfile: The name of the pak file
+* 
+* Returns: A boolean if the file was mapped or not
+*/
+static bool MapFiles(const char *filename, const char *pakfile)
+{
+	size_t index = HashFileName(filename);
+
+	fileentry_t *entry = Mem_Alloc(sizeof(*entry));
+	if (!entry)
+	{
+		Log_WriteSeq(LOG_ERROR, "Failed to allocate memory for file map entry");
+		return(false);
+	}
+
+	snprintf(entry->filename, SYS_MAX_PATH, "%s", filename);
+	snprintf(entry->pakfile, SYS_MAX_PATH, "%s", pakfile);
+
+	entry->next = filemap->files[index];
+	filemap->files[index] = entry;
+	filemap->numfiles++;
+
+	return(true);
 }
 
 /*
@@ -170,40 +202,6 @@ void FileSys_Shutdown(void)
 	Mem_Free(filemap);
 
 	initialized = false;
-}
-
-/*
-* Function: FileSys_GetBasePath
-* Checks if a file exists inside the loaded PAK files
-* 
-*	filename: The filename to check
-* 
-* Returns: A boolean if the file exists or not
-*/
-bool FileSys_FileExistsInPAK(const char *filename)
-{
-	if (!filename)
-		return(false);
-
-	return(true);
-}
-
-/*
-* Function: FileSys_ListFilesInPAK
-* Lists all files in the loaded PAK files
-* 
-* 	numfiles: The number of files found
-* 	filter: The filter to apply to the file list
-* 
-* Returns: A list of filedata_t structs
-*/
-filedata_t *FileSys_ListFilesInPAK(unsigned int *numfiles, const char *filter)	// uses same free FileSys_FreeFileList function
-{
-	if (!numfiles || !filter)
-		return(NULL);
-
-	*numfiles = 0;
-	return(NULL);
 }
 
 /*

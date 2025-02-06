@@ -43,12 +43,12 @@ static bool initialized;
 static size_t HashCmdName(const char *name)
 {
 	size_t hash = 0;
-	size_t len = Sys_Strlen(name, CVAR_MAX_STR_LEN);
+	size_t len = Sys_Strlen(name, CMD_MAX_STR_LEN);
 
 	for (size_t i=0; i<len; i++)
 		hash = (hash * 31) + name[i];
 
-	return(hash % cmdmap->capacity);
+	return(hash & (cmdmap->capacity - 1));
 }
 
 /*
@@ -320,7 +320,7 @@ void Cmd_RegisterCommand(const char *name, cmdfunction_t function, const char *d
 
 	cmdmap->numcmds++;
 
-	// if the number of cvars is st 75% capacity, resize the map to double, move all the cvars to the new map, and free the old map
+	// if the number of cmds is at 75% capacity, resize the map to double
 	if (cmdmap->numcmds >= (cmdmap->capacity * 0.75))
 	{
 		cmdmap->capacity *= 2;

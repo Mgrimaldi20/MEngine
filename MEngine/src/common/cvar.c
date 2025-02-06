@@ -6,7 +6,34 @@
 #include "sys/sys.h"
 #include "common.h"
 
-#define DEF_CVAR_MAP_CAPACITY 256
+#define DEF_CVAR_MAP_CAPACITY 128
+#define CVAR_MAX_STR_LEN 256
+#define CVAR_MAX_LINE_LEN 512		// double the max string length
+
+typedef enum
+{
+	CVAR_INT = 0,
+	CVAR_FLOAT,
+	CVAR_STRING,
+	CVAR_BOOL
+} cvartype_t;
+
+typedef union
+{
+	bool b;
+	char s[CVAR_MAX_STR_LEN];
+	int i;
+	float f;
+} cvarvalue_t;
+
+struct cvar
+{
+	char *name;
+	cvarvalue_t value;
+	const char *description;
+	cvartype_t type;
+	unsigned long long flags;
+};
 
 typedef struct cvarentry
 {
@@ -47,7 +74,7 @@ static size_t HashCVarName(const char *name)
 	for (size_t i=0; i<len; i++)
 		hash = (hash * 31) + name[i];
 
-	return(hash % cvarmap->capacity);
+	return(hash & (cvarmap->capacity - 1));
 }
 
 /*
@@ -347,7 +374,7 @@ static cvar_t *RegisterCVar(const char *name, const cvarvalue_t value, const cva
 
 	cvarmap->numcvars++;
 
-	// if the number of cvars is st 75% capacity, resize the map to double, move all the cvars to the new map, and free the old map
+	// if the number of cvars is at 75% capacity, resize the map to double
 	if (cvarmap->numcvars >= (cvarmap->capacity * 0.75))
 	{
 		cvarmap->capacity *= 2;

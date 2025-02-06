@@ -38,39 +38,22 @@ size_t MemCahce_GetMemUsed(void);
 size_t MemCache_GetTotalMemory(void);
 bool MemCache_UseCache(void);
 
+#define CMD_MAX_STR_LEN 1024
+#define CMD_MAX_ARGS 32
+
+typedef struct cmdargs
+{
+	int argc;
+	char *argv[CMD_MAX_ARGS];			// points into the command string cmdstr
+	char cmdstr[CMD_MAX_STR_LEN];
+} cmdargs_t;
+
 bool Cmd_Init(void);
 void Cmd_Shutdown(void);
 void Cmd_RegisterCommand(const char *name, cmdfunction_t function, const char *description);
 void Cmd_RemoveCommand(const char *name);
 void Cmd_BufferCommand(const cmdexecution_t exec, const char *cmd);
 void Cmd_ExecuteCommandBuffer(void);
-
-#define CVAR_MAX_STR_LEN 256
-
-typedef enum
-{
-	CVAR_INT = 0,
-	CVAR_FLOAT,
-	CVAR_STRING,
-	CVAR_BOOL
-} cvartype_t;
-
-typedef struct
-{
-	bool b;
-	char s[CVAR_MAX_STR_LEN];
-	int i;
-	float f;
-} cvarvalue_t;
-
-struct cvar
-{
-	char *name;
-	cvarvalue_t value;
-	const char *description;
-	cvartype_t type;
-	unsigned long long flags;
-};
 
 bool CVar_Init(void);
 void CVar_Shutdown(void);
@@ -99,8 +82,6 @@ struct filedata
 
 bool FileSys_Init(void);
 void FileSys_Shutdown(void);
-bool FileSys_FileExistsInPAK(const char *filename);
-filedata_t *FileSys_ListFilesInPAK(unsigned int *numfiles, const char *filter);
 bool FileSys_FileExists(const char *filename);
 filedata_t *FileSys_ListFiles(unsigned int *numfiles, const char *directory, const char *filter);
 void FileSys_FreeFileList(filedata_t *filelist);
