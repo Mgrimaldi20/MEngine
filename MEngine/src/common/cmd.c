@@ -320,8 +320,7 @@ void Cmd_RegisterCommand(const char *name, cmdfunction_t function, const char *d
 
 	cmdmap->numcmds++;
 
-	// if the number of cmds is at 75% capacity, resize the map to double
-	if (cmdmap->numcmds >= (cmdmap->capacity * 0.75))
+	if (cmdmap->numcmds >= (cmdmap->capacity * 0.75))	// if the number of cmds is at 75% capacity, resize the map to double
 	{
 		cmdmap->capacity *= 2;
 
