@@ -374,8 +374,7 @@ static cvar_t *RegisterCVar(const char *name, const cvarvalue_t value, const cva
 
 	cvarmap->numcvars++;
 
-	// if the number of cvars is at 75% capacity, resize the map to double
-	if (cvarmap->numcvars >= (cvarmap->capacity * 0.75))
+	if (cvarmap->numcvars >= (cvarmap->capacity * 0.75))	// if the number of cvars is at 75% capacity, resize the map to double
 	{
 		cvarmap->capacity *= 2;
 
