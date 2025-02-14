@@ -319,10 +319,8 @@ static cvar_t *RegisterCVar(const char *name, const cvarvalue_t value, const cva
 	if (existing)
 	{
 		Log_Write(LOG_INFO, "CVar already exists: (%s): updating new parameters", name);
-
 		existing->flags = flags;
 		existing->description = description;
-
 		return(existing);
 	}
 

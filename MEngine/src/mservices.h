@@ -29,14 +29,14 @@ typedef enum
 	CMD_EXEC_APPEND
 } cmdexecution_t;
 
-typedef void (*cmdfunction_t)(const cmdargs_t *args);
-
 typedef struct cvar cvar_t;			// opaque type to cvar struct, only access through CVar_ functions
 typedef struct thread thread_t;		// opaque type to thread struct, only access through Sys_ thread functions
 typedef struct mutex mutex_t;		// opaque type to mutex struct, only access through Sys_ mutex functions
 typedef struct condvar condvar_t;	// opaque type to condvar struct, only access through Sys_ condvar functions
 typedef struct filedata filedata_t;	// opaque type to filedata struct, only access through Sys_ file functions
 typedef struct cmdargs cmdargs_t;	// opaque type to cmdargs struct, only access through Cmd_ functions
+
+typedef void (*cmdfunction_t)(const cmdargs_t *args);
 
 typedef struct		// logging service
 {
@@ -83,8 +83,6 @@ typedef struct		// cvar system
 
 typedef struct
 {
-	bool (*FileExistsInPAK)(const char *filename);
-	filedata_t *(*ListFilesInPAK)(unsigned int *numfiles, const char *filter);
 	bool (*FileExists)(const char *filename);
 	filedata_t *(*ListFiles)(unsigned int *numfiles, const char *directory, const char *filter);
 	void (*FreeFileList)(filedata_t *filelist);

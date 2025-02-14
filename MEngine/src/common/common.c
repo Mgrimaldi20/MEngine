@@ -142,9 +142,7 @@ static void CreateMServices(void)
 	filesystem = (filesystem_t)
 	{
 		.FileExists = FileSys_FileExists,
-		.FileExistsInPAK = FileSys_FileExistsInPAK,
 		.ListFiles = FileSys_ListFiles,
-		.ListFilesInPAK = FileSys_ListFilesInPAK,
 		.FreeFileList = FileSys_FreeFileList
 	};
 
@@ -205,7 +203,7 @@ static bool InitGame(void)
 		return(false);
 	}
 
-	char gamedllname[CVAR_MAX_STR_LEN] = { 0 };
+	char gamedllname[SYS_MAX_PATH] = { 0 };
 	if (!CVar_GetString(gamedll, gamedllname))
 	{
 		Log_WriteSeq(LOG_ERROR, "Failed to get game DLL name from CVar system");
