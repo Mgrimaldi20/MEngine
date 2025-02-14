@@ -41,8 +41,8 @@ typedef struct
 
 static filemap_t *filemap;
 
-static cvar_t *fs_basepath;
-static cvar_t *fs_savepath;
+static cvar_t *fsbasepath;
+static cvar_t *fssavepath;
 
 static bool initialized;
 
@@ -110,29 +110,33 @@ static bool PathMatchSpec(const char *path, const char *filter)
 * Files in higher numbered paks have priority over lower numbered paks
 * Eg. pak.1.pk has priority over pak.0.pk, etc...
 * 
-* 	filename: The name of the file to map
-* 	pakfile: The name of the pak file
-* 
-* Returns: A boolean if the file was mapped or not
+* Returns: A boolean if the files were mapped successfully or not
 */
-static bool MapFiles(const char *filename, const char *pakfile)
+static bool MapFiles(void)
 {
-	size_t index = HashFileName(filename);
+	//char pakfile[SYS_MAX_PATH] = { 0 };
+	//char filename[SYS_MAX_PATH] = { 0 };
+	char basepath[SYS_MAX_PATH] = { 0 };
 
-	fileentry_t *entry = Mem_Alloc(sizeof(*entry));
-	if (!entry)
+	if (CVar_GetString(fsbasepath, basepath))
 	{
-		Log_WriteSeq(LOG_ERROR, "Failed to allocate memory for file map entry");
+		Log_WriteSeq(LOG_ERROR, "Failed to get base path from CVar system");
 		return(false);
 	}
 
-	snprintf(entry->filename, SYS_MAX_PATH, "%s", filename);
-	snprintf(entry->pakfile, SYS_MAX_PATH, "%s", pakfile);
+	unsigned int numfiles = 0;
+	filedata_t *pakfiles = FileSys_ListFiles(&numfiles, basepath, "pak.*.pk");
+	if (!pakfiles)
+	{
+		Log_WriteSeq(LOG_ERROR, "Failed to create a pak file list");
+		return(false);
+	}
 
-	entry->next = filemap->files[index];
-	filemap->files[index] = entry;
-	filemap->numfiles++;
+	for (unsigned int i=0; i<numfiles; i++)
+	{
+	}
 
+	FileSys_FreeFileList(pakfiles);
 	return(true);
 }
 
@@ -147,7 +151,7 @@ bool FileSys_Init(void)
 	if (initialized)
 		return(true);
 
-	filemap = Mem_Alloc(sizeof(*filemap));
+	filemap = MemCache_Alloc(sizeof(*filemap));
 	if (!filemap)
 	{
 		Log_WriteSeq(LOG_ERROR, "Failed to allocate memory for file map");
@@ -157,19 +161,27 @@ bool FileSys_Init(void)
 	filemap->capacity = DEF_FILE_MAP_CAPACITY;
 	filemap->numfiles = 0;
 
-	filemap->files = Mem_Alloc(sizeof(*filemap->files) * filemap->capacity);
+	filemap->files = MemCache_Alloc(sizeof(*filemap->files) * filemap->capacity);
 	if (!filemap->files)
 	{
 		Log_WriteSeq(LOG_ERROR, "Failed to allocate memory for file map entries");
-		Mem_Free(filemap);
+		MemCache_Free(filemap);
 		return(false);
 	}
 
 	for (size_t i=0; i<filemap->capacity; i++)
 		filemap->files[i] = NULL;
 
-	fs_basepath = CVar_RegisterString("fs_basepath", "", CVAR_FILESYSTEM | CVAR_READONLY, "The base path for the engine. Path to the installation");
-	fs_savepath = CVar_RegisterString("fs_savepath", "save", CVAR_FILESYSTEM, "The path to the games save files, relative to the base path");
+	fsbasepath = CVar_RegisterString("fs_basepath", "", CVAR_FILESYSTEM | CVAR_READONLY, "The base path for the engine. Path to the installation");
+	fssavepath = CVar_RegisterString("fs_savepath", "save", CVAR_FILESYSTEM, "The path to the games save files, relative to the base path");
+
+	if (!MapFiles())
+	{
+		Log_WriteSeq(LOG_ERROR, "Failed to map the files sourced from the PAKs");
+		MemCache_Free(filemap->files);
+		MemCache_Free(filemap);
+		return(false);
+	}
 
 	initialized = true;
 
@@ -193,13 +205,13 @@ void FileSys_Shutdown(void)
 		while (current)
 		{
 			fileentry_t *next = current->next;
-			Mem_Free(current);
+			MemCache_Free(current);
 			current = next;
 		}
 	}
 
-	Mem_Free(filemap->files);
-	Mem_Free(filemap);
+	MemCache_Free(filemap->files);
+	MemCache_Free(filemap);
 
 	initialized = false;
 }
@@ -239,7 +251,10 @@ filedata_t *FileSys_ListFiles(unsigned int *numfiles, const char *directory, con
 {
 	void *dir = Sys_OpenDir(directory);
 	if (!dir)
+	{
+		*numfiles = 0;
 		return(NULL);
+	}
 
 	unsigned int filecount = 0;
 	char filename[SYS_MAX_PATH] = { 0 };
@@ -257,11 +272,12 @@ filedata_t *FileSys_ListFiles(unsigned int *numfiles, const char *directory, con
 		return(NULL);
 	}
 
+	*numfiles = filecount;
+
 	filedata_t *filelist = MemCache_Alloc(filecount * sizeof(*filelist));
 	if (!filelist)
 	{
 		Sys_CloseDir(dir);
-		*numfiles = 0;
 		return(NULL);
 	}
 
@@ -269,6 +285,11 @@ filedata_t *FileSys_ListFiles(unsigned int *numfiles, const char *directory, con
 	dir = NULL;
 
 	dir = Sys_OpenDir(directory);
+	if (!dir)
+	{
+		MemCache_Free(filelist);
+		return(NULL);
+	}
 
 	unsigned int index = 0;
 	while (Sys_ReadDir(dir, filename, SYS_MAX_PATH))
@@ -293,8 +314,6 @@ filedata_t *FileSys_ListFiles(unsigned int *numfiles, const char *directory, con
 	}
 
 	Sys_CloseDir(dir);
-	*numfiles = filecount;
-
 	return(filelist);
 }
 
