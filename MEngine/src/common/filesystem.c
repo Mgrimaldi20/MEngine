@@ -112,10 +112,32 @@ static bool PathMatchSpec(const char *path, const char *filter)
 * 
 * Returns: A boolean if the files were mapped successfully or not
 */
-static bool MapFiles(void)
+static bool MapFiles(filedata_t *filelist, const unsigned int numfiles)
 {
 	//char pakfile[SYS_MAX_PATH] = { 0 };
 	//char filename[SYS_MAX_PATH] = { 0 };
+
+	for (unsigned int i=0; i<numfiles; i++)
+	{
+	}
+
+	return(true);
+}
+
+/*
+* Function: FileSys_Init
+* Initializes the filesystem
+* 
+* Returns: A boolean if initialization was successful or not
+*/
+bool FileSys_Init(void)
+{
+	if (initialized)
+		return(true);
+
+	fsbasepath = CVar_RegisterString("fs_basepath", "", CVAR_FILESYSTEM | CVAR_READONLY, "The base path for the engine. Path to the installation");
+	fssavepath = CVar_RegisterString("fs_savepath", "save", CVAR_FILESYSTEM, "The path to the games save files, relative to the base path");
+
 	char basepath[SYS_MAX_PATH] = { 0 };
 
 	if (CVar_GetString(fsbasepath, basepath))
@@ -132,55 +154,42 @@ static bool MapFiles(void)
 		return(false);
 	}
 
-	for (unsigned int i=0; i<numfiles; i++)
+	if (numfiles)
 	{
-	}
 
-	FileSys_FreeFileList(pakfiles);
-	return(true);
-}
+		filemap = MemCache_Alloc(sizeof(*filemap));
+		if (!filemap)
+		{
+			Log_WriteSeq(LOG_ERROR, "Failed to allocate memory for file map");
+			FileSys_FreeFileList(pakfiles);
+			return(false);
+		}
 
-/*
-* Function: FileSys_Init
-* Initializes the filesystem
-* 
-* Returns: A boolean if initialization was successful or not
-*/
-bool FileSys_Init(void)
-{
-	if (initialized)
-		return(true);
+		filemap->capacity = DEF_FILE_MAP_CAPACITY;
+		filemap->numfiles = 0;
 
-	filemap = MemCache_Alloc(sizeof(*filemap));
-	if (!filemap)
-	{
-		Log_WriteSeq(LOG_ERROR, "Failed to allocate memory for file map");
-		return(false);
-	}
+		filemap->files = MemCache_Alloc(sizeof(*filemap->files) * filemap->capacity);
+		if (!filemap->files)
+		{
+			Log_WriteSeq(LOG_ERROR, "Failed to allocate memory for file map entries");
+			FileSys_FreeFileList(pakfiles);
+			MemCache_Free(filemap);
+			return(false);
+		}
 
-	filemap->capacity = DEF_FILE_MAP_CAPACITY;
-	filemap->numfiles = 0;
+		for (size_t i=0; i<filemap->capacity; i++)
+			filemap->files[i] = NULL;
 
-	filemap->files = MemCache_Alloc(sizeof(*filemap->files) * filemap->capacity);
-	if (!filemap->files)
-	{
-		Log_WriteSeq(LOG_ERROR, "Failed to allocate memory for file map entries");
-		MemCache_Free(filemap);
-		return(false);
-	}
+		if (!MapFiles(pakfiles, numfiles))
+		{
+			Log_WriteSeq(LOG_ERROR, "Failed to map the files sourced from the PAKs");
+			FileSys_FreeFileList(pakfiles);
+			MemCache_Free(filemap->files);
+			MemCache_Free(filemap);
+			return(false);
+		}
 
-	for (size_t i=0; i<filemap->capacity; i++)
-		filemap->files[i] = NULL;
-
-	fsbasepath = CVar_RegisterString("fs_basepath", "", CVAR_FILESYSTEM | CVAR_READONLY, "The base path for the engine. Path to the installation");
-	fssavepath = CVar_RegisterString("fs_savepath", "save", CVAR_FILESYSTEM, "The path to the games save files, relative to the base path");
-
-	if (!MapFiles())
-	{
-		Log_WriteSeq(LOG_ERROR, "Failed to map the files sourced from the PAKs");
-		MemCache_Free(filemap->files);
-		MemCache_Free(filemap);
-		return(false);
+		FileSys_FreeFileList(pakfiles);
 	}
 
 	initialized = true;
