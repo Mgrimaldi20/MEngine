@@ -33,7 +33,6 @@ endif()
 if(WIN32)
 	target_sources(MEngine PRIVATE
 		"src/sys/win32/winlocal.h"
-		"src/sys/win32/wglext.h"
 		"src/sys/win32/winmain.c"
 		"src/sys/win32/wndproc.c"
 		"src/sys/win32/syswin.c"

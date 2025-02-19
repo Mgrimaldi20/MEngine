@@ -110,9 +110,12 @@ static bool PathMatchSpec(const char *path, const char *filter)
 * Files in higher numbered paks have priority over lower numbered paks
 * Eg. pak.1.pk has priority over pak.0.pk, etc...
 * 
+* 	filelist: The list of files to map to the VFS
+* 	numfiles: The number of files in the list
+* 
 * Returns: A boolean if the files were mapped successfully or not
 */
-static bool MapFiles(filedata_t *filelist, const unsigned int numfiles)
+static bool MapFiles(const filedata_t *filelist, const unsigned int numfiles)
 {
 	//char pakfile[SYS_MAX_PATH] = { 0 };
 	//char filename[SYS_MAX_PATH] = { 0 };
@@ -148,7 +151,7 @@ bool FileSys_Init(void)
 
 	unsigned int numfiles = 0;
 	filedata_t *pakfiles = FileSys_ListFiles(&numfiles, basepath, "pak.*.pk");
-	if (!pakfiles)
+	if (!pakfiles && numfiles)
 	{
 		Log_WriteSeq(LOG_ERROR, "Failed to create a pak file list");
 		return(false);
@@ -191,6 +194,9 @@ bool FileSys_Init(void)
 
 		FileSys_FreeFileList(pakfiles);
 	}
+
+	if (!pakfiles && !numfiles)
+		Log_WriteSeq(LOG_WARN, "No pak files found in the base path, using regular filesystem");
 
 	initialized = true;
 
@@ -256,7 +262,7 @@ bool FileSys_FileExists(const char *filename)
 * 
 * Returns: A list of filedata_t structs
 */
-filedata_t *FileSys_ListFiles(unsigned int *numfiles, const char *directory, const char *filter)	// also outputs the number of files found
+filedata_t *FileSys_ListFiles(unsigned int *numfiles, const char *directory, const char *filter)
 {
 	void *dir = Sys_OpenDir(directory);
 	if (!dir)
