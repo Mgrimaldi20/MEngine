@@ -4,7 +4,6 @@
 #include "common/common.h"
 #include "winlocal.h"
 #include "renderer/renderer.h"
-#include "wglext.h"		// for OpenGL Windows extensions
 
 #define FS_WINDOW_STYLE (WS_POPUP | WS_VISIBLE | WS_SYSMENU)
 
@@ -15,24 +14,25 @@ static const wchar_t *fakewndclassname = L"Fake_MEngine";
 
 static bool initialized;
 
-PFNWGLGETEXTENSIONSSTRINGARBPROC wglGetExtensionsStringARB;
+#define WGL_DRAW_TO_WINDOW_ARB 0x2001
+#define WGL_SUPPORT_OPENGL_ARB 0x2010
+#define WGL_DOUBLE_BUFFER_ARB 0x2011
+#define WGL_PIXEL_TYPE_ARB 0x2013
+#define WGL_COLOR_BITS_ARB 0x2014
+#define WGL_DEPTH_BITS_ARB 0x2022
+#define WGL_STENCIL_BITS_ARB 0x2023
+#define WGL_SAMPLE_BUFFERS_ARB 0x2041
+#define WGL_SAMPLES_ARB 0x2042
 
+typedef const char *(WINAPI *PFNWGLGETEXTENSIONSSTRINGARBPROC)(HDC hdc);
+typedef BOOL(WINAPI *PFNWGLSWAPINTERVALEXTPROC)(int interval);
+typedef int (WINAPI *PFNWGLGETSWAPINTERVALEXTPROC)(void);
+typedef BOOL(WINAPI *PFNWGLCHOOSEPIXELFORMATARBPROC)(HDC hdc, const int *piAttribIList, const FLOAT *pfAttribFList, UINT nMaxFormats, int *piFormats, UINT *nNumFormats);
+
+PFNWGLGETEXTENSIONSSTRINGARBPROC wglGetExtensionsStringARB;
 PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT;
 PFNWGLGETSWAPINTERVALEXTPROC wglGetSwapIntervalEXT;
-
-PFNWGLGETPIXELFORMATATTRIBIVARBPROC wglGetPixelFormatAttribivARB;
-PFNWGLGETPIXELFORMATATTRIBFVARBPROC wglGetPixelFormatAttribfvARB;
 PFNWGLCHOOSEPIXELFORMATARBPROC wglChoosePixelFormatARB;
-
-PFNWGLCREATEPBUFFERARBPROC wglCreatePbufferARB;
-PFNWGLGETPBUFFERDCARBPROC wglGetPbufferDCARB;
-PFNWGLRELEASEPBUFFERDCARBPROC wglReleasePbufferDCARB;
-PFNWGLDESTROYPBUFFERARBPROC wglDestroyPbufferARB;
-PFNWGLQUERYPBUFFERARBPROC wglQueryPbufferARB;
-
-PFNWGLBINDTEXIMAGEARBPROC wglBindTexImageARB;
-PFNWGLRELEASETEXIMAGEARBPROC wglReleaseTexImageARB;
-PFNWGLSETPBUFFERATTRIBARBPROC wglSetPbufferAttribARB;
 
 /*
 * Function: GetWGLProcAddress
@@ -145,20 +145,7 @@ static void GetWGLExtensions(HDC hdc)
 
 	wglSwapIntervalEXT = (PFNWGLSWAPINTERVALEXTPROC)GetWGLProcAddress("wglSwapIntervalEXT");
 	wglGetSwapIntervalEXT = (PFNWGLGETSWAPINTERVALEXTPROC)GetWGLProcAddress("wglGetSwapIntervalEXT");
-
-	wglGetPixelFormatAttribivARB = (PFNWGLGETPIXELFORMATATTRIBIVARBPROC)GetWGLProcAddress("wglGetPixelFormatAttribivARB");
-	wglGetPixelFormatAttribfvARB = (PFNWGLGETPIXELFORMATATTRIBFVARBPROC)GetWGLProcAddress("wglGetPixelFormatAttribfvARB");
 	wglChoosePixelFormatARB = (PFNWGLCHOOSEPIXELFORMATARBPROC)GetWGLProcAddress("wglChoosePixelFormatARB");
-
-	wglCreatePbufferARB = (PFNWGLCREATEPBUFFERARBPROC)GetWGLProcAddress("wglCreatePbufferARB");
-	wglGetPbufferDCARB = (PFNWGLGETPBUFFERDCARBPROC)GetWGLProcAddress("wglGetPbufferDCARB");
-	wglReleasePbufferDCARB = (PFNWGLRELEASEPBUFFERDCARBPROC)GetWGLProcAddress("wglReleasePbufferDCARB");
-	wglDestroyPbufferARB = (PFNWGLDESTROYPBUFFERARBPROC)GetWGLProcAddress("wglDestroyPbufferARB");
-	wglQueryPbufferARB = (PFNWGLQUERYPBUFFERARBPROC)GetWGLProcAddress("wglQueryPbufferARB");
-
-	wglBindTexImageARB = (PFNWGLBINDTEXIMAGEARBPROC)GetWGLProcAddress("wglBindTexImageARB");
-	wglReleaseTexImageARB = (PFNWGLRELEASETEXIMAGEARBPROC)GetWGLProcAddress("wglReleaseTexImageARB");
-	wglSetPbufferAttribARB = (PFNWGLSETPBUFFERATTRIBARBPROC)GetWGLProcAddress("wglSetPbufferAttribARB");
 }
 
 /*
