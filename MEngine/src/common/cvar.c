@@ -160,6 +160,7 @@ static void ListAllCvars(void)
 /*
 * Function: GetNameValue
 * Gets a name and value pair from the config file. Ignores comments and leading whitespace.
+* A comment is a line that starts with a # symbol
 *
 *	line: The line to parse
 *	length: The length of the line
@@ -250,7 +251,7 @@ static bool GetNameValue(char *line, const size_t length, char *name, char *valu
 
 /*
 * Function: ReadCvarsFromFile
-* Inserts the cvars into the hashmap from the file given.
+* Inserts the cvars into the hashmap from the file given. The input file can be a regular config file or an override file
 * 
 *	infile: The file with the cvars in it
 *	filename: A string to insert into the log messages so you can tell what file it came from
@@ -270,13 +271,13 @@ static void ReadCvarsFromFile(FILE *infile, const char *filename)
 
 		if (!cmdname)
 		{
-			Log_Write(LOG_ERROR, "Failed to read the command name from file: %s", filename);
+			Log_WriteSeq(LOG_ERROR, "Failed to read the command name from file: %s", filename);
 			continue;
 		}
 
 		if (!args)
 		{
-			Log_Write(LOG_ERROR, "Failed to read the arguments from file: %s", filename);
+			Log_WriteSeq(LOG_ERROR, "Failed to read the arguments from file: %s", filename);
 			continue;
 		}
 
@@ -285,7 +286,7 @@ static void ReadCvarsFromFile(FILE *infile, const char *filename)
 
 		if (!GetNameValue(args, Sys_Strlen(args, sizeof(line) - (cmdname - line)), name, value))
 		{
-			Log_Write(LOG_ERROR, "Failed to read cvar from file: %s", filename);
+			Log_WriteSeq(LOG_ERROR, "Failed to read cvar from file: %s", filename);
 			continue;
 		}
 

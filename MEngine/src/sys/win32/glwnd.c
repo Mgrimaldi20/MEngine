@@ -495,10 +495,10 @@ static bool SetFullScreen(glwndparams_t params)
 
 	while (EnumDisplaySettings(NULL, mode, &dmtest))
 	{
-		if ((int)dmtest.dmPelsWidth == params.width &&
-			(int)dmtest.dmPelsHeight == params.height &&
-			(int)dmtest.dmBitsPerPel == 32 &&
-			(int)dmtest.dmDisplayFrequency == params.refreshrate)
+		if ((int)dmtest.dmPelsWidth == params.width
+			&& (int)dmtest.dmPelsHeight == params.height
+			&& (int)dmtest.dmBitsPerPel == 32
+			&& (int)dmtest.dmDisplayFrequency == params.refreshrate)
 		{
 			Log_WriteSeq(LOG_INFO, "Selected display mode %dx%d @ %dHz is valid", dmtest.dmPelsWidth, dmtest.dmPelsHeight, dmtest.dmDisplayFrequency);
 			validmode = true;
@@ -538,9 +538,9 @@ static bool SetFullScreen(glwndparams_t params)
 
 	while (EnumDisplaySettings(NULL, mode, &dm))
 	{
-		if ((int)dm.dmPelsWidth >= params.width &&
-			(int)dm.dmPelsHeight >= params.height &&
-			(int)dm.dmBitsPerPel == 32)
+		if ((int)dm.dmPelsWidth >= params.width
+			&& (int)dm.dmPelsHeight >= params.height
+			&& (int)dm.dmBitsPerPel == 32)
 		{
 			if (ChangeDisplaySettings(&dm, CDS_FULLSCREEN) == DISP_CHANGE_SUCCESSFUL)
 			{
