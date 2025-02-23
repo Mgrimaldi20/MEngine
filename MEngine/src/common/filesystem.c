@@ -105,9 +105,9 @@ static bool PathMatchSpec(const char *path, const char *filter)
 
 /*
 * Function: MapFiles
-* Maps files from the all the pak files to the file map
-* Files in the paks have priority over files on disk
-* Files in higher numbered paks have priority over lower numbered paks
+* Maps files from the all the pak files to the file map.
+* Files in the paks have priority over files on disk.
+* Files in higher numbered paks have priority over lower numbered paks.
 * Eg. pak.1.pk has priority over pak.0.pk, etc...
 * 
 * 	filelist: The list of files to map to the VFS
@@ -186,7 +186,7 @@ bool FileSys_Init(void)
 
 	char basepath[SYS_MAX_PATH] = { 0 };
 
-	if (Cvar_GetString(fsbasepath, basepath))
+	if (!Cvar_GetString(fsbasepath, basepath))
 	{
 		Log_WriteSeq(LOG_ERROR, "Failed to get base path from Cvar system");
 		return(false);

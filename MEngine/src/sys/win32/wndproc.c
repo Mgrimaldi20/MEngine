@@ -67,7 +67,8 @@ static void WindowSizing(WPARAM wparam, RECT *rect)
 
 /*
 * Function: MainWndProc
-* The main window procedure for the engine, handles all the window messages including native events, uses the default window procedure for unhandled messages
+* The main window procedure for the engine, handles all the window messages including native events,
+* uses the default window procedure for unhandled messages
 * 
 *	hwnd: The window handle
 *	umsg: The message

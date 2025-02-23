@@ -59,10 +59,10 @@ bool Sys_Init(void)
 	VER_SET_CONDITION(dwlcondmask, VER_SERVICEPACKMAJOR, VER_GREATER_EQUAL);
 	VER_SET_CONDITION(dwlcondmask, VER_SERVICEPACKMINOR, VER_GREATER_EQUAL);
 
-	if (!VerifyVersionInfo(&win32state.osver, VER_MAJORVERSION |
-		VER_MINORVERSION |
-		VER_SERVICEPACKMAJOR |
-		VER_SERVICEPACKMINOR, dwlcondmask))
+	if (!VerifyVersionInfo(&win32state.osver, VER_MAJORVERSION
+		| VER_MINORVERSION
+		| VER_SERVICEPACKMAJOR
+		| VER_SERVICEPACKMINOR, dwlcondmask))
 		WindowsError();
 
 	Log_WriteSeq(LOG_INFO, "Windows version: %d.%d.%d.%d",
@@ -77,8 +77,7 @@ bool Sys_Init(void)
 			"This code has only been tested on Win10 and version 6.2 "
 			"but should work on older OS versions, use with caution");
 
-	else if ((win32state.osver.dwMajorVersion < 6) ||
-		(win32state.osver.dwMajorVersion == 6 && win32state.osver.dwMinorVersion < 2))
+	else if ((win32state.osver.dwMajorVersion < 6) || (win32state.osver.dwMajorVersion == 6 && win32state.osver.dwMinorVersion < 2))
 	{
 		Sys_Error("Requires Windows 8 or greater");
 		return(false);

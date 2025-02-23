@@ -300,46 +300,31 @@ bool Common_Init(void)
 		snprintf(outfilename, SYS_MAX_PATH, "logs/stdout.log");
 		snprintf(errfilename, SYS_MAX_PATH, "logs/stderr.log");
 
-		(FILE *)outfp = fopen(outfilename, "w");	// truncate for each run
-		(FILE *)errfp = fopen(errfilename, "w");
+		outfp = fopen(outfilename, "w");	// truncate for each run
+		errfp = fopen(errfilename, "w");
 	}
 #endif
 
-	if (!ProcessCommandLine())
+	if (!ProcessCommandLine()
+		|| !MemCache_Init()
+		|| !Log_Init()
+		|| !Cmd_Init()
+		|| !Cvar_Init()
+		|| !FileSys_Init()
+		|| !Sys_Init()
+		|| !Input_Init()
+		|| !Event_Init()
+		|| !InitGame())
+	{
+		Common_Errorf("Failed to initialize the engine, shutting down...");
 		return(false);
-
-	if (!MemCache_Init())
-		return(false);
-
-	if (!Log_Init())
-		return(false);
+	}
 
 	if (!MemCache_UseCache())
 		Log_WriteSeq(LOG_WARN, "Not enough system memory for the memory cache, using the default allocator");
 
 	else
 		Log_WriteSeq(LOG_INFO, "Memory Cache allocated [bytes: %zu]", MemCache_GetTotalMemory());
-
-	if (!Cmd_Init())
-		return(false);
-
-	if (!Cvar_Init())
-		return(false);
-
-	if (!FileSys_Init())
-		return(false);
-
-	if (!Sys_Init())
-		return(false);
-
-	if (!Input_Init())
-		return(false);
-
-	if (!Event_Init())
-		return(false);
-
-	if (!InitGame())
-		return(false);
 
 	Log_WriteSeq(LOG_INFO, "Engine initialized successfully...");
 
