@@ -97,8 +97,8 @@ bool Sys_Init(void)
 	Log_WriteSeq(LOG_INFO, "Thread stack limits: Low: %llu, High: %llu", lowlimit, highlimit);
 	Log_WriteSeq(LOG_INFO, "Stack size: %juMB", stacksize / (1024 * 1024));
 
-	CVar_RegisterString("g_gamedll", "DemoGame.dll", CVAR_GAME, "The name of the game DLL for Windows systems");
-	CVar_RegisterString("g_demogamedll", "DemoGame.dll", CVAR_GAME | CVAR_READONLY, "The name of the game DLL for Windows systems");
+	Cvar_RegisterString("g_gamedll", "DemoGame.dll", CVAR_GAME, "The name of the game DLL for Windows systems");
+	Cvar_RegisterString("g_demogamedll", "DemoGame.dll", CVAR_GAME | CVAR_READONLY, "The name of the game DLL for Windows systems");
 
 	initialized = true;
 

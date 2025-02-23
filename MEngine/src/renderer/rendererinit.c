@@ -59,14 +59,14 @@ static bool GetVideoModeInfo(int *width, int *height, int mode)
 		Log_WriteSeq(LOG_WARN, "Using a custom video mode, might not render correctly if aspect ratio is non standard");
 
 		int w = 0;
-		if (!CVar_GetInt(rwidth, &w))
+		if (!Cvar_GetInt(rwidth, &w))
 		{
 			Log_WriteSeq(LOG_WARN, "Failed to get r_width cvar, using the default width: %d", R_DEF_WIN_WIDTH);
 			*width = R_DEF_WIN_WIDTH;
 		}
 
 		int h = 0;
-		if (!CVar_GetInt(rheight, &h))
+		if (!Cvar_GetInt(rheight, &h))
 		{
 			Log_WriteSeq(LOG_WARN, "Failed to get r_height cvar, using the default height: %d", R_DEF_WIN_HEIGHT);
 			*height = R_DEF_WIN_HEIGHT;
@@ -142,33 +142,33 @@ bool Render_Init(void)
 
 	Cmd_RegisterCommand("sizeviewport", Sizeviewport_Cmd, "Resizes the viewport to the window size, happens on screen size change");
 
-	rwidth = CVar_RegisterInt("r_width", R_DEF_WIN_WIDTH, CVAR_ARCHIVE | CVAR_RENDERER, "Custom width of the window");
-	rheight = CVar_RegisterInt("r_height", R_DEF_WIN_HEIGHT, CVAR_ARCHIVE | CVAR_RENDERER, "Custom height of the window");
-	rfullscreen = CVar_RegisterBool("r_fullscreen", R_DEF_FULLSCREEN, CVAR_ARCHIVE | CVAR_RENDERER, "Fullscreen mode");
-	rmultisamples = CVar_RegisterInt("r_multisamples", R_DEF_MULTISAMPLES, CVAR_ARCHIVE | CVAR_RENDERER, "Multisample anti-aliasing");
-	rrefresh = CVar_RegisterInt("r_refresh", R_DEF_REFRESH_RATE, CVAR_ARCHIVE | CVAR_RENDERER, "Refresh rate of the monitor");
-	rvsync = CVar_RegisterInt("r_vsync", R_DEF_VSYNC, CVAR_ARCHIVE | CVAR_RENDERER, "Vertical sync");
-	rfov = CVar_RegisterFloat("r_fov", R_DEF_FOV, CVAR_ARCHIVE | CVAR_RENDERER, "Field of view");
+	rwidth = Cvar_RegisterInt("r_width", R_DEF_WIN_WIDTH, CVAR_ARCHIVE | CVAR_RENDERER, "Custom width of the window");
+	rheight = Cvar_RegisterInt("r_height", R_DEF_WIN_HEIGHT, CVAR_ARCHIVE | CVAR_RENDERER, "Custom height of the window");
+	rfullscreen = Cvar_RegisterBool("r_fullscreen", R_DEF_FULLSCREEN, CVAR_ARCHIVE | CVAR_RENDERER, "Fullscreen mode");
+	rmultisamples = Cvar_RegisterInt("r_multisamples", R_DEF_MULTISAMPLES, CVAR_ARCHIVE | CVAR_RENDERER, "Multisample anti-aliasing");
+	rrefresh = Cvar_RegisterInt("r_refresh", R_DEF_REFRESH_RATE, CVAR_ARCHIVE | CVAR_RENDERER, "Refresh rate of the monitor");
+	rvsync = Cvar_RegisterInt("r_vsync", R_DEF_VSYNC, CVAR_ARCHIVE | CVAR_RENDERER, "Vertical sync");
+	rfov = Cvar_RegisterFloat("r_fov", R_DEF_FOV, CVAR_ARCHIVE | CVAR_RENDERER, "Field of view");
 
 	if (!GetVideoModeInfo(&glstate.width, &glstate.height, -1))
 		return(false);
 
 	bool fullscreen = false;
-	if (!CVar_GetBool(rfullscreen, &fullscreen))
+	if (!Cvar_GetBool(rfullscreen, &fullscreen))
 	{
 		Log_WriteSeq(LOG_WARN, "Failed to get r_fullscreen cvar, using the default value: %d", R_DEF_FULLSCREEN);
 		fullscreen = R_DEF_FULLSCREEN;
 	}
 
 	int multisamples = 0;
-	if (!CVar_GetInt(rmultisamples, &multisamples))
+	if (!Cvar_GetInt(rmultisamples, &multisamples))
 	{
 		Log_WriteSeq(LOG_WARN, "Failed to get r_multisamples cvar, using the default value: %d", R_DEF_MULTISAMPLES);
 		multisamples = R_DEF_MULTISAMPLES;
 	}
 
 	int refreshrate = 0;
-	if (!CVar_GetInt(rrefresh, &refreshrate))
+	if (!Cvar_GetInt(rrefresh, &refreshrate))
 	{
 		Log_WriteSeq(LOG_WARN, "Failed to get r_refresh cvar, using the default value: %d", R_DEF_REFRESH_RATE);
 		refreshrate = R_DEF_REFRESH_RATE;
@@ -188,14 +188,14 @@ bool Render_Init(void)
 		return(false);
 
 	int vsync = 0;
-	if (!CVar_GetInt(rvsync, &vsync))
+	if (!Cvar_GetInt(rvsync, &vsync))
 	{
 		Log_WriteSeq(LOG_WARN, "Failed to get r_vsync cvar, using the default value: %d", R_DEF_VSYNC);
 		vsync = R_DEF_VSYNC;
 	}
 
 	float fov = 0.0f;
-	if (!CVar_GetFloat(rfov, &fov))
+	if (!Cvar_GetFloat(rfov, &fov))
 	{
 		Log_WriteSeq(LOG_WARN, "Failed to get r_fov cvar, using the default value: %f", R_DEF_FOV);
 		fov = R_DEF_FOV;

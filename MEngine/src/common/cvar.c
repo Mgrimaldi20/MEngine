@@ -59,14 +59,14 @@ static char cvarfullname[SYS_MAX_PATH];
 static bool initialized;
 
 /*
-* Function: HashCVarName
+* Function: HashCvarName
 * Hashes the name of the cvar to generate an index
 * 
 *	name: The name of the cvar
 * 
 * Returns: The hash value
 */
-static size_t HashCVarName(const char *name)
+static size_t HashCvarName(const char *name)
 {
 	size_t hash = 0;
 	size_t len = Sys_Strlen(name, CVAR_MAX_STR_LEN);
@@ -116,12 +116,12 @@ static bool HandleConversionErrors(const char *value, const char *end)
 }
 
 /*
-* Function: ListAllCVars
+* Function: ListAllCvars
 * Lists all the cvars in the hashmap
 */
-static void ListAllCVars(void)
+static void ListAllCvars(void)
 {
-	Log_WriteSeq(LOG_INFO, "\t\tCVar Dump [number of cvars: %zu, cvar map capacity: %zu]", cvarmap->numcvars, cvarmap->capacity);
+	Log_WriteSeq(LOG_INFO, "\t\tCvar Dump [number of cvars: %zu, cvar map capacity: %zu]", cvarmap->numcvars, cvarmap->capacity);
 
 	size_t numcvars = 0;
 	for (size_t i=0; i<cvarmap->capacity; i++)
@@ -133,19 +133,19 @@ static void ListAllCVars(void)
 			switch (cvar->type)
 			{
 				case CVAR_BOOL:
-					Log_WriteSeq(LOG_INFO, "\t\t\tCVar: %s, Value: %d, Type: %d, Flags: %llu Description: %s", cvar->name, cvar->value.b, cvar->type, cvar->flags, cvar->description);
+					Log_WriteSeq(LOG_INFO, "\t\t\tCvar: %s, Value: %d, Type: %d, Flags: %llu Description: %s", cvar->name, cvar->value.b, cvar->type, cvar->flags, cvar->description);
 					break;
 
 				case CVAR_INT:
-					Log_WriteSeq(LOG_INFO, "\t\t\tCVar: %s, Value: %d, Type: %d, Flags: %llu, Description: %s", cvar->name, cvar->value.i, cvar->type, cvar->flags, cvar->description);
+					Log_WriteSeq(LOG_INFO, "\t\t\tCvar: %s, Value: %d, Type: %d, Flags: %llu, Description: %s", cvar->name, cvar->value.i, cvar->type, cvar->flags, cvar->description);
 					break;
 
 				case CVAR_FLOAT:
-					Log_WriteSeq(LOG_INFO, "\t\t\tCVar: %s, Value: %f, Type: %d, Flags: %llu, Description: %s", cvar->name, cvar->value.f, cvar->type, cvar->flags, cvar->description);
+					Log_WriteSeq(LOG_INFO, "\t\t\tCvar: %s, Value: %f, Type: %d, Flags: %llu, Description: %s", cvar->name, cvar->value.f, cvar->type, cvar->flags, cvar->description);
 					break;
 
 				case CVAR_STRING:
-					Log_WriteSeq(LOG_INFO, "\t\t\tCVar: %s, Value: %s, Type: %d, Flags: %llu, Description: %s", cvar->name, cvar->value.s, cvar->type, cvar->flags, cvar->description);
+					Log_WriteSeq(LOG_INFO, "\t\t\tCvar: %s, Value: %s, Type: %d, Flags: %llu, Description: %s", cvar->name, cvar->value.s, cvar->type, cvar->flags, cvar->description);
 					break;
 			}
 
@@ -154,7 +154,7 @@ static void ListAllCVars(void)
 		}
 	}
 
-	Log_WriteSeq(LOG_INFO, "\t\tEnd of CVar Dump");
+	Log_WriteSeq(LOG_INFO, "\t\tEnd of Cvar Dump");
 }
 
 /*
@@ -249,13 +249,13 @@ static bool GetNameValue(char *line, const size_t length, char *name, char *valu
 }
 
 /*
-* Function: ReadCVarsFromFile
+* Function: ReadCvarsFromFile
 * Inserts the cvars into the hashmap from the file given.
 * 
 *	infile: The file with the cvars in it
 *	filename: A string to insert into the log messages so you can tell what file it came from
 */
-static void ReadCVarsFromFile(FILE *infile, const char *filename)
+static void ReadCvarsFromFile(FILE *infile, const char *filename)
 {
 	char line[1024] = { 0 };
 	while (fgets(line, sizeof(line), infile))
@@ -296,7 +296,7 @@ static void ReadCVarsFromFile(FILE *infile, const char *filename)
 }
 
 /*
-* Function: RegisterCVar
+* Function: RegisterCvar
 * Registers a cvar with the cvar system and adds it to the cvar hash map.
 * 
 *	name: The name of the cvar
@@ -307,18 +307,18 @@ static void ReadCVarsFromFile(FILE *infile, const char *filename)
 * 
 * Returns: A pointer to the newly registered cvar
 */
-static cvar_t *RegisterCVar(const char *name, const cvarvalue_t value, const cvartype_t type, const unsigned long long flags, const char *description)
+static cvar_t *RegisterCvar(const char *name, const cvarvalue_t value, const cvartype_t type, const unsigned long long flags, const char *description)
 {
 	if (!name || !name[0])
 	{
-		Log_Write(LOG_WARN, "Failed to register cvar, invalid cvar name: CVar name could be empty");
+		Log_Write(LOG_WARN, "Failed to register cvar, invalid cvar name: Cvar name could be empty");
 		return(NULL);
 	}
 
-	cvar_t *existing = CVar_Find(name);	// check if the cvar already exists and update its params if it does
+	cvar_t *existing = Cvar_Find(name);	// check if the cvar already exists and update its params if it does
 	if (existing)
 	{
-		Log_Write(LOG_INFO, "CVar already exists: (%s): updating new parameters", name);
+		Log_Write(LOG_INFO, "Cvar already exists: (%s): updating new parameters", name);
 		existing->flags = flags;
 		existing->description = description;
 		return(existing);
@@ -359,7 +359,7 @@ static cvar_t *RegisterCVar(const char *name, const cvarvalue_t value, const cva
 	entry->value = cvar;
 	entry->next = NULL;
 
-	size_t index = HashCVarName(name);
+	size_t index = HashCvarName(name);
 
 	if (!cvarmap->cvars[index])
 		cvarmap->cvars[index] = entry;
@@ -394,7 +394,7 @@ static cvar_t *RegisterCVar(const char *name, const cvarvalue_t value, const cva
 			while (current)
 			{
 				cvarentry_t *next = current->next;
-				size_t newindex = HashCVarName(current->value->name);
+				size_t newindex = HashCvarName(current->value->name);
 
 				if (!newcvars[newindex])
 					newcvars[newindex] = current;
@@ -430,7 +430,7 @@ static void Seta_Cmd(const cmdargs_t *args)
 		return;
 	}
 
-	if (!CVar_RegisterString(args->argv[1], args->argv[2], CVAR_NONE, ""))
+	if (!Cvar_RegisterString(args->argv[1], args->argv[2], CVAR_NONE, ""))
 		Log_Write(LOG_ERROR, "Failed to set cvar: %s", args->argv[1]);
 }
 
@@ -454,7 +454,7 @@ static void Seti_Cmd(const cmdargs_t *args)
 	int castval = strtol(args->argv[2], &end, 10);
 	HandleConversionErrors(args->argv[2], end);
 
-	if (!CVar_RegisterInt(args->argv[1], castval, CVAR_NONE, ""))
+	if (!Cvar_RegisterInt(args->argv[1], castval, CVAR_NONE, ""))
 		Log_Write(LOG_ERROR, "Failed to set cvar: %s", args->argv[1]);
 }
 
@@ -478,7 +478,7 @@ static void Setf_Cmd(const cmdargs_t *args)
 	float castval = strtof(args->argv[2], &end);
 	HandleConversionErrors(args->argv[2], end);
 
-	if (!CVar_RegisterFloat(args->argv[1], castval, CVAR_NONE, ""))
+	if (!Cvar_RegisterFloat(args->argv[1], castval, CVAR_NONE, ""))
 		Log_Write(LOG_ERROR, "Failed to set cvar: %s", args->argv[1]);
 }
 
@@ -502,17 +502,17 @@ static void Setb_Cmd(const cmdargs_t *args)
 	bool castval = strtol(args->argv[2], &end, 10);
 	HandleConversionErrors(args->argv[2], end);
 
-	if (!CVar_RegisterBool(args->argv[1], castval, CVAR_NONE, ""))
+	if (!Cvar_RegisterBool(args->argv[1], castval, CVAR_NONE, ""))
 		Log_Write(LOG_ERROR, "Failed to set cvar: %s", args->argv[1]);
 }
 
 /*
-* Function: CVar_Init
+* Function: Cvar_Init
 * Initializes the cvar system
 * 
 * Returns: A boolean if the initialization was successful or not
 */
-bool CVar_Init(void)
+bool Cvar_Init(void)
 {
 	if (initialized)
 		return(true);
@@ -556,7 +556,7 @@ bool CVar_Init(void)
 		cvarfile = fopen(cvarfullname, "w+");	// try to just recreate file, will lose cvars if file cant be read properly
 		if (!cvarfile)
 		{
-			Log_WriteSeq(LOG_ERROR, "CVar file does not exist and cannot be recreated: %s", cvarfullname);
+			Log_WriteSeq(LOG_ERROR, "Cvar file does not exist and cannot be recreated: %s", cvarfullname);
 			return(false);
 		}
 
@@ -571,7 +571,7 @@ bool CVar_Init(void)
 		return(false);
 	}
 
-	ReadCVarsFromFile(cvarfile, cvarfullname);
+	ReadCvarsFromFile(cvarfile, cvarfullname);
 
 	fclose(cvarfile);
 	cvarfile = NULL;
@@ -588,7 +588,7 @@ bool CVar_Init(void)
 
 		Log_WriteSeq(LOG_INFO, "Reading data from the overrides file: %s", overridefilename);
 
-		ReadCVarsFromFile(overridesfile, overridefilename);
+		ReadCvarsFromFile(overridesfile, overridefilename);
 
 		fclose(overridesfile);
 		overridesfile = NULL;
@@ -600,10 +600,10 @@ bool CVar_Init(void)
 }
 
 /*
-* Function: CVar_Shutdown
+* Function: Cvar_Shutdown
 * Shuts down the cvar system
 */
-void CVar_Shutdown(void)
+void Cvar_Shutdown(void)
 {
 	if (!initialized)
 		return;
@@ -611,10 +611,10 @@ void CVar_Shutdown(void)
 	Log_WriteSeq(LOG_INFO, "Shutting down cvar system");
 
 #if defined(MENGINE_DEBUG)
-	ListAllCVars();
+	ListAllCvars();
 #endif
 
-	(void)ListAllCVars;		// gets rid of unused function warning
+	(void)ListAllCvars;		// gets rid of unused function warning
 
 	cvarfile = fopen(cvarfullname, "w");
 	if (!cvarfile)
@@ -671,17 +671,19 @@ void CVar_Shutdown(void)
 }
 
 /*
-* Function: CVar_Find
+* Function: Cvar_Find
 * Finds a cvar in the hashmap
 * 
 *	name: The name of the cvar
+* 
+* Returns: A pointer to the cvar if it exists or NULL
 */
-cvar_t *CVar_Find(const char *name)
+cvar_t *Cvar_Find(const char *name)
 {
 	if (!name || !name[0])
 		return(NULL);
 
-	size_t index = HashCVarName(name);
+	size_t index = HashCvarName(name);
 	cvarentry_t *current = cvarmap->cvars[index];
 	while (current)
 	{
@@ -695,54 +697,87 @@ cvar_t *CVar_Find(const char *name)
 }
 
 /*
-* Function: CVar_RegisterString
+* Function: Cvar_RegisterString
 * Registers a string cvar
+* 
+*	name: The name of the cvar
+*	value: The value of the cvar
+*	flags: Bitfield to define the cvars properties
+*	description: A short description of the cvar
+* 
+* Returns: A pointer to the newly registered cvar or NULL
 */
-cvar_t *CVar_RegisterString(const char *name, const char *value, const unsigned long long flags, const char *description)
+cvar_t *Cvar_RegisterString(const char *name, const char *value, const unsigned long long flags, const char *description)
 {
 	cvarvalue_t cvarvalue = { 0 };
 	snprintf(cvarvalue.s, sizeof(cvarvalue.s), "%s", value);
-	return(RegisterCVar(name, cvarvalue, CVAR_STRING, flags, description));
+	return(RegisterCvar(name, cvarvalue, CVAR_STRING, flags, description));
 }
 
 /*
-* Function: CVar_RegisterInt
+* Function: Cvar_RegisterInt
 * Registers an integer cvar
+* 
+*	name: The name of the cvar
+*	value: The value of the cvar
+*	flags: Bitfield to define the cvars properties
+*	description: A short description of the cvar
+* 
+* Returns: A pointer to the newly registered cvar or NULL
 */
-cvar_t *CVar_RegisterInt(const char *name, const int value, const unsigned long long flags, const char *description)
+cvar_t *Cvar_RegisterInt(const char *name, const int value, const unsigned long long flags, const char *description)
 {
 	cvarvalue_t cvarvalue = { 0 };
 	cvarvalue.i = value;
-	return(RegisterCVar(name, cvarvalue, CVAR_INT, flags, description));
+	return(RegisterCvar(name, cvarvalue, CVAR_INT, flags, description));
 }
 
 /*
-* Function: CVar_RegisterFloat
+* Function: Cvar_RegisterFloat
 * Registers a float cvar
+* 
+*	name: The name of the cvar
+*	value: The value of the cvar
+*	flags: Bitfield to define the cvars properties
+*	description: A short description of the cvar
+* 
+* Returns: A pointer to the newly registered cvar or NULL
 */
-cvar_t *CVar_RegisterFloat(const char *name, const float value, const unsigned long long flags, const char *description)
+cvar_t *Cvar_RegisterFloat(const char *name, const float value, const unsigned long long flags, const char *description)
 {
 	cvarvalue_t cvarvalue = { 0 };
 	cvarvalue.f = value;
-	return(RegisterCVar(name, cvarvalue, CVAR_FLOAT, flags, description));
+	return(RegisterCvar(name, cvarvalue, CVAR_FLOAT, flags, description));
 }
 
 /*
-* Function: CVar_RegisterBool
+* Function: Cvar_RegisterBool
 * Registers a boolean cvar
+* 
+*	name: The name of the cvar
+*	value: The value of the cvar
+*	flags: Bitfield to define the cvars properties
+*	description: A short description of the cvar
+* 
+* Returns: A pointer to the newly registered cvar or NULL
 */
-cvar_t *CVar_RegisterBool(const char *name, const bool value, const unsigned long long flags, const char *description)
+cvar_t *Cvar_RegisterBool(const char *name, const bool value, const unsigned long long flags, const char *description)
 {
 	cvarvalue_t cvarvalue = { 0 };
 	cvarvalue.b = value;
-	return(RegisterCVar(name, cvarvalue, CVAR_BOOL, flags, description));
+	return(RegisterCvar(name, cvarvalue, CVAR_BOOL, flags, description));
 }
 
 /*
-* Function: CVar_GetString
+* Function: Cvar_GetString
 * Gets the string value of a cvar
+* 
+*	cvar: The cvar to get the value from
+*	out: The output buffer to store the value
+* 
+* Returns: A boolean if the operation was successful or not
 */
-bool CVar_GetString(const cvar_t *cvar, char *out)
+bool Cvar_GetString(const cvar_t *cvar, char *out)
 {
 	if ((!cvar) || (cvar->type != CVAR_STRING))
 		return(false);
@@ -752,10 +787,15 @@ bool CVar_GetString(const cvar_t *cvar, char *out)
 }
 
 /*
-* Function: CVar_GetInt
+* Function: Cvar_GetInt
 * Gets the integer value of a cvar
+* 
+*	cvar: The cvar to get the value from
+*	out: The output buffer to store the value
+* 
+* Returns: A boolean if the operation was successful or not
 */
-bool CVar_GetInt(const cvar_t *cvar, int *out)
+bool Cvar_GetInt(const cvar_t *cvar, int *out)
 {
 	if ((!cvar) || (cvar->type != CVAR_INT))
 		return(false);
@@ -765,10 +805,15 @@ bool CVar_GetInt(const cvar_t *cvar, int *out)
 }
 
 /*
-* Function: CVar_GetFloat
+* Function: Cvar_GetFloat
 * Gets the float value of a cvar
+* 
+*	cvar: The cvar to get the value from
+*	out: The output buffer to store the value
+* 
+* Returns: A boolean if the operation was successful or not
 */
-bool CVar_GetFloat(const cvar_t *cvar, float *out)
+bool Cvar_GetFloat(const cvar_t *cvar, float *out)
 {
 	if ((!cvar) || (cvar->type != CVAR_FLOAT))
 		return(false);
@@ -778,10 +823,15 @@ bool CVar_GetFloat(const cvar_t *cvar, float *out)
 }
 
 /*
-* Function: CVar_GetBool
+* Function: Cvar_GetBool
 * Gets the boolean value of a cvar
+* 
+*	cvar: The cvar to get the value from
+*	out: The output buffer to store the value
+* 
+* Returns: A boolean if the operation was successful or not
 */
-bool CVar_GetBool(const cvar_t *cvar, bool *out)
+bool Cvar_GetBool(const cvar_t *cvar, bool *out)
 {
 	if ((!cvar) || (cvar->type != CVAR_BOOL))
 		return(false);
@@ -791,10 +841,13 @@ bool CVar_GetBool(const cvar_t *cvar, bool *out)
 }
 
 /*
-* Function: CVar_SetString
+* Function: Cvar_SetString
 * Sets the string value of a cvar
+* 
+*	cvar: The cvar to set the value of
+*	value: The value to set
 */
-void CVar_SetString(cvar_t *cvar, const char *value)
+void Cvar_SetString(cvar_t *cvar, const char *value)
 {
 	if ((!cvar) || (cvar->type != CVAR_STRING) || (cvar->flags & CVAR_READONLY))
 		return;
@@ -803,10 +856,13 @@ void CVar_SetString(cvar_t *cvar, const char *value)
 }
 
 /*
-* Function: CVar_SetInt
+* Function: Cvar_SetInt
 * Sets the integer value of a cvar
+* 
+*	cvar: The cvar to set the value of
+*	value: The value to set
 */
-void CVar_SetInt(cvar_t *cvar, const int value)
+void Cvar_SetInt(cvar_t *cvar, const int value)
 {
 	if ((!cvar) || (cvar->type != CVAR_INT) || (cvar->flags & CVAR_READONLY))
 		return;
@@ -815,10 +871,13 @@ void CVar_SetInt(cvar_t *cvar, const int value)
 }
 
 /*
-* Function: CVar_SetFloat
+* Function: Cvar_SetFloat
 * Sets the float value of a cvar
+* 
+*	cvar: The cvar to set the value of
+*	value: The value to set
 */
-void CVar_SetFloat(cvar_t *cvar, const float value)
+void Cvar_SetFloat(cvar_t *cvar, const float value)
 {
 	if ((!cvar) || (cvar->type != CVAR_FLOAT) || (cvar->flags & CVAR_READONLY))
 		return;
@@ -827,10 +886,13 @@ void CVar_SetFloat(cvar_t *cvar, const float value)
 }
 
 /*
-* Function: CVar_SetBool
+* Function: Cvar_SetBool
 * Sets the boolean value of a cvar
+* 
+*	cvar: The cvar to set the value of
+*	value: The value to set
 */
-void CVar_SetBool(cvar_t *cvar, const bool value)
+void Cvar_SetBool(cvar_t *cvar, const bool value)
 {
 	if ((!cvar) || (cvar->type != CVAR_BOOL) || (cvar->flags & CVAR_READONLY))
 		return;

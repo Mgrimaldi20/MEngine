@@ -117,11 +117,54 @@ static bool PathMatchSpec(const char *path, const char *filter)
 */
 static bool MapFiles(const filedata_t *filelist, const unsigned int numfiles)
 {
-	//char pakfile[SYS_MAX_PATH] = { 0 };
-	//char filename[SYS_MAX_PATH] = { 0 };
-
 	for (unsigned int i=0; i<numfiles; i++)
 	{
+		const char *pakfile = filelist[i].filename;
+
+		unzFile pak = unzOpen(pakfile);
+		if (!pak)
+		{
+			Log_WriteSeq(LOG_ERROR, "Failed to open pak file: %s", pakfile);
+			return(false);
+		}
+
+		if (unzGoToFirstFile(pak) != UNZ_OK)
+		{
+			Log_WriteSeq(LOG_ERROR, "Failed to go to the first file in the pak: %s", pakfile);
+			unzClose(pak);
+			return(false);
+		}
+
+		do
+		{
+			unz_file_info info;
+
+			char filename[SYS_MAX_PATH] = { 0 };
+			if (unzGetCurrentFileInfo(pak, &info, filename, SYS_MAX_PATH, NULL, 0, NULL, 0) != UNZ_OK)
+			{
+				Log_WriteSeq(LOG_ERROR, "Failed to get the current file info in the pak: %s", pakfile);
+				unzClose(pak);
+				return(false);
+			}
+
+			fileentry_t *entry = MemCache_Alloc(sizeof(*entry));
+			if (!entry)
+			{
+				Log_WriteSeq(LOG_ERROR, "Failed to allocate memory for file entry");
+				unzClose(pak);
+				return(false);
+			}
+
+			size_t index = HashFileName(filename);
+
+			entry->next = filemap->files[index];
+			filemap->files[index] = entry;
+
+			snprintf(entry->filename, SYS_MAX_PATH, "%s", filename);
+			snprintf(entry->pakfile, SYS_MAX_PATH, "%s", pakfile);
+		} while (unzGoToNextFile(pak) == UNZ_OK);
+
+		unzClose(pak);
 	}
 
 	return(true);
@@ -129,7 +172,7 @@ static bool MapFiles(const filedata_t *filelist, const unsigned int numfiles)
 
 /*
 * Function: FileSys_Init
-* Initializes the filesystem
+* Initializes the filesystem, if no PAK files are found, the filesystem will use the regular disk instead of the PAKs
 * 
 * Returns: A boolean if initialization was successful or not
 */
@@ -138,14 +181,14 @@ bool FileSys_Init(void)
 	if (initialized)
 		return(true);
 
-	fsbasepath = CVar_RegisterString("fs_basepath", "", CVAR_FILESYSTEM | CVAR_READONLY, "The base path for the engine. Path to the installation");
-	fssavepath = CVar_RegisterString("fs_savepath", "save", CVAR_FILESYSTEM, "The path to the games save files, relative to the base path");
+	fsbasepath = Cvar_RegisterString("fs_basepath", "", CVAR_FILESYSTEM | CVAR_READONLY, "The base path for the engine. Path to the installation");
+	fssavepath = Cvar_RegisterString("fs_savepath", "save", CVAR_FILESYSTEM, "The path to the games save files, relative to the base path");
 
 	char basepath[SYS_MAX_PATH] = { 0 };
 
-	if (CVar_GetString(fsbasepath, basepath))
+	if (Cvar_GetString(fsbasepath, basepath))
 	{
-		Log_WriteSeq(LOG_ERROR, "Failed to get base path from CVar system");
+		Log_WriteSeq(LOG_ERROR, "Failed to get base path from Cvar system");
 		return(false);
 	}
 
@@ -157,9 +200,8 @@ bool FileSys_Init(void)
 		return(false);
 	}
 
-	if (numfiles)
+	if (pakfiles && numfiles)
 	{
-
 		filemap = MemCache_Alloc(sizeof(*filemap));
 		if (!filemap)
 		{
