@@ -55,21 +55,21 @@ void Cmd_RemoveCommand(const char *name);
 void Cmd_BufferCommand(const cmdexecution_t exec, const char *cmd);
 void Cmd_ExecuteCommandBuffer(void);
 
-bool CVar_Init(void);
-void CVar_Shutdown(void);
-cvar_t *CVar_Find(const char *name);
-cvar_t *CVar_RegisterString(const char *name, const char *value, const unsigned long long flags, const char *description);
-cvar_t *CVar_RegisterInt(const char *name, const int value, const unsigned long long flags, const char *description);
-cvar_t *CVar_RegisterFloat(const char *name, const float value, const unsigned long long flags, const char *description);
-cvar_t *CVar_RegisterBool(const char *name, const bool value, const unsigned long long flags, const char *description);
-bool CVar_GetString(const cvar_t *cvar, char *out);
-bool CVar_GetInt(const cvar_t *cvar, int *out);
-bool CVar_GetFloat(const cvar_t *cvar, float *out);
-bool CVar_GetBool(const cvar_t *cvar, bool *out);
-void CVar_SetString(cvar_t *cvar, const char *value);
-void CVar_SetInt(cvar_t *cvar, const int value);
-void CVar_SetFloat(cvar_t *cvar, const float value);
-void CVar_SetBool(cvar_t *cvar, const bool value);
+bool Cvar_Init(void);
+void Cvar_Shutdown(void);
+cvar_t *Cvar_Find(const char *name);
+cvar_t *Cvar_RegisterString(const char *name, const char *value, const unsigned long long flags, const char *description);
+cvar_t *Cvar_RegisterInt(const char *name, const int value, const unsigned long long flags, const char *description);
+cvar_t *Cvar_RegisterFloat(const char *name, const float value, const unsigned long long flags, const char *description);
+cvar_t *Cvar_RegisterBool(const char *name, const bool value, const unsigned long long flags, const char *description);
+bool Cvar_GetString(const cvar_t *cvar, char *out);
+bool Cvar_GetInt(const cvar_t *cvar, int *out);
+bool Cvar_GetFloat(const cvar_t *cvar, float *out);
+bool Cvar_GetBool(const cvar_t *cvar, bool *out);
+void Cvar_SetString(cvar_t *cvar, const char *value);
+void Cvar_SetInt(cvar_t *cvar, const int value);
+void Cvar_SetFloat(cvar_t *cvar, const float value);
+void Cvar_SetBool(cvar_t *cvar, const bool value);
 
 struct filedata
 {

@@ -124,19 +124,19 @@ static void CreateMServices(void)
 
 	cvarsystem = (cvarsystem_t)
 	{
-		.Find = CVar_Find,
-		.RegisterString = CVar_RegisterString,
-		.RegisterInt = CVar_RegisterInt,
-		.RegisterFloat = CVar_RegisterFloat,
-		.RegisterBool = CVar_RegisterBool,
-		.GetString = CVar_GetString,
-		.GetInt = CVar_GetInt,
-		.GetFloat = CVar_GetFloat,
-		.GetBool = CVar_GetBool,
-		.SetString = CVar_SetString,
-		.SetInt = CVar_SetInt,
-		.SetFloat = CVar_SetFloat,
-		.SetBool = CVar_SetBool
+		.Find = Cvar_Find,
+		.RegisterString = Cvar_RegisterString,
+		.RegisterInt = Cvar_RegisterInt,
+		.RegisterFloat = Cvar_RegisterFloat,
+		.RegisterBool = Cvar_RegisterBool,
+		.GetString = Cvar_GetString,
+		.GetInt = Cvar_GetInt,
+		.GetFloat = Cvar_GetFloat,
+		.GetBool = Cvar_GetBool,
+		.SetString = Cvar_SetString,
+		.SetInt = Cvar_SetInt,
+		.SetFloat = Cvar_SetFloat,
+		.SetBool = Cvar_SetBool
 	};
 
 	filesystem = (filesystem_t)
@@ -192,21 +192,21 @@ static bool InitGame(void)
 	cvar_t *gamedll = NULL;
 
 	if (Common_RunDemoGame())
-		gamedll = CVar_Find("g_demogamedll");
+		gamedll = Cvar_Find("g_demogamedll");
 
 	else
-		gamedll = CVar_Find("g_gamedll");	// get the game DLL name from the CVar system, designed to be overriden by the client
+		gamedll = Cvar_Find("g_gamedll");	// get the game DLL name from the Cvar system, designed to be overriden by the client
 
 	if (!gamedll)
 	{
-		Log_WriteSeq(LOG_ERROR, "Failed to find game DLL name in CVar system");
+		Log_WriteSeq(LOG_ERROR, "Failed to find game DLL name in Cvar system");
 		return(false);
 	}
 
 	char gamedllname[SYS_MAX_PATH] = { 0 };
-	if (!CVar_GetString(gamedll, gamedllname))
+	if (!Cvar_GetString(gamedll, gamedllname))
 	{
-		Log_WriteSeq(LOG_ERROR, "Failed to get game DLL name from CVar system");
+		Log_WriteSeq(LOG_ERROR, "Failed to get game DLL name from Cvar system");
 		return(false);
 	}
 
@@ -323,7 +323,7 @@ bool Common_Init(void)
 	if (!Cmd_Init())
 		return(false);
 
-	if (!CVar_Init())
+	if (!Cvar_Init())
 		return(false);
 
 	if (!FileSys_Init())
@@ -359,7 +359,7 @@ void Common_Shutdown(void)
 	Input_Shutdown();
 	Sys_Shutdown();
 	FileSys_Shutdown();
-	CVar_Shutdown();
+	Cvar_Shutdown();
 	Cmd_Shutdown();
 	MemCache_Shutdown();
 	Log_Shutdown();
