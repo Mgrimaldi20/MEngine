@@ -42,7 +42,7 @@ elseif(MENGINE_USE_MSVC)
 	set(CMAKE_CXX_COMPILER "cl")
 endif()
 
-# Create a main output directory under the build directory where all exe and dll files will be placed.
+# Create a main output directory under the build directory where all exe and dll files will be placed
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 message(STATUS "Binary output directory set: ${CMAKE_BINARY_DIR}")

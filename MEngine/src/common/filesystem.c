@@ -17,7 +17,7 @@ typedef enum
 typedef struct
 {
 	filesource_t source;
-	char *filename;
+	char filename[SYS_MAX_PATH];
 	union
 	{
 		unzFile pakfile;
@@ -48,7 +48,7 @@ static bool initialized;
 
 /*
 * Function: HashFileName
-* Hashes the name of the file to generate an index
+* Hashes the name of the file to generate an index, using the FNV-1a algorithm
 * 
 * 	name: The name of the file
 * 
@@ -56,11 +56,14 @@ static bool initialized;
 */
 static size_t HashFileName(const char *name)
 {
-	size_t hash = 0;
+	size_t hash = 2166136261u;	// initial offset basis, large prime number
 	size_t len = Sys_Strlen(name, SYS_MAX_PATH);
 
 	for (size_t i=0; i<len; i++)
-		hash = (hash * 31) + name[i];
+	{
+		hash ^= (unsigned char)name[i];
+		hash *= 16777619;	// FNV prime number
+	}
 
 	return(hash & (filemap->capacity - 1));
 }
@@ -256,19 +259,22 @@ void FileSys_Shutdown(void)
 
 	Log_WriteSeq(LOG_INFO, "Shutting down filesystem");
 
-	for (size_t i=0; i<filemap->capacity; i++)
+	if (filemap)
 	{
-		fileentry_t *current = filemap->files[i];
-		while (current)
+		for (size_t i=0; i<filemap->capacity; i++)
 		{
-			fileentry_t *next = current->next;
-			MemCache_Free(current);
-			current = next;
+			fileentry_t *current = filemap->files[i];
+			while (current)
+			{
+				fileentry_t *next = current->next;
+				MemCache_Free(current);
+				current = next;
+			}
 		}
-	}
 
-	MemCache_Free(filemap->files);
-	MemCache_Free(filemap);
+		MemCache_Free(filemap->files);
+		MemCache_Free(filemap);
+	}
 
 	initialized = false;
 }

@@ -60,7 +60,7 @@ static bool initialized;
 
 /*
 * Function: HashCvarName
-* Hashes the name of the cvar to generate an index
+* Hashes the name of the cvar to generate an index, using the FNV-1a algorithm
 * 
 *	name: The name of the cvar
 * 
@@ -68,11 +68,14 @@ static bool initialized;
 */
 static size_t HashCvarName(const char *name)
 {
-	size_t hash = 0;
+	size_t hash = 2166136261u;	// initial offset basis, large prime number
 	size_t len = Sys_Strlen(name, CVAR_MAX_STR_LEN);
 
 	for (size_t i=0; i<len; i++)
-		hash = (hash * 31) + name[i];
+	{
+		hash ^= (unsigned char)name[i];
+		hash *= 16777619;	// FNV prime number
+	}
 
 	return(hash & (cvarmap->capacity - 1));
 }
