@@ -34,7 +34,7 @@ static bool initialized;
 
 /*
 * Function: HashCmdName
-* Hashes the name of the command to generate an index
+* Hashes the name of the command to generate an index, using the FNV-1a algorithm
 * 
 * 	name: The name of the command
 * 
@@ -42,11 +42,14 @@ static bool initialized;
 */
 static size_t HashCmdName(const char *name)
 {
-	size_t hash = 0;
+	size_t hash = 2166136261u;	// initial offset basis, large prime number
 	size_t len = Sys_Strlen(name, CMD_MAX_STR_LEN);
 
 	for (size_t i=0; i<len; i++)
-		hash = (hash * 31) + name[i];
+	{
+		hash ^= (unsigned char)name[i];
+		hash *= 16777619;	// FNV prime number
+	}
 
 	return(hash & (cmdmap->capacity - 1));
 }
@@ -167,26 +170,20 @@ static void ExecuteCommand(const char *cmdstr)
 */
 static void Help_Cmd(const cmdargs_t *args)
 {
-	if (args->argc == 1)
+	if ((args->argc < 2) || (args->argc > 2))
 	{
-		// print out the default help message
+		Common_Printf("Usage: %s | %s [command]", args->argv[0], args->argv[0]);
 		return;
 	}
 
-	if (args->argc == 2)
+	cmd_t *cmd = FindCommand(args->argv[1]);
+	if (!cmd)
 	{
-		cmd_t *cmd = FindCommand(args->argv[1]);
-		if (!cmd)
-		{
-			Common_Warnf("Failed to execute \"%s\" command, command not found: %s", args->argv[0], args->argv[1]);
-			return;
-		}
-
-		Common_Printf("Command: %s, Description: %s", cmd->name, cmd->description);
+		Common_Warnf("Failed to execute \"%s\" command, command not found: %s", args->argv[0], args->argv[1]);
 		return;
 	}
 
-	Common_Printf("Usage: %s | %s [command]", args->argv[0], args->argv[0]);
+	Common_Printf("Command: %s, Description: %s", cmd->name, cmd->description);
 }
 
 /*
