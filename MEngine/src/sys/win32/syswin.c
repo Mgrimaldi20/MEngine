@@ -374,7 +374,7 @@ unsigned long Sys_GetMaxThreads(void)
 
 /*
 * Function: Sys_CreateThread
-* Creates a new thread
+* Creates a new thread, the thread is pulled off a stack of threads of size SYS_MAX_THREADS
 * 
 *	func: The function to run in the new thread
 *	arg: The arguments to pass to the function
@@ -424,7 +424,7 @@ void Sys_JoinThread(thread_t *thread)
 
 /*
 * Function: Sys_CreateMutex
-* Creates a new mutex
+* Creates a new mutex, the mutex is pulled off a stack of mutexes of size SYS_MAX_MUTEXES
 * 
 * Returns: A pointer to the new mutex handle
 */
@@ -496,7 +496,7 @@ void Sys_UnlockMutex(mutex_t *mutex)
 
 /*
 * Function: Sys_CreateCondVar
-* Creates a new condition variable
+* Creates a new condition variable, the condition variable is pulled off a stack of condition variables of size SYS_MAX_CONDVARS
 * 
 *	Returns: A pointer to the new condition variable handle
 */
