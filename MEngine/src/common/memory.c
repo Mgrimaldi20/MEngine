@@ -32,7 +32,7 @@ typedef struct taglist
 	struct taglist *next;
 } taglist_t;
 
-static unsigned char *memcache;
+static unsigned char *memcache;		// this is the actual memory cache data, its just a big block of bytes
 static size_t memcacheused;
 static size_t lastreported;
 
@@ -42,49 +42,10 @@ static taglist_t *taglist;			// this is used by the default allocator only
 
 static allocator_t allocator;		// if system memory is less than 4GB or the nocache param is active, use malloc/free, else use the cache allocator
 
+static int numallocs;
+static int numfrees;
+
 static bool initialized;
-
-/*
-* Function: GetFreeBlock
-* Gets a free block from the pool or allocates a new one
-* 
-* Returns: A free block, either from the pool or a new allocation
-*/
-static freeblock_t *GetFreeBlock(void)
-{
-	freeblock_t *block;
-	if (pool)
-	{
-		block = pool;
-		pool = block->next;
-	}
-
-	else
-	{
-		block = malloc(sizeof(*block));
-
-		if (block)
-		{
-			block->index = 0;
-			block->size = 0;
-			block->next = NULL;
-		}
-	}
-
-	return(block);
-}
-
-/*
-* Function: ReturnFreeBlock
-* Returns a free block to the pool
-* 
-* 	block: The block to return
-*/
-static void ReturnFreeBlock(freeblock_t *block)
-{
-	block->next = pool;
-	pool = block;
-}
 
 /*
 * Function: DefaultAlloc
@@ -124,6 +85,8 @@ static void *DefaultAlloc(size_t size)
 		lastreported = memcacheused;
 	}
 
+	numallocs++;
+
 	return(ptr);
 }
 
@@ -160,6 +123,8 @@ static void DefaultFree(void *ptr)
 		prev = current;
 		current = current->next;
 	}
+
+	numfrees++;
 }
 
 /*
@@ -182,6 +147,9 @@ static void DefaultReset(void)
 	taglist = NULL;
 	memcacheused = 0;
 	lastreported = 0;
+
+	numallocs = 0;
+	numfrees = 0;
 }
 
 /*
@@ -213,6 +181,48 @@ static void DefaultDump(void)
 static size_t DefaultTotalMemory(void)
 {
 	return(memcacheused);
+}
+
+/*
+* Function: GetFreeBlock
+* Gets a free block from the pool or allocates a new one
+*
+* Returns: A free block, either from the pool or a new allocation
+*/
+static freeblock_t *GetFreeBlock(void)
+{
+	freeblock_t *block;
+	if (pool)
+	{
+		block = pool;
+		pool = block->next;
+	}
+
+	else
+	{
+		block = malloc(sizeof(*block));
+
+		if (block)
+		{
+			block->index = 0;
+			block->size = 0;
+			block->next = NULL;
+		}
+	}
+
+	return(block);
+}
+
+/*
+* Function: ReturnFreeBlock
+* Returns a free block to the pool
+*
+* 	block: The block to return
+*/
+static void ReturnFreeBlock(freeblock_t *block)
+{
+	block->next = pool;
+	pool = block;
 }
 
 /*
@@ -270,6 +280,8 @@ static void *CacheAlloc(size_t size)
 			}
 
 			assert((unsigned char *)ptr + size <= memcache + MEM_CACHE_SIZE);
+
+			numallocs++;
 
 			return(ptr);
 		}
@@ -347,6 +359,8 @@ static void CacheFree(void *ptr)
 		ReturnFreeBlock(next);
 	}
 
+	numfrees++;
+
 #if defined(MENGINE_DEBUG)
 	memset(ptr, 0, size);	// 0 out the previous allocation, no need to do this
 #endif
@@ -376,8 +390,8 @@ static void CacheReset(void)
 	freeblocks->size = MEM_CACHE_SIZE;
 	freeblocks->next = NULL;
 
-#if defined(MENGINE_DEBUG)
-	if (memcacheused == (MEM_CACHE_SIZE / 2))			// dont really have to do the following resetting to 0, just making the blocks point to NULL is enough
+#if defined(MENGINE_DEBUG)							// dont really have to do the following resetting to 0, just making the blocks point to NULL is enough
+	if (memcacheused == (MEM_CACHE_SIZE / 2))
 		memset(memcache, 0, MEM_CACHE_SIZE);
 
 	else
@@ -393,6 +407,9 @@ static void CacheReset(void)
 
 	memcacheused = 0;
 	lastreported = 0;
+
+	numallocs = 0;
+	numfrees = 0;
 }
 
 /*
@@ -428,7 +445,7 @@ static size_t CacheTotalMemory(void)
 * Function: DumpAllocData
 * Dumps all allocation data, polymorphic function to call the appropriate allocator dump function, used for debugging
 */
-void DumpAllocData(void)
+static void DumpAllocData(void)
 {
 	allocator.Dump();
 }
@@ -531,6 +548,12 @@ void MemCache_Shutdown(void)
 	Log_WriteSeq(LOG_INFO, "Shutting down memory cache");
 
 #if defined(MENGINE_DEBUG)
+	int diff = numallocs - numfrees;
+
+	Log_WriteSeq(LOG_INFO, "\t\tNum allocs: [%d], Num frees: [%d], Difference: [%d] - %s", numallocs, numfrees, diff,
+		(diff == 0) ? "All allocations have been freed" : "Not all allocations have been freed"
+	);
+
 	DumpAllocData();
 #endif
 
