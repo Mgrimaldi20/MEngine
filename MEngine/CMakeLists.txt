@@ -120,6 +120,7 @@ if(LINUX OR APPLE)		# Only add GLFW to the project on a Unix system, Windows wil
 	include_directories(libs/glfw/include)											# Just add the include path for ease of use
 endif()
 
+#[[		# This is for adding Zlib-ng and Minizip-ng to the project, still not sure if I want to support zip files yet
 # Add Zlib-ng to the project
 set(WITH_NATIVE_INSTRUCTIONS ON CACHE BOOL "Compiles with full instruction set supported on this host (gcc/clang -march=native)")
 set(ZLIBNG_ENABLE_TESTS OFF CACHE BOOL "Test zlib-ng specific API")
@@ -148,6 +149,7 @@ set(MZ_ICONV OFF CACHE BOOL "Enable iconv support")
 add_subdirectory("libs/minizip-ng" EXCLUDE_FROM_ALL)
 target_link_libraries(MEngine PRIVATE MINIZIP::minizip)
 include_directories("libs/minizip-ng")
+]]
 
 # Set up all the compiler options here
 if(MSVC)
