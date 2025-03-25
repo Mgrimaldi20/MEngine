@@ -3,70 +3,11 @@
 #include <string.h>
 #include "sys/sys.h"
 #include "common.h"
-#include "unzip.h"
-#include "zip.h"
-
-#define DEF_FILE_MAP_CAPACITY 512
-
-typedef enum
-{
-	FILE_FROM_PAK,
-	FILE_FROM_DISK
-} filesource_t;
-
-typedef struct
-{
-	filesource_t source;
-	char filename[SYS_MAX_PATH];
-	union
-	{
-		unzFile pakfile;
-		FILE *diskfile;
-	} handle;
-} vfile_t;
-
-typedef struct fileentry
-{
-	char filename[SYS_MAX_PATH];
-	char pakfile[SYS_MAX_PATH];
-	struct fileentry *next;
-} fileentry_t;
-
-typedef struct
-{
-	size_t numfiles;
-	size_t capacity;
-	fileentry_t **files;
-} filemap_t;
-
-static filemap_t *filemap;
 
 static cvar_t *fsbasepath;
 static cvar_t *fssavepath;
 
 static bool initialized;
-
-/*
-* Function: HashFileName
-* Hashes the name of the file to generate an index, using the FNV-1a algorithm
-* 
-* 	name: The name of the file
-* 
-* Returns: The hash value
-*/
-static size_t HashFileName(const char *name)
-{
-	size_t hash = 2166136261u;	// initial offset basis, large prime number
-	size_t len = Sys_Strlen(name, SYS_MAX_PATH);
-
-	for (size_t i=0; i<len; i++)
-	{
-		hash ^= (unsigned char)name[i];
-		hash *= 16777619;	// FNV prime number
-	}
-
-	return(hash & (filemap->capacity - 1));
-}
 
 /*
 * Function: PathMatchSpec
@@ -107,73 +48,6 @@ static bool PathMatchSpec(const char *path, const char *filter)
 }
 
 /*
-* Function: MapFiles
-* Maps files from the all the pak files to the file map.
-* Files in the paks have priority over files on disk.
-* Files in higher numbered paks have priority over lower numbered paks.
-* Eg. pak.1.pk has priority over pak.0.pk, etc...
-* 
-* 	filelist: The list of files to map to the VFS
-* 	numfiles: The number of files in the list
-* 
-* Returns: A boolean if the files were mapped successfully or not
-*/
-static bool MapFiles(const filedata_t *filelist, const unsigned int numfiles)
-{
-	for (unsigned int i=0; i<numfiles; i++)
-	{
-		const char *pakfile = filelist[i].filename;
-
-		unzFile pak = unzOpen(pakfile);
-		if (!pak)
-		{
-			Log_WriteSeq(LOG_ERROR, "Failed to open pak file: %s", pakfile);
-			return(false);
-		}
-
-		if (unzGoToFirstFile(pak) != UNZ_OK)
-		{
-			Log_WriteSeq(LOG_ERROR, "Failed to go to the first file in the pak: %s", pakfile);
-			unzClose(pak);
-			return(false);
-		}
-
-		do
-		{
-			unz_file_info info;
-
-			char filename[SYS_MAX_PATH] = { 0 };
-			if (unzGetCurrentFileInfo(pak, &info, filename, SYS_MAX_PATH, NULL, 0, NULL, 0) != UNZ_OK)
-			{
-				Log_WriteSeq(LOG_ERROR, "Failed to get the current file info in the pak: %s", pakfile);
-				unzClose(pak);
-				return(false);
-			}
-
-			fileentry_t *entry = MemCache_Alloc(sizeof(*entry));
-			if (!entry)
-			{
-				Log_WriteSeq(LOG_ERROR, "Failed to allocate memory for file entry");
-				unzClose(pak);
-				return(false);
-			}
-
-			size_t index = HashFileName(filename);
-
-			entry->next = filemap->files[index];
-			filemap->files[index] = entry;
-
-			snprintf(entry->filename, SYS_MAX_PATH, "%s", filename);
-			snprintf(entry->pakfile, SYS_MAX_PATH, "%s", pakfile);
-		} while (unzGoToNextFile(pak) == UNZ_OK);
-
-		unzClose(pak);
-	}
-
-	return(true);
-}
-
-/*
 * Function: FileSys_Init
 * Initializes the filesystem, if no PAK files are found, the filesystem will use the regular disk instead of the PAKs
 * 
@@ -186,62 +60,6 @@ bool FileSys_Init(void)
 
 	fsbasepath = Cvar_RegisterString("fs_basepath", "", CVAR_FILESYSTEM | CVAR_READONLY, "The base path for the engine. Path to the installation");
 	fssavepath = Cvar_RegisterString("fs_savepath", "save", CVAR_FILESYSTEM, "The path to the games save files, relative to the base path");
-
-	char basepath[SYS_MAX_PATH] = { 0 };
-
-	if (!Cvar_GetString(fsbasepath, basepath))
-	{
-		Log_WriteSeq(LOG_ERROR, "Failed to get base path from Cvar system");
-		return(false);
-	}
-
-	unsigned int numfiles = 0;
-	filedata_t *pakfiles = FileSys_ListFiles(&numfiles, basepath, "pak.*.pk");
-	if (!pakfiles && numfiles)
-	{
-		Log_WriteSeq(LOG_ERROR, "Failed to create a pak file list");
-		return(false);
-	}
-
-	if (pakfiles && numfiles)
-	{
-		filemap = MemCache_Alloc(sizeof(*filemap));
-		if (!filemap)
-		{
-			Log_WriteSeq(LOG_ERROR, "Failed to allocate memory for file map");
-			FileSys_FreeFileList(pakfiles);
-			return(false);
-		}
-
-		filemap->capacity = DEF_FILE_MAP_CAPACITY;
-		filemap->numfiles = 0;
-
-		filemap->files = MemCache_Alloc(sizeof(*filemap->files) * filemap->capacity);
-		if (!filemap->files)
-		{
-			Log_WriteSeq(LOG_ERROR, "Failed to allocate memory for file map entries");
-			FileSys_FreeFileList(pakfiles);
-			MemCache_Free(filemap);
-			return(false);
-		}
-
-		for (size_t i=0; i<filemap->capacity; i++)
-			filemap->files[i] = NULL;
-
-		if (!MapFiles(pakfiles, numfiles))
-		{
-			Log_WriteSeq(LOG_ERROR, "Failed to map the files sourced from the PAKs");
-			FileSys_FreeFileList(pakfiles);
-			MemCache_Free(filemap->files);
-			MemCache_Free(filemap);
-			return(false);
-		}
-
-		FileSys_FreeFileList(pakfiles);
-	}
-
-	if (!pakfiles && !numfiles)
-		Log_WriteSeq(LOG_WARN, "No pak files found in the base path, using regular filesystem");
 
 	initialized = true;
 
@@ -258,23 +76,6 @@ void FileSys_Shutdown(void)
 		return;
 
 	Log_WriteSeq(LOG_INFO, "Shutting down filesystem");
-
-	if (filemap)
-	{
-		for (size_t i=0; i<filemap->capacity; i++)
-		{
-			fileentry_t *current = filemap->files[i];
-			while (current)
-			{
-				fileentry_t *next = current->next;
-				MemCache_Free(current);
-				current = next;
-			}
-		}
-
-		MemCache_Free(filemap->files);
-		MemCache_Free(filemap);
-	}
 
 	initialized = false;
 }
