@@ -14,6 +14,8 @@ static const wchar_t *fakewndclassname = L"Fake_MEngine";
 
 static bool initialized;
 
+#define WGL_CONTEXT_DEBUG_BIT_ARB 0x00000001
+#define WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB 0x00000002
 #define WGL_DRAW_TO_WINDOW_ARB 0x2001
 #define WGL_SUPPORT_OPENGL_ARB 0x2010
 #define WGL_DOUBLE_BUFFER_ARB 0x2011

@@ -49,14 +49,22 @@
                 "rhs": "Linux"
             }
         },
-        {
-            "name": "windows-debug",
-            "displayName": "Debug",
-            "inherits": "windows-base",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug"
-            }
-        },
+		{
+			"name": "windows-debug",
+			"displayName": "Debug",
+			"inherits": "windows-base",
+			"cacheVariables": {
+				"CMAKE_BUILD_TYPE": "Debug"
+			}
+		},
+		{
+			"name": "windows-relwithdebinfo",
+			"displayName": "RelWithDebInfo",
+			"inherits": "windows-base",
+			"cacheVariables": {
+				"CMAKE_BUILD_TYPE": "RelWithDebInfo"
+			}
+		},
         {
             "name": "windows-release",
             "displayName": "Release",
@@ -65,14 +73,22 @@
                 "CMAKE_BUILD_TYPE": "Release"
             }
         },
-        {
-            "name": "macos-debug",
-            "displayName": "Debug",
-            "inherits": "macos-base",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug"
-            }
-        },
+		{
+			"name": "macos-debug",
+			"displayName": "Debug",
+			"inherits": "macos-base",
+			"cacheVariables": {
+				"CMAKE_BUILD_TYPE": "Debug"
+			}
+		},
+		{
+			"name": "macos-relwithdebinfo",
+			"displayName": "RelWithDebInfo",
+			"inherits": "macos-base",
+			"cacheVariables": {
+				"CMAKE_BUILD_TYPE": "RelWithDebInfo"
+			}
+		},
         {
             "name": "macos-release",
             "displayName": "Release",
@@ -81,14 +97,22 @@
                 "CMAKE_BUILD_TYPE": "Release"
             }
         },
-        {
-            "name": "linux-debug",
-            "displayName": "Debug",
-            "inherits": "linux-base",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug"
-            }
-        },
+		{
+			"name": "linux-debug",
+			"displayName": "Debug",
+			"inherits": "linux-base",
+			"cacheVariables": {
+				"CMAKE_BUILD_TYPE": "Debug"
+			}
+		},
+		{
+			"name": "linux-relwithdebinfo",
+			"displayName": "RelWithDebInfo",
+			"inherits": "linux-base",
+			"cacheVariables": {
+				"CMAKE_BUILD_TYPE": "RelWithDebInfo"
+			}
+		},
         {
             "name": "linux-release",
             "displayName": "Release",
