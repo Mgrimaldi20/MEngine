@@ -388,7 +388,8 @@ int Common_Printf(const char *msg, ...)
 	vsnprintf(buffer, sizeof(buffer), msg, argptr);
 	va_end(argptr);
 
-	int res = printf("%s\n", buffer);
+	int res = printf("%s\n", buffer);		// TODO: remove later
+	Log_Write(LOG_INFO, buffer);
 
 	if (outfp)
 		fprintf(outfp, "%s\n", buffer);
@@ -413,7 +414,8 @@ int Common_Warnf(const char *msg, ...)
 	vsnprintf(buffer, sizeof(buffer), msg, argptr);
 	va_end(argptr);
 
-	int res = printf("%s\n", buffer);
+	int res = printf("%s\n", buffer);		// TODO: remove later
+	Log_Write(LOG_WARN, buffer);
 
 	if (outfp)
 		fprintf(outfp, "%s\n", buffer);
@@ -438,7 +440,8 @@ int Common_Errorf(const char *msg, ...)
 	vsnprintf(buffer, sizeof(buffer), msg, argptr);
 	va_end(argptr);
 
-	int res = fprintf(stderr, "%s\n", buffer);
+	int res = fprintf(stderr, "%s\n", buffer);		// TODO: remove later
+	Log_Write(LOG_ERROR, buffer);
 
 	if (errfp)
 		fprintf(errfp, "%s\n", buffer);
