@@ -330,6 +330,9 @@ bool Render_Init(void)
 	if (!GLWnd_Init(params))	// create the window
 		return(false);
 
+	if (!EMGL_Init())	// initialize the gl function calls and load the OpenGL library
+		return(false);
+
 	int vsync = 0;
 	if (!Cvar_GetInt(rvsync, &vsync))
 	{
@@ -370,6 +373,7 @@ void Render_Shutdown(void)
 
 	Log_WriteSeq(LOG_INFO, "Shutting down rendering system");
 
+	EMGL_Shutdown();
 	GLWnd_Shutdown();
 
 	initialized = false;
