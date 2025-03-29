@@ -3,6 +3,7 @@
 #include "sys/sys.h"
 #include "common/common.h"
 #include "winlocal.h"
+#include "renderer/emgl.h"
 #include "renderer/renderer.h"
 
 #define FS_WINDOW_STYLE (WS_POPUP | WS_VISIBLE | WS_SYSMENU)
@@ -15,7 +16,13 @@ static const wchar_t *fakewndclassname = L"Fake_MEngine";
 static bool initialized;
 
 #define WGL_CONTEXT_DEBUG_BIT_ARB 0x00000001
-#define WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB 0x00000002
+#define WGL_CONTEXT_MAJOR_VERSION_ARB 0x2091
+#define WGL_CONTEXT_MINOR_VERSION_ARB 0x2092
+#define WGL_CONTEXT_PROFILE_MASK_ARB 0x9126
+#define WGL_CONTEXT_CORE_PROFILE_BIT_ARB 0x00000001
+#define WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB 0x00000002
+
+#define WGL_CONTEXT_FLAGS_ARB 0x2094
 #define WGL_DRAW_TO_WINDOW_ARB 0x2001
 #define WGL_SUPPORT_OPENGL_ARB 0x2010
 #define WGL_DOUBLE_BUFFER_ARB 0x2011
@@ -237,6 +244,12 @@ static bool InitOpenGL(glwndparams_t params)
 			WGL_STENCIL_BITS_ARB, 8,
 			WGL_SAMPLE_BUFFERS_ARB, GL_TRUE,
 			WGL_SAMPLES_ARB, params.multisamples,
+			WGL_CONTEXT_FLAGS_ARB,
+#if defined(MENGINE_DEBUG)
+			WGL_CONTEXT_DEBUG_BIT_ARB,
+#else
+			0,
+#endif
 			0, 0
 		};
 

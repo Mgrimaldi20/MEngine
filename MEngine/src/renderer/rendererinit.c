@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <time.h>
-#include "sys/sys.h"
+#include "emgl.h"
 #include "common/common.h"
 #include "renderer.h"
 
@@ -89,11 +89,154 @@ static bool GetVideoModeInfo(int *width, int *height, int mode)
 }
 
 /*
+* Function: GLDebugCallback
+* The OpenGL debug callback function prototype, logging for OpenGL messages, only used in engine debug mode
+*
+* 	source: The source of the message, API, window system, etc...
+* 	type: The type of message, error, warning, etc...
+* 	id: The message ID
+* 	severity: The severity of the message, high, medium, low, etc...
+* 	length: The length of the message
+* 	message: The message
+* 	userparam: The user parameter, an object or pointer to user data passed to the callback, can be referenced in the callback
+*/
+static void GLDebugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userparam)
+{
+	const char *sourcestr = NULL;
+	const char *typestr = NULL;
+	const char *severitystr = NULL;
+	logtype_t logtype = LOG_INFO;
+
+	switch (source)
+	{
+		case GL_DEBUG_SOURCE_API:
+			sourcestr = "Source: API";
+			break;
+
+		case GL_DEBUG_SOURCE_WINDOW_SYSTEM:
+			sourcestr = "Source: Window System";
+			break;
+
+		case GL_DEBUG_SOURCE_SHADER_COMPILER:
+			sourcestr = "Source: Shader Compiler";
+			break;
+
+		case GL_DEBUG_SOURCE_THIRD_PARTY:
+			sourcestr = "Source: Third Party";
+			break;
+
+		case GL_DEBUG_SOURCE_APPLICATION:
+			sourcestr = "Source: Application";
+			break;
+
+		case GL_DEBUG_SOURCE_OTHER:
+			sourcestr = "Source: Other";
+			break;
+
+		default:
+			sourcestr = "Source: Unknown";
+			break;
+	}
+
+	switch (type)
+	{
+		case GL_DEBUG_TYPE_ERROR:
+			typestr = "Type: Error";
+			break;
+
+		case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
+			typestr = "Type: Deprecated Behavior";
+			break;
+
+		case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
+			typestr = "Type: Undefined Behavior";
+			break;
+
+		case GL_DEBUG_TYPE_PORTABILITY:
+			typestr = "Type: Portability";
+			break;
+
+		case GL_DEBUG_TYPE_PERFORMANCE:
+			typestr = "Type: Performance";
+			break;
+
+		case GL_DEBUG_TYPE_OTHER:
+			typestr = "Type: Other";
+			break;
+
+		case GL_DEBUG_TYPE_MARKER:
+			typestr = "Type: Marker";
+			break;
+
+		default:
+			typestr = "Type: Unknown";
+			break;
+	}
+
+	switch (severity)
+	{
+		case GL_DEBUG_SEVERITY_HIGH:
+			severitystr = "Severity: High";
+			logtype = LOG_ERROR;
+			break;
+
+		case GL_DEBUG_SEVERITY_MEDIUM:
+			severitystr = "Severity: Medium";
+			logtype = LOG_WARN;
+			break;
+
+		case GL_DEBUG_SEVERITY_LOW:
+			severitystr = "Severity: Low";
+			logtype = LOG_WARN;
+			break;
+
+		case GL_DEBUG_SEVERITY_NOTIFICATION:
+			severitystr = "Severity: Notification";
+			logtype = LOG_INFO;
+			break;
+
+		default:
+			severitystr = "Severity: Unknown";
+			logtype = LOG_INFO;
+			break;
+	}
+
+	const char *logmsg = "OpenGL Debug Message: %s, %s, %d, %s, %s";
+
+	switch (logtype)
+	{
+		case LOG_INFO:
+			Common_Printf(logmsg, sourcestr, typestr, id, severitystr, message);
+			break;
+
+		case LOG_WARN:
+			Common_Warnf(logmsg, sourcestr, typestr, id, severitystr, message);
+			break;
+
+		case LOG_ERROR:
+			Common_Errorf(logmsg, sourcestr, typestr, id, severitystr, message);
+			break;
+	}
+}
+
+
+/*
 * Function: InitOpenGL
 * Initializes the OpenGL state and options
 */
 static void InitOpenGL(void)
 {
+	// get the debug output info if the bit is set (engine is in debug mode)
+	GLint flags;
+	glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
+	if (flags & GL_CONTEXT_FLAG_DEBUG_BIT)
+	{
+		glEnable(GL_DEBUG_OUTPUT);
+		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+		glDebugMessageCallback(GLDebugCallback, NULL);
+		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, GL_TRUE);
+	}
+
 	glViewport(0, 0, (GLsizei)glstate.width, (GLsizei)glstate.height);
 
 	glShadeModel(GL_SMOOTH);	// sets shading to smooth

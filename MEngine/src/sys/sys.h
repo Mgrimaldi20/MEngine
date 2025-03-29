@@ -1,18 +1,5 @@
 #pragma once
 
-#if defined(MENGINE_PLATFORM_WINDOWS)
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>				// needed for GLU
-#include <gl/GLU.h>
-#elif defined(MENGINE_PLATFORM_LINUX)
-#include <GL/glu.h>
-#elif defined(MENGINE_PLATFORM_MACOS)
-#define GL_SILENCE_DEPRECATION
-#include <OpenGL/glu.h>
-#else
-#error Unknown GL libraries.
-#endif
-
 #include "common/common.h"
 
 typedef struct

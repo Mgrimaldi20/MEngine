@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <time.h>
-#include "sys/sys.h"
+#include "emgl.h"
 #include "common/common.h"
 #include "renderer.h"
 
