@@ -36,6 +36,7 @@ if(WIN32)
 		"src/sys/win32/winmain.c"
 		"src/sys/win32/wndproc.c"
 		"src/sys/win32/syswin.c"
+		"src/sys/win32/winemgl.c"
 		"src/sys/win32/glwnd.c"
 		"src/sys/win32/wininput.c"
 	)
@@ -76,6 +77,7 @@ target_sources(MEngine PRIVATE
 	"src/common/keycodes.h"
 	"src/common/input.c"
 	"src/common/event.c"
+	"src/renderer/emgl.h"
 	"src/renderer/renderer.h"
 	"src/renderer/rendererinit.c"
 	"src/renderer/renderer.c"
