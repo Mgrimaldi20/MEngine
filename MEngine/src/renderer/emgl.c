@@ -4,8 +4,6 @@
 
 static void *gldllhandle;
 
-static bool initialized;
-
 PFNGLDEBUGMESSAGECALLBACKPROC glDebugMessageCallback;
 PFNGLDEBUGMESSAGECONTROLPROC glDebugMessageControl;
 
@@ -19,9 +17,6 @@ PFNGLDEBUGMESSAGECONTROLPROC glDebugMessageControl;
 */
 bool EMGL_Init(const char *dllname)
 {
-	if (initialized)
-		return(true);
-
 	if (gldllhandle)
 		return(true);
 
@@ -32,10 +27,8 @@ bool EMGL_Init(const char *dllname)
 		return(false);
 	}
 
-	glDebugMessageCallback = (PFNGLDEBUGMESSAGECALLBACKPROC)Sys_GetProcAddress(gldllhandle, "glDebugMessageCallback");
-	glDebugMessageControl = (PFNGLDEBUGMESSAGECONTROLPROC)Sys_GetProcAddress(gldllhandle, "glDebugMessageControl");
-
-	initialized = true;
+	glDebugMessageCallback = (PFNGLDEBUGMESSAGECALLBACKPROC)wglGetProcAddress("glDebugMessageCallback");
+	glDebugMessageControl = (PFNGLDEBUGMESSAGECONTROLPROC)wglGetProcAddress("glDebugMessageControl");
 
 	return(true);
 }
@@ -46,9 +39,6 @@ bool EMGL_Init(const char *dllname)
 */
 void EMGL_Shutdown(void)
 {
-	if (!initialized)
-		return;
-
 	Log_Write(LOG_INFO, "Shutting down OpenGL library");
 
 	if (gldllhandle)
@@ -57,5 +47,6 @@ void EMGL_Shutdown(void)
 		gldllhandle = NULL;
 	}
 
-	initialized = false;
+	glDebugMessageCallback = NULL;
+	glDebugMessageControl = NULL;
 }

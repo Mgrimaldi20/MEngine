@@ -13,8 +13,6 @@ typedef long long (*glwndproc_t)(void);
 static const wchar_t *wndclassname = L"MEngine";
 static const wchar_t *fakewndclassname = L"Fake_MEngine";
 
-static bool initialized;
-
 #define WGL_CONTEXT_DEBUG_BIT_ARB 0x00000001
 #define WGL_CONTEXT_MAJOR_VERSION_ARB 0x2091
 #define WGL_CONTEXT_MINOR_VERSION_ARB 0x2092
@@ -330,19 +328,18 @@ static bool InitOpenGL(glwndparams_t params)
 		0, 0
 	};
 
-	win32state.hglrc = wglCreateContextAttribsARB(win32state.hdc, NULL, glattribs);
-	if (!win32state.hglrc)
+	if (!wglCreateContextAttribsARB)
 	{
-		Log_Write(LOG_ERROR, "%s: Could not create OpenGL context", __func__);
+		Log_Write(LOG_ERROR, "%s: Could not call wglCreateContextAttribsARB, function pointer is NULL", __func__);
 		return(false);
 	}
 
-	//win32state.hglrc = wglCreateContext(win32state.hdc);
-	//if (!win32state.hglrc)
-	//{
-	//	Log_WriteSeq(LOG_ERROR, "%s: Could not create OpenGL context", __func__);
-	//	return(false);
-	//}
+	win32state.hglrc = wglCreateContextAttribsARB(win32state.hdc, NULL, glattribs);
+	if (!win32state.hglrc)
+	{
+		Log_WriteSeq(LOG_ERROR, "%s: Could not create OpenGL context", __func__);
+		return(false);
+	}
 
 	if (!wglMakeCurrent(win32state.hdc, win32state.hglrc))
 	{
@@ -600,9 +597,6 @@ static bool SetFullScreen(glwndparams_t params)
 */
 bool GLWnd_Init(glwndparams_t params)
 {
-	if (initialized)
-		return(true);
-
 	HDC hdc = GetDC(GetDesktopWindow());
 	if (!hdc)
 		WindowsError();
@@ -667,8 +661,6 @@ bool GLWnd_Init(glwndparams_t params)
 
 	Log_WriteSeq(LOG_INFO, "OpenGL initalised and created window");
 
-	initialized = true;
-
 	return(true);
 }
 
@@ -678,9 +670,6 @@ bool GLWnd_Init(glwndparams_t params)
 */
 void GLWnd_Shutdown(void)
 {
-	if (!initialized)
-		return;
-
 	Log_WriteSeq(LOG_INFO, "Shutting down OpenGL system");
 
 	wglMakeCurrent(NULL, NULL);
@@ -704,10 +693,11 @@ void GLWnd_Shutdown(void)
 		win32state.hwnd = NULL;
 	}
 
-	UnregisterClass(fakewndclassname, win32state.hinst);
-	UnregisterClass(wndclassname, win32state.hinst);
-
-	initialized = false;
+	if (win32state.hinst)
+	{
+		UnregisterClass(fakewndclassname, win32state.hinst);
+		UnregisterClass(wndclassname, win32state.hinst);
+	}
 }
 
 /*
