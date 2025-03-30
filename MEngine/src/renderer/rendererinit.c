@@ -355,6 +355,8 @@ bool Render_Init(void)
 	InitOpenGL();
 
 	Log_WriteSeq(LOG_INFO, "OpenGL version: %s", (const char *)glGetString(GL_VERSION));
+	Log_WriteSeq(LOG_INFO, "OpenGL renderer: %s", (const char *)glGetString(GL_RENDERER));
+	Log_WriteSeq(LOG_INFO, "OpenGL vendor: %s", (const char *)glGetString(GL_VENDOR));
 
 	initialized = true;
 	glstate.initialized = initialized;

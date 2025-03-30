@@ -50,3 +50,4 @@ bool GLWnd_ChangeScreenParams(glwndparams_t params);
 void GLWnd_SwapBuffers(void);
 void GLWnd_SetVSync(int vsync);
 int GLWnd_GetVSync(void);
+void *GLWnd_GetProcAddressGL(void *dllhandle, const char *procname);
