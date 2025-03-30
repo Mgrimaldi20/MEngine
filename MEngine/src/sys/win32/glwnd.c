@@ -38,11 +38,13 @@ typedef const char *(WINAPI *PFNWGLGETEXTENSIONSSTRINGARBPROC)(HDC hdc);
 typedef BOOL(WINAPI *PFNWGLSWAPINTERVALEXTPROC)(int interval);
 typedef int (WINAPI *PFNWGLGETSWAPINTERVALEXTPROC)(void);
 typedef BOOL(WINAPI *PFNWGLCHOOSEPIXELFORMATARBPROC)(HDC hdc, const int *piAttribIList, const FLOAT *pfAttribFList, UINT nMaxFormats, int *piFormats, UINT *nNumFormats);
+typedef HGLRC(WINAPI *PFNWGLCREATECONTEXTATTRIBSARBPROC)(HDC hdc, HGLRC hShareContext, const int *attribList);
 
 PFNWGLGETEXTENSIONSSTRINGARBPROC wglGetExtensionsStringARB;
 PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT;
 PFNWGLGETSWAPINTERVALEXTPROC wglGetSwapIntervalEXT;
 PFNWGLCHOOSEPIXELFORMATARBPROC wglChoosePixelFormatARB;
+PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB;
 
 /*
 * Function: GetWGLProcAddress
@@ -156,6 +158,7 @@ static void GetWGLExtensions(HDC hdc)
 	wglSwapIntervalEXT = (PFNWGLSWAPINTERVALEXTPROC)GetWGLProcAddress("wglSwapIntervalEXT");
 	wglGetSwapIntervalEXT = (PFNWGLGETSWAPINTERVALEXTPROC)GetWGLProcAddress("wglGetSwapIntervalEXT");
 	wglChoosePixelFormatARB = (PFNWGLCHOOSEPIXELFORMATARBPROC)GetWGLProcAddress("wglChoosePixelFormatARB");
+	wglCreateContextAttribsARB = (PFNWGLCREATECONTEXTATTRIBSARBPROC)GetWGLProcAddress("wglCreateContextAttribsARB");
 }
 
 /*
@@ -244,12 +247,6 @@ static bool InitOpenGL(glwndparams_t params)
 			WGL_STENCIL_BITS_ARB, 8,
 			WGL_SAMPLE_BUFFERS_ARB, GL_TRUE,
 			WGL_SAMPLES_ARB, params.multisamples,
-			WGL_CONTEXT_FLAGS_ARB,
-#if defined(MENGINE_DEBUG)
-			WGL_CONTEXT_DEBUG_BIT_ARB,
-#else
-			0,
-#endif
 			0, 0
 		};
 
@@ -318,12 +315,34 @@ static bool InitOpenGL(glwndparams_t params)
 
 	// setup OpenGL stuff
 	Log_WriteSeq(LOG_INFO, "Creating OpenGL context...");
-	win32state.hglrc = wglCreateContext(win32state.hdc);
+
+	int glattribs[] =
+	{
+		WGL_CONTEXT_MAJOR_VERSION_ARB, 4,
+		WGL_CONTEXT_MINOR_VERSION_ARB, 5,
+		WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB,
+		WGL_CONTEXT_FLAGS_ARB,
+#if defined(MENGINE_DEBUG)
+		WGL_CONTEXT_DEBUG_BIT_ARB,
+#else
+		0,
+#endif
+		0, 0
+	};
+
+	win32state.hglrc = wglCreateContextAttribsARB(win32state.hdc, NULL, glattribs);
 	if (!win32state.hglrc)
 	{
-		Log_WriteSeq(LOG_ERROR, "%s: Could not create OpenGL context", __func__);
+		Log_Write(LOG_ERROR, "%s: Could not create OpenGL context", __func__);
 		return(false);
 	}
+
+	//win32state.hglrc = wglCreateContext(win32state.hdc);
+	//if (!win32state.hglrc)
+	//{
+	//	Log_WriteSeq(LOG_ERROR, "%s: Could not create OpenGL context", __func__);
+	//	return(false);
+	//}
 
 	if (!wglMakeCurrent(win32state.hdc, win32state.hglrc))
 	{
@@ -626,9 +645,6 @@ bool GLWnd_Init(glwndparams_t params)
 	if (!win32state.wndclassregistered)
 		WindowsError();
 
-	if (!EMGL_Init("opengl32.dll"))	// initialize the gl function calls and load the OpenGL library
-		return(false);
-
 	// create fake window to get WGL extensions, very weird but its how DOOM 3 does it so it must work
 	if (!CreateFakeWindowExt())
 		return(false);
@@ -645,6 +661,9 @@ bool GLWnd_Init(glwndparams_t params)
 		WindowsError();
 
 	GetWGLExtensions(win32state.hdc);	// get WGL extensions for real window
+
+	if (!EMGL_Init("opengl32.dll"))	// initialize the gl function calls and load the OpenGL library
+		return(false);
 
 	Log_WriteSeq(LOG_INFO, "OpenGL initalised and created window");
 
