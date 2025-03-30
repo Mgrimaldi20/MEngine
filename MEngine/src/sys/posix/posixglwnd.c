@@ -184,3 +184,31 @@ int GLWnd_GetVSync(void)
 {
 	return(posixstate.swapinterval);
 }
+
+/*
+* Function: GLWnd_GetProcAddressGL
+* Gets the OpenGL function pointer for the given function name from the OpenGL dll
+*
+* 	dllhandle: The handle to the OpenGL dll
+* 	procname: The name of the function to get the pointer for
+*
+* Returns: The function pointer for the proc name
+*/
+void *GLWnd_GetProcAddressGL(const void *dllhandle, const char *procname)
+{
+	if (!dllhandle || !procname)
+		return(NULL);
+
+	void *proc = glfwGetProcAddress(procname);
+	if (!proc)
+	{
+		proc = Sys_GetProcAddress(dllhandle, procname);
+		if (!proc)
+		{
+			Log_Write(LOG_ERROR, "Could not get proc address for %s", procname);
+			return(NULL);
+		}
+	}
+
+	return(proc);
+}

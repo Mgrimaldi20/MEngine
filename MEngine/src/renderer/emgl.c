@@ -1,4 +1,5 @@
-#include "renderer/emgl.h"
+#include "emgl.h"
+#include "renderer.h"
 #include "common/common.h"
 #include "sys/sys.h"
 
@@ -20,6 +21,8 @@ bool EMGL_Init(const char *dllname)
 	if (gldllhandle)
 		return(true);
 
+	Log_Write(LOG_INFO, "Loading OpenGL library: %s", dllname);
+
 	gldllhandle = Sys_LoadDLL(dllname);
 	if (!gldllhandle)
 	{
@@ -27,8 +30,8 @@ bool EMGL_Init(const char *dllname)
 		return(false);
 	}
 
-	glDebugMessageCallback = (PFNGLDEBUGMESSAGECALLBACKPROC)wglGetProcAddress("glDebugMessageCallback");
-	glDebugMessageControl = (PFNGLDEBUGMESSAGECONTROLPROC)wglGetProcAddress("glDebugMessageControl");
+	glDebugMessageCallback = (PFNGLDEBUGMESSAGECALLBACKPROC)GLWnd_GetProcAddressGL(gldllhandle, "glDebugMessageCallback");
+	glDebugMessageControl = (PFNGLDEBUGMESSAGECONTROLPROC)GLWnd_GetProcAddressGL(gldllhandle, "glDebugMessageControl");
 
 	return(true);
 }
