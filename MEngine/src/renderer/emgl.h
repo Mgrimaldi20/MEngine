@@ -56,9 +56,11 @@ typedef char GLchar;
 
 typedef void(APIENTRY *GLDEBUGPROC)(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam);
 typedef void(APIENTRY *PFNGLDEBUGMESSAGECALLBACKPROC)(GLDEBUGPROC callback, const void *userParam);
+typedef void(APIENTRY *PFNGLDEBUGMESSAGECONTROLPROC)(GLenum source, GLenum type, GLenum severity, GLsizei count, const GLuint *ids, GLboolean enabled);
 
-GLDEBUGPROC glDebugProc;
-PFNGLDEBUGMESSAGECALLBACKPROC glDebugMessageCallback;
+extern GLDEBUGPROC glDebugProc;
+extern PFNGLDEBUGMESSAGECALLBACKPROC glDebugMessageCallback;
+extern PFNGLDEBUGMESSAGECONTROLPROC glDebugMessageControl;
 
 // system specific OpenGL loaders
 bool EMGL_Init(const char *dllname);

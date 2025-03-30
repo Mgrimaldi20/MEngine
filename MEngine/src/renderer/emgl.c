@@ -1,4 +1,14 @@
 #include "renderer/emgl.h"
+#include "common/common.h"
+#include "sys/sys.h"
+
+static void *gldllhandle;
+
+static bool initialized;
+
+GLDEBUGPROC glDebugProc;
+PFNGLDEBUGMESSAGECALLBACKPROC glDebugMessageCallback;
+PFNGLDEBUGMESSAGECONTROLPROC glDebugMessageControl;
 
 /*
 * Function: EMGL_Init
@@ -10,6 +20,25 @@
 */
 bool EMGL_Init(const char *dllname)
 {
+	if (initialized)
+		return(true);
+
+	if (gldllhandle)
+		return(true);
+
+	gldllhandle = Sys_LoadDLL(dllname);
+	if (!gldllhandle)
+	{
+		Log_Write(LOG_INFO, "Failed to load OpenGL library: %s", dllname);
+		return(false);
+	}
+
+	glDebugProc = (GLDEBUGPROC)Sys_GetProcAddress(gldllhandle, "glDebugProc");
+	glDebugMessageCallback = (PFNGLDEBUGMESSAGECALLBACKPROC)Sys_GetProcAddress(gldllhandle, "glDebugMessageCallback");
+	glDebugMessageControl = (PFNGLDEBUGMESSAGECONTROLPROC)Sys_GetProcAddress(gldllhandle, "glDebugMessageControl");
+
+	initialized = true;
+
 	return(true);
 }
 
@@ -19,4 +48,16 @@ bool EMGL_Init(const char *dllname)
 */
 void EMGL_Shutdown(void)
 {
+	if (!initialized)
+		return;
+
+	Log_Write(LOG_INFO, "Shutting down OpenGL library");
+
+	if (gldllhandle)
+	{
+		Sys_UnloadDLL(gldllhandle);
+		gldllhandle = NULL;
+	}
+
+	initialized = false;
 }

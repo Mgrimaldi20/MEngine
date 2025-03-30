@@ -102,6 +102,9 @@ static bool GetVideoModeInfo(int *width, int *height, int mode)
 */
 static void GLDebugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userparam)
 {
+	(const void *)userparam;
+	(GLsizei)length;
+
 	const char *sourcestr = NULL;
 	const char *typestr = NULL;
 	const char *severitystr = NULL;
@@ -330,9 +333,6 @@ bool Render_Init(void)
 	if (!GLWnd_Init(params))	// create the window
 		return(false);
 
-	if (!EMGL_Init())	// initialize the gl function calls and load the OpenGL library
-		return(false);
-
 	int vsync = 0;
 	if (!Cvar_GetInt(rvsync, &vsync))
 	{
@@ -373,7 +373,6 @@ void Render_Shutdown(void)
 
 	Log_WriteSeq(LOG_INFO, "Shutting down rendering system");
 
-	EMGL_Shutdown();
 	GLWnd_Shutdown();
 
 	initialized = false;
