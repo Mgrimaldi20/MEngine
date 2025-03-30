@@ -61,5 +61,5 @@ GLDEBUGPROC glDebugProc;
 PFNGLDEBUGMESSAGECALLBACKPROC glDebugMessageCallback;
 
 // system specific OpenGL loaders
-bool EMGL_Init(void);
+bool EMGL_Init(const char *dllname);
 void EMGL_Shutdown(void);
