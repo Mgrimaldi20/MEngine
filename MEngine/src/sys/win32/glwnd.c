@@ -626,6 +626,9 @@ bool GLWnd_Init(glwndparams_t params)
 	if (!win32state.wndclassregistered)
 		WindowsError();
 
+	if (!EMGL_Init("opengl32.dll"))	// initialize the gl function calls and load the OpenGL library
+		return(false);
+
 	// create fake window to get WGL extensions, very weird but its how DOOM 3 does it so it must work
 	if (!CreateFakeWindowExt())
 		return(false);
