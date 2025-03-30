@@ -6,7 +6,6 @@ static void *gldllhandle;
 
 static bool initialized;
 
-GLDEBUGPROC glDebugProc;
 PFNGLDEBUGMESSAGECALLBACKPROC glDebugMessageCallback;
 PFNGLDEBUGMESSAGECONTROLPROC glDebugMessageControl;
 
@@ -33,7 +32,6 @@ bool EMGL_Init(const char *dllname)
 		return(false);
 	}
 
-	glDebugProc = (GLDEBUGPROC)Sys_GetProcAddress(gldllhandle, "glDebugProc");
 	glDebugMessageCallback = (PFNGLDEBUGMESSAGECALLBACKPROC)Sys_GetProcAddress(gldllhandle, "glDebugMessageCallback");
 	glDebugMessageControl = (PFNGLDEBUGMESSAGECONTROLPROC)Sys_GetProcAddress(gldllhandle, "glDebugMessageControl");
 

@@ -330,7 +330,7 @@ bool Render_Init(void)
 		.wndname = gameservices.gamename
 	};
 
-	if (!GLWnd_Init(params))	// create the window
+	if (!GLWnd_Init(params))	// create the window and get gl function pointers
 		return(false);
 
 	int vsync = 0;
