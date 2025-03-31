@@ -236,9 +236,9 @@ static bool InitGame(void)
 
 	gameservices = *GetMServices(&mservices);
 
-	if (gameservices.version != MENGINE_VERSION)
+	if (strcmp(gameservices.version, MENGINE_VERSION) != 0)
 	{
-		Log_WriteSeq(LOG_ERROR, "Game DLL version and Engine version mismatch: (Game: %d), (Engine: %d)", gameservices.version, MENGINE_VERSION);
+		Sys_Error(LOG_ERROR, "Game DLL version and Engine version mismatch: (Game: %s), (Engine: %s)", gameservices.version, MENGINE_VERSION);
 		return(false);
 	}
 

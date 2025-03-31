@@ -7,7 +7,7 @@ add_library(DemoGame SHARED)
 
 if(CMAKE_VERSION VERSION_GREATER 3.25)
 	set_property(TARGET DemoGame PROPERTY CXX_STANDARD 20)
-	set_property(TARGET DemoGame PROPERTY C_STANDARD 17)
+	set_property(TARGET DemoGame PROPERTY C_STANDARD 23)
 endif()
 
 # Common source files, all this code is Operating System independent
