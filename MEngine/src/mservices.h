@@ -117,8 +117,8 @@ typedef struct		// system services
 
 typedef struct
 {
-	int version;
-	char gamename[SYS_MAX_PATH];
+	const char *version;					// version of the game
+	const char *gamename;					// name of the game used by the engine
 	char iconpath[SYS_MAX_PATH];			// games icon path
 	char smiconpath[SYS_MAX_PATH];			// games icon path for small icon
 
@@ -129,7 +129,7 @@ typedef struct
 
 typedef struct
 {
-	int version;
+	const char *version;
 	log_t *log;
 	memcache_t *memcache;
 	cmdsystem_t *cmdsystem;

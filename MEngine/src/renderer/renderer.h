@@ -40,7 +40,7 @@ typedef struct
 	int height;
 	int multisamples;
 	int refreshrate;
-	char *wndname;		// propogated from gamename in gameservices, so always 256 chars/wchars
+	const char *wndname;		// propogated from gamename in gameservices
 } glwndparams_t;
 
 // system specific renderer functions

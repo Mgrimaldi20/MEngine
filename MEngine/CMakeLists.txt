@@ -7,7 +7,7 @@ add_executable(MEngine)
 
 if(CMAKE_VERSION VERSION_GREATER 3.25)
 	set_property(TARGET MEngine PROPERTY CXX_STANDARD 20)
-	set_property(TARGET MEngine PROPERTY C_STANDARD 17)
+	set_property(TARGET MEngine PROPERTY C_STANDARD 23)
 endif()
 
 # Define some project macros
@@ -16,7 +16,7 @@ if(WIN32)
 endif()
 
 # Define global macros for the project
-target_compile_definitions(MEngine PRIVATE MENGINE_VERSION=1)
+target_compile_definitions(MEngine PRIVATE MENGINE_VERSION="0.13.256")			# Major.Minor.Commit, Major: API changes, Minor: New features, Commit: Bug fixes, revisions: Commit number
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 	target_compile_definitions(MEngine PRIVATE MENGINE_DEBUG)
 endif()
