@@ -36,7 +36,6 @@ void Render_Frame(void)
 	// switch to 2D orthographic projection
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();	// reset the current modelview matrix
-	glPushMatrix();
 	gluOrtho2D(0.0, 1.0, 0.0, 1.0);
 	glMatrixMode(GL_MODELVIEW);
 
@@ -54,7 +53,6 @@ void Render_Frame(void)
 	glEnd();
 	// end testing code
 
-	glPopMatrix();
 	glPopMatrix();
 }
 
