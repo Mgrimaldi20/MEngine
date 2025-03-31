@@ -147,7 +147,7 @@ static void FormatSessionEntry(const char *logfullname)
 * Function: ProcessLogQueue
 * Processes the log queue and writes the log entries to the log file in another thread
 * 
-*	args: The arguments to the thread function
+*	args: The arguments to the thread function, unused for this function
 */
 static void *ProcessLogQueue(void *args)
 {
@@ -326,7 +326,7 @@ void Log_Shutdown(void)
 */
 void Log_Write(const logtype_t type, const char *msg)
 {
-	if ((logcount >= MAX_LOG_ENTRIES) || (!initialized))
+	if ((logcount >= MAX_LOG_ENTRIES) || !initialized)
 		return;
 
 	Sys_LockMutex(loglock);
@@ -335,7 +335,14 @@ void Log_Write(const logtype_t type, const char *msg)
 
 	entry->time = time(NULL);
 	entry->type = type;
-	snprintf(entry->msg, LOG_MAX_LEN, msg);
+	int len = snprintf(entry->msg, LOG_MAX_LEN, msg);
+
+	if (len > LOG_MAX_LEN)
+	{
+		entry->longmsg = MemCache_Alloc(len + 1);
+		if (entry->longmsg)
+			snprintf(entry->longmsg, len + 1, msg);
+	}
 
 	logcount++;
 
@@ -353,7 +360,7 @@ void Log_Write(const logtype_t type, const char *msg)
 */
 void Log_Writef(const logtype_t type, const char *msg, ...)
 {
-	if ((logcount >= MAX_LOG_ENTRIES) || (!initialized))
+	if ((logcount >= MAX_LOG_ENTRIES) || !initialized)
 		return;
 
 	Sys_LockMutex(loglock);
@@ -365,77 +372,18 @@ void Log_Writef(const logtype_t type, const char *msg, ...)
 
 	va_list arg;
 	va_start(arg, msg);
-	vsnprintf(entry->msg, LOG_MAX_LEN, msg, arg);
+	int len = vsnprintf(entry->msg, LOG_MAX_LEN, msg, arg);
 	va_end(arg);
 
-	logcount++;
-
-	Sys_UnlockMutex(loglock);
-	Sys_SignalCondVar(logcond);
-}
-
-/*
-* Function: Log_WriteLarge
-* Writes a log message to the log file, will allocate heap memory for large log messages that are over the max log length
-*
-* 	type: The type of log message
-* 	msg: The message to log, just a string
-*/
-void Log_WriteLarge(const logtype_t type, const char *msg)
-{
-	if ((logcount >= MAX_LOG_ENTRIES) || (!initialized))
-		return;
-
-	Sys_LockMutex(loglock);
-
-	logentry_t *entry = &logqueue[logcount];
-
-	int len = snprintf(NULL, 0, msg);
-
-	entry->time = time(NULL);
-	entry->type = type;
-	entry->longmsg = MemCache_Alloc(len + 1);
-
-	if (entry->longmsg)
-		snprintf(entry->longmsg, len + 1, msg);
-
-	logcount++;
-
-	Sys_UnlockMutex(loglock);
-	Sys_SignalCondVar(logcond);
-}
-
-/*
-* Function: Log_WriteLargef
-* Writes a formatted log message to the log file, will allocate heap memory for large log messages that are over the max log length
-*
-* 	type: The type of log message
-* 	msg: The message to log, the log message format is the same as printf
-*	...: The arguments to the format string
-*/
-void Log_WriteLargef(const logtype_t type, const char *msg, ...)
-{
-	if ((logcount >= MAX_LOG_ENTRIES) || (!initialized))
-		return;
-
-	Sys_LockMutex(loglock);
-
-	logentry_t *entry = &logqueue[logcount];
-
-	va_list arg;
-	va_start(arg, msg);
-	int len = vsnprintf(NULL, 0, msg, arg);
-	va_end(arg);
-
-	entry->time = time(NULL);
-	entry->type = type;
-	entry->longmsg = MemCache_Alloc(len + 1);
-
-	if (entry->longmsg)
+	if (len > LOG_MAX_LEN)
 	{
-		va_start(arg, msg);
-		vsnprintf(entry->longmsg, len + 1, msg, arg);
-		va_end(arg);
+		entry->longmsg = MemCache_Alloc(len + 1);
+		if (entry->longmsg)
+		{
+			va_start(arg, msg);
+			vsnprintf(entry->longmsg, len + 1, msg, arg);
+			va_end(arg);
+		}
 	}
 
 	logcount++;

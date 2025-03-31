@@ -42,8 +42,6 @@ typedef struct		// logging service
 {
 	void (*Write)(logtype_t type, const char *msg);				// write a log message
 	void (*Writef)(logtype_t type, const char *msg, ...);		// write a formatted log message
-	void (*WriteLarge)(logtype_t type, const char *msg);		// write a log over the max log length, will allocte heap memory
-	void (*WriteLargef)(logtype_t type, const char *msg, ...);	// write a formatted log over the max log length, will allocte heap memory
 } log_t;
 
 typedef struct		// memory cache allocator and manager

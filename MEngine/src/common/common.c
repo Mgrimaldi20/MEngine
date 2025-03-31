@@ -103,9 +103,7 @@ static void CreateMServices(void)
 	logsystem = (log_t)
 	{
 		.Write = Log_Write,
-		.Writef = Log_Writef,
-		.WriteLarge = Log_WriteLarge,
-		.WriteLargef = Log_WriteLargef
+		.Writef = Log_Writef
 	};
 
 	memcache = (memcache_t)

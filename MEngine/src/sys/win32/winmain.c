@@ -37,10 +37,9 @@ int WINAPI wWinMain(HINSTANCE hinst, HINSTANCE hprevinst, PWSTR pcmdline, int nc
 			InitConsole();
 			HideConsole();
 		}
-	}
 
-	if (win32state.conshow)
 		ShowConsole();
+	}
 	
 	if (!Common_Init())
 	{
