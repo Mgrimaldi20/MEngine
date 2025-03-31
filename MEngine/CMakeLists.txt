@@ -16,7 +16,7 @@ if(WIN32)
 endif()
 
 # Define global macros for the project
-target_compile_definitions(MEngine PRIVATE MENGINE_VERSION="0.13.256")			# Major.Minor.Commit, Major: API changes, Minor: New features, Commit: Bug fixes, revisions: Commit number
+target_compile_definitions(MEngine PRIVATE MENGINE_VERSION=0)					# Major version: The API version
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 	target_compile_definitions(MEngine PRIVATE MENGINE_DEBUG)
 endif()

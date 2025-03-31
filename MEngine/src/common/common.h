@@ -25,9 +25,10 @@ bool Common_UseDefaultAlloc(void);
 
 bool Log_Init(void);
 void Log_Shutdown(void);
-void Log_Write(const logtype_t type, const char *msg, ...);
-void Log_WriteSeq(const logtype_t type, const char *msg, ...);
-void Log_WriteLargeSeq(const logtype_t type, const char *msg, ...);
+void Log_Write(const logtype_t type, const char *msg);
+void Log_Writef(const logtype_t type, const char *msg, ...);
+void Log_WriteLarge(const logtype_t type, const char *msg);
+void Log_WriteLargef(const logtype_t type, const char *msg, ...);
 
 bool MemCache_Init(void);
 void MemCache_Shutdown(void);

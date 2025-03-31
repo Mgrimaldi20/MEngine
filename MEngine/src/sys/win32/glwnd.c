@@ -57,7 +57,7 @@ static glwndproc_t GetWGLProcAddress(const char *extension)
 	glwndproc_t proc = (glwndproc_t)wglGetProcAddress(extension);
 	if (!proc)
 	{
-		Log_Write(LOG_INFO, "Could not get WGL proc address for %s", extension);
+		Log_Writef(LOG_INFO, "Could not get WGL proc address for %s", extension);
 		return(NULL);
 	}
 
@@ -145,7 +145,7 @@ static void GetWGLExtensions(HDC hdc)
 		static bool printed = false;
 		if (!printed)
 		{
-			Log_WriteSeq(LOG_INFO, "WGL extensions: %s", win32state.extstr);	// just checking
+			Log_Writef(LOG_INFO, "WGL extensions: %s", win32state.extstr);	// just checking
 			printed = true;
 		}
 	}
@@ -218,14 +218,14 @@ static bool InitOpenGL(glwndparams_t params)
 {
 	if (win32state.hdc != NULL)
 	{
-		Log_WriteSeq(LOG_ERROR, "%s: Non-NULL HDC already exists: %lld", __func__, win32state.hdc);
+		Log_Writef(LOG_ERROR, "%s: Non-NULL HDC already exists: %lld", __func__, win32state.hdc);
 		return(false);
 	}
 
 	win32state.hdc = GetDC(win32state.hwnd);
 	if (!win32state.hdc)
 	{
-		Log_WriteSeq(LOG_ERROR, "%s: Could not get HDC", __func__);
+		Log_Writef(LOG_ERROR, "%s: Could not get HDC", __func__);
 		return(false);
 	}
 
@@ -250,11 +250,11 @@ static bool InitOpenGL(glwndparams_t params)
 
 		if (!wglChoosePixelFormatARB(win32state.hdc, iattributes, fattributes, 1, &win32state.pixelformat, &numformats))
 		{
-			Log_WriteSeq(LOG_ERROR, "%s: Could not choose pixel format", __func__);
+			Log_Writef(LOG_ERROR, "%s: Could not choose pixel format", __func__);
 			return(false);
 		}
 		
-		Log_WriteSeq(LOG_INFO, "Using wglChoosePixelFormatARB, PIXELFORMAT %d selected", win32state.pixelformat);
+		Log_Writef(LOG_INFO, "Using wglChoosePixelFormatARB, PIXELFORMAT %d selected", win32state.pixelformat);
 	}
 
 	else
@@ -290,29 +290,29 @@ static bool InitOpenGL(glwndparams_t params)
 		};
 
 		win32state.pixelformat = ChoosePixelFormat(win32state.hdc, &pfd);
-		Log_WriteSeq(LOG_INFO, "Using ChoosePixelFormat, PIXELFORMAT %d selected", win32state.pixelformat);
+		Log_Writef(LOG_INFO, "Using ChoosePixelFormat, PIXELFORMAT %d selected", win32state.pixelformat);
 	}
 
 	if (!win32state.pixelformat)
 	{
-		Log_WriteSeq(LOG_ERROR, "%s: Could not choose Pixel Format", __func__);
+		Log_Writef(LOG_ERROR, "%s: Could not choose Pixel Format", __func__);
 		return(false);
 	}
 
 	if (!DescribePixelFormat(win32state.hdc, win32state.pixelformat, sizeof(win32state.pfd), &win32state.pfd))
 	{
-		Log_WriteSeq(LOG_ERROR, "%s: Failed to describe Pixel Format", __func__);
+		Log_Writef(LOG_ERROR, "%s: Failed to describe Pixel Format", __func__);
 		return(false);
 	}
 
 	if (!SetPixelFormat(win32state.hdc, win32state.pixelformat, &win32state.pfd))
 	{
-		Log_WriteSeq(LOG_ERROR, "%s: Could not set Pixel Format", __func__);
+		Log_Writef(LOG_ERROR, "%s: Could not set Pixel Format", __func__);
 		return(false);
 	}
 
 	// setup OpenGL stuff
-	Log_WriteSeq(LOG_INFO, "Creating OpenGL context...");
+	Log_Write(LOG_INFO, "Creating OpenGL context...");
 
 	int glattribs[] =
 	{
@@ -330,20 +330,20 @@ static bool InitOpenGL(glwndparams_t params)
 
 	if (!wglCreateContextAttribsARB)
 	{
-		Log_Write(LOG_ERROR, "%s: Could not call wglCreateContextAttribsARB, function pointer is NULL", __func__);
+		Log_Writef(LOG_ERROR, "%s: Could not call wglCreateContextAttribsARB, function pointer is NULL", __func__);
 		return(false);
 	}
 
 	win32state.hglrc = wglCreateContextAttribsARB(win32state.hdc, NULL, glattribs);
 	if (!win32state.hglrc)
 	{
-		Log_WriteSeq(LOG_ERROR, "%s: Could not create OpenGL context", __func__);
+		Log_Writef(LOG_ERROR, "%s: Could not create OpenGL context", __func__);
 		return(false);
 	}
 
 	if (!wglMakeCurrent(win32state.hdc, win32state.hglrc))
 	{
-		Log_WriteSeq(LOG_ERROR, "%s: Could not make OpenGL context current", __func__);
+		Log_Writef(LOG_ERROR, "%s: Could not make OpenGL context current", __func__);
 		return(false);
 	}
 
@@ -377,11 +377,11 @@ static void CreateWndClasses(void)
 
 	if (!RegisterClassEx(&wc))
 	{
-		Log_WriteSeq(LOG_ERROR, "%s: Could not register window class", __func__);
+		Log_Writef(LOG_ERROR, "%s: Could not register window class", __func__);
 		win32state.wndclassregistered = false;
 	}
 
-	Log_WriteSeq(LOG_INFO, "Registered window class");
+	Log_Write(LOG_INFO, "Registered window class");
 
 	wc = (WNDCLASSEX)
 	{
@@ -401,11 +401,11 @@ static void CreateWndClasses(void)
 
 	if (!RegisterClassEx(&wc))
 	{
-		Log_WriteSeq(LOG_ERROR, "%s: Could not register fake window class", __func__);
+		Log_Writef(LOG_ERROR, "%s: Could not register fake window class", __func__);
 		win32state.wndclassregistered = false;
 	}
 
-	Log_WriteSeq(LOG_INFO, "Registered fake window class");
+	Log_Write(LOG_INFO, "Registered fake window class");
 	win32state.wndclassregistered = true;
 }
 
@@ -531,7 +531,7 @@ static bool SetFullScreen(glwndparams_t params)
 			&& (int)dmtest.dmBitsPerPel == 32
 			&& (int)dmtest.dmDisplayFrequency == params.refreshrate)
 		{
-			Log_WriteSeq(LOG_INFO, "Selected display mode %dx%d @ %dHz is valid", dmtest.dmPelsWidth, dmtest.dmPelsHeight, dmtest.dmDisplayFrequency);
+			Log_Writef(LOG_INFO, "Selected display mode %dx%d @ %dHz is valid", dmtest.dmPelsWidth, dmtest.dmPelsHeight, dmtest.dmDisplayFrequency);
 			validmode = true;
 			break;
 		}
@@ -541,7 +541,7 @@ static bool SetFullScreen(glwndparams_t params)
 
 	if (!validmode)
 	{
-		Log_WriteSeq(LOG_ERROR, "%s: No valid display mode found", __func__);
+		Log_Writef(LOG_ERROR, "%s: No valid display mode found", __func__);
 		return(false);
 	}
 
@@ -558,7 +558,7 @@ static bool SetFullScreen(glwndparams_t params)
 
 	if (ChangeDisplaySettings(&dm, CDS_FULLSCREEN) == DISP_CHANGE_SUCCESSFUL)
 	{
-		Log_WriteSeq(LOG_INFO, "Changed display settings to %dx%d @ %dHz", dm.dmPelsWidth, dm.dmPelsHeight, dm.dmDisplayFrequency);
+		Log_Writef(LOG_INFO, "Changed display settings to %dx%d @ %dHz", dm.dmPelsWidth, dm.dmPelsHeight, dm.dmDisplayFrequency);
 		return(true);
 	}
 
@@ -575,7 +575,7 @@ static bool SetFullScreen(glwndparams_t params)
 		{
 			if (ChangeDisplaySettings(&dm, CDS_FULLSCREEN) == DISP_CHANGE_SUCCESSFUL)
 			{
-				Log_WriteSeq(LOG_INFO, "Changed display settings to %dx%d @ %dHz", dm.dmPelsWidth, dm.dmPelsHeight, dm.dmDisplayFrequency);
+				Log_Writef(LOG_INFO, "Changed display settings to %dx%d @ %dHz", dm.dmPelsWidth, dm.dmPelsHeight, dm.dmDisplayFrequency);
 				return(true);
 			}
 		}
@@ -583,7 +583,7 @@ static bool SetFullScreen(glwndparams_t params)
 		mode++;
 	}
 
-	Log_WriteSeq(LOG_ERROR, "%s: Could not set fullscreen mode", __func__);
+	Log_Writef(LOG_ERROR, "%s: Could not set fullscreen mode", __func__);
 	return(false);
 }
 
@@ -610,7 +610,7 @@ bool GLWnd_Init(glwndparams_t params)
 
 	if (win32state.desktopbpp < 32 && !params.fullscreen)
 	{
-		Log_WriteSeq(LOG_ERROR, "%s: Desktop is not 32bpp, windowed mode requires 32bpp", __func__);
+		Log_Writef(LOG_ERROR, "%s: Desktop is not 32bpp, windowed mode requires 32bpp", __func__);
 		return(false);
 	}
 
@@ -618,21 +618,21 @@ bool GLWnd_Init(glwndparams_t params)
 	if ((params.refreshrate == 0) || (params.refreshrate > win32state.desktoprefresh))
 	{
 		params.refreshrate = win32state.desktoprefresh;
-		Log_WriteSeq(LOG_WARN, "Could not set refresh rate. Refresh rate set to desktop refresh rate: %d", params.refreshrate);
+		Log_Writef(LOG_WARN, "Could not set refresh rate. Refresh rate set to desktop refresh rate: %d", params.refreshrate);
 	}
 
 	if ((params.width == 0) || (params.width > win32state.desktopwidth))
 	{
 		params.width = win32state.desktopwidth;
 		glstate.width = win32state.desktopwidth;
-		Log_WriteSeq(LOG_WARN, "Could not set window width. Width set to desktop width: %d", params.width);
+		Log_Writef(LOG_WARN, "Could not set window width. Width set to desktop width: %d", params.width);
 	}
 
 	if ((params.height == 0) || (params.height > win32state.desktopheight))
 	{
 		params.height = win32state.desktopheight;
 		glstate.height = win32state.desktopheight;
-		Log_WriteSeq(LOG_WARN, "Could not set window height. Height set to desktop height: %d", params.height);
+		Log_Writef(LOG_WARN, "Could not set window height. Height set to desktop height: %d", params.height);
 	}
 
 	CreateWndClasses();
@@ -659,7 +659,7 @@ bool GLWnd_Init(glwndparams_t params)
 	if (!EMGL_Init("opengl32.dll"))	// initialize the gl function calls and load the OpenGL library
 		return(false);
 
-	Log_WriteSeq(LOG_INFO, "OpenGL initalised and created window");
+	Log_Write(LOG_INFO, "OpenGL initalised and created window");
 
 	return(true);
 }
@@ -670,7 +670,7 @@ bool GLWnd_Init(glwndparams_t params)
 */
 void GLWnd_Shutdown(void)
 {
-	Log_WriteSeq(LOG_INFO, "Shutting down OpenGL system");
+	Log_Write(LOG_INFO, "Shutting down OpenGL system");
 
 	wglMakeCurrent(NULL, NULL);
 
@@ -799,7 +799,7 @@ bool GLWnd_ChangeScreenParams(glwndparams_t params)
 	);
 
 	bool ret = ChangeDisplaySettings(&dm, params.fullscreen ? CDS_FULLSCREEN : 0) == DISP_CHANGE_SUCCESSFUL;
-	Log_WriteSeq(LOG_INFO, "Changed display settings to %dx%d @ %dHz", dm.dmPelsWidth, dm.dmPelsHeight, dm.dmDisplayFrequency);
+	Log_Writef(LOG_INFO, "Changed display settings to %dx%d @ %dHz", dm.dmPelsWidth, dm.dmPelsHeight, dm.dmDisplayFrequency);
 	return(ret);
 }
 
@@ -860,7 +860,7 @@ void *GLWnd_GetProcAddressGL(void *dllhandle, const char *procname)
 		proc = Sys_GetProcAddress(dllhandle, procname);
 		if (!proc)
 		{
-			Log_Write(LOG_ERROR, "Could not get proc address for %s", procname);
+			Log_Writef(LOG_ERROR, "Could not get proc address for %s", procname);
 			return(NULL);
 		}
 	}

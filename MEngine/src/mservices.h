@@ -40,9 +40,10 @@ typedef void (*cmdfunction_t)(const cmdargs_t *args);
 
 typedef struct		// logging service
 {
-	void (*Write)(logtype_t type, const char *msg, ...);			// write a log message MT
-	void (*WriteSeq)(logtype_t type, const char *msg, ...);			// write a log message sequentially
-	void (*WriteLargeSeq)(logtype_t type, const char *msg, ...);	// write a log over the max log length, will allocte heap memory
+	void (*Write)(logtype_t type, const char *msg);				// write a log message
+	void (*Writef)(logtype_t type, const char *msg, ...);		// write a formatted log message
+	void (*WriteLarge)(logtype_t type, const char *msg);		// write a log over the max log length, will allocte heap memory
+	void (*WriteLargef)(logtype_t type, const char *msg, ...);	// write a formatted log over the max log length, will allocte heap memory
 } log_t;
 
 typedef struct		// memory cache allocator and manager
@@ -117,7 +118,7 @@ typedef struct		// system services
 
 typedef struct
 {
-	const char *version;					// version of the game
+	int version;							// version of the game
 	const char *gamename;					// name of the game used by the engine
 	char iconpath[SYS_MAX_PATH];			// games icon path
 	char smiconpath[SYS_MAX_PATH];			// games icon path for small icon
@@ -129,7 +130,7 @@ typedef struct
 
 typedef struct
 {
-	const char *version;
+	int version;
 	log_t *log;
 	memcache_t *memcache;
 	cmdsystem_t *cmdsystem;

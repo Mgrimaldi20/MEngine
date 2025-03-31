@@ -90,7 +90,7 @@ void Event_Shutdown(void)
 	if (!initialized)
 		return;
 
-	Log_WriteSeq(LOG_INFO, "Shutting down event system");
+	Log_Write(LOG_INFO, "Shutting down event system");
 
 	initialized = false;
 }
@@ -109,7 +109,7 @@ void Event_QueueEvent(const eventtype_t type, int var1, int var2)
 	{
 		if ((currentframe - lastlogframe + UINT_MAX) % UINT_MAX >= DEF_LOG_FRAME_INTERVAL)
 		{
-			Log_Write(LOG_WARN, "Event queue overflow, discarding events: type: %d, evars: %d, %d", type, var1, var2);
+			Log_Writef(LOG_WARN, "Event queue overflow, discarding events: type: %d, evars: %d, %d", type, var1, var2);
 			lastlogframe = currentframe;
 		}
 

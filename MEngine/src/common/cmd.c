@@ -103,7 +103,7 @@ static void ExecuteCommand(const char *cmdstr)
 	{
 		if (args.argc > CMD_MAX_ARGS)
 		{
-			Log_Write(LOG_WARN, "Failed to execute command, too many arguments: %s", cmdstr);
+			Log_Writef(LOG_WARN, "Failed to execute command, too many arguments: %s", cmdstr);
 			return;
 		}
 
@@ -155,7 +155,7 @@ static void ExecuteCommand(const char *cmdstr)
 	cmd_t *cmd = FindCommand(args.argv[0]);
 	if (!cmd)
 	{
-		Log_Write(LOG_WARN, "Failed to execute command, command not found: %s", args.argv[0]);
+		Log_Writef(LOG_WARN, "Failed to execute command, command not found: %s", args.argv[0]);
 		return;
 	}
 
@@ -200,7 +200,7 @@ bool Cmd_Init(void)
 	cmdmap = MemCache_Alloc(sizeof(*cmdmap));
 	if (!cmdmap)
 	{
-		Log_WriteSeq(LOG_ERROR, "Failed to allocate memory for command map");
+		Log_Write(LOG_ERROR, "Failed to allocate memory for command map");
 		return(false);
 	}
 
@@ -210,7 +210,7 @@ bool Cmd_Init(void)
 	cmdmap->cmds = MemCache_Alloc(sizeof(*cmdmap->cmds) * cmdmap->capacity);
 	if (!cmdmap->cmds)
 	{
-		Log_WriteSeq(LOG_ERROR, "Failed to allocate memory for command map entries");
+		Log_Write(LOG_ERROR, "Failed to allocate memory for command map entries");
 		MemCache_Free(cmdmap);
 		return(false);
 	}
@@ -234,7 +234,7 @@ void Cmd_Shutdown(void)
 	if (!initialized)
 		return;
 
-	Log_WriteSeq(LOG_INFO, "Shutting down command system");
+	Log_Write(LOG_INFO, "Shutting down command system");
 
 	for (size_t i=0; i<cmdmap->capacity; i++)
 	{
@@ -278,14 +278,14 @@ void Cmd_RegisterCommand(const char *name, cmdfunction_t function, const char *d
 
 	if (FindCommand(name))		// if the command already exists, dont register it
 	{
-		Log_Write(LOG_WARN, "Failed to register command, command already exists: %s", name);
+		Log_Writef(LOG_WARN, "Failed to register command, command already exists: %s", name);
 		return;
 	}
 
 	cmd_t *cmd = MemCache_Alloc(sizeof(*cmd));
 	if (!cmd)
 	{
-		Log_Write(LOG_ERROR, "Failed to allocate memory for command: %s", name);
+		Log_Writef(LOG_ERROR, "Failed to allocate memory for command: %s", name);
 		return;
 	}
 
@@ -296,7 +296,7 @@ void Cmd_RegisterCommand(const char *name, cmdfunction_t function, const char *d
 	cmdentry_t *entry = MemCache_Alloc(sizeof(*entry));
 	if (!entry)
 	{
-		Log_Write(LOG_ERROR, "Failed to allocate memory for command entry: %s", name);
+		Log_Writef(LOG_ERROR, "Failed to allocate memory for command entry: %s", name);
 		MemCache_Free(cmd);
 		return;
 	}
@@ -434,7 +434,7 @@ void Cmd_BufferCommand(const cmdexecution_t exec, const char *cmd)
 			break;
 
 		default:
-			Log_Write(LOG_WARN, "Failed to buffer command, invalid command execution type: %d", exec);
+			Log_Writef(LOG_WARN, "Failed to buffer command, invalid command execution type: %d", exec);
 			break;
 	}
 }

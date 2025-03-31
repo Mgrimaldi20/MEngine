@@ -93,25 +93,25 @@ static bool HandleConversionErrors(const char *value, const char *end)
 {
 	if (value == end)
 	{
-		Log_Write(LOG_ERROR, "Failed to convert string to int: %s", value);
+		Log_Writef(LOG_ERROR, "Failed to convert string to int: %s", value);
 		return(false);
 	}
 
 	if (errno == ERANGE)
 	{
-		Log_Write(LOG_ERROR, "%s: Failed to convert string to int: %s", strerror(errno), value);
+		Log_Writef(LOG_ERROR, "%s: Failed to convert string to int: %s", strerror(errno), value);
 		return(false);
 	}
 
 	if ((errno == 0) && end && (end != 0) && (strcmp(end, "") != 0))
 	{
-		Log_Write(LOG_ERROR, "Invalid characters in string, additional characters remain: %s", value);
+		Log_Writef(LOG_ERROR, "Invalid characters in string, additional characters remain: %s", value);
 		return(false);
 	}
 
 	if (errno != 0)
 	{
-		Log_Write(LOG_ERROR, "%s: An error occured: %s", value, strerror(errno));
+		Log_Writef(LOG_ERROR, "%s: An error occured: %s", value, strerror(errno));
 		return(false);
 	}
 
@@ -124,7 +124,7 @@ static bool HandleConversionErrors(const char *value, const char *end)
 */
 static void ListAllCvars(void)
 {
-	Log_WriteSeq(LOG_INFO, "\t\tCvar Dump [number of cvars: %zu, cvar map capacity: %zu]", cvarmap->numcvars, cvarmap->capacity);
+	Log_Writef(LOG_INFO, "\t\tCvar Dump [number of cvars: %zu, cvar map capacity: %zu]", cvarmap->numcvars, cvarmap->capacity);
 
 	size_t numcvars = 0;
 	for (size_t i=0; i<cvarmap->capacity; i++)
@@ -136,19 +136,19 @@ static void ListAllCvars(void)
 			switch (cvar->type)
 			{
 				case CVAR_BOOL:
-					Log_WriteSeq(LOG_INFO, "\t\t\tCvar: %s, Value: %d, Type: %d, Flags: %llu Description: %s", cvar->name, cvar->value.b, cvar->type, cvar->flags, cvar->description);
+					Log_Writef(LOG_INFO, "\t\t\tCvar: %s, Value: %d, Type: %d, Flags: %llu Description: %s", cvar->name, cvar->value.b, cvar->type, cvar->flags, cvar->description);
 					break;
 
 				case CVAR_INT:
-					Log_WriteSeq(LOG_INFO, "\t\t\tCvar: %s, Value: %d, Type: %d, Flags: %llu, Description: %s", cvar->name, cvar->value.i, cvar->type, cvar->flags, cvar->description);
+					Log_Writef(LOG_INFO, "\t\t\tCvar: %s, Value: %d, Type: %d, Flags: %llu, Description: %s", cvar->name, cvar->value.i, cvar->type, cvar->flags, cvar->description);
 					break;
 
 				case CVAR_FLOAT:
-					Log_WriteSeq(LOG_INFO, "\t\t\tCvar: %s, Value: %f, Type: %d, Flags: %llu, Description: %s", cvar->name, cvar->value.f, cvar->type, cvar->flags, cvar->description);
+					Log_Writef(LOG_INFO, "\t\t\tCvar: %s, Value: %f, Type: %d, Flags: %llu, Description: %s", cvar->name, cvar->value.f, cvar->type, cvar->flags, cvar->description);
 					break;
 
 				case CVAR_STRING:
-					Log_WriteSeq(LOG_INFO, "\t\t\tCvar: %s, Value: %s, Type: %d, Flags: %llu, Description: %s", cvar->name, cvar->value.s, cvar->type, cvar->flags, cvar->description);
+					Log_Writef(LOG_INFO, "\t\t\tCvar: %s, Value: %s, Type: %d, Flags: %llu, Description: %s", cvar->name, cvar->value.s, cvar->type, cvar->flags, cvar->description);
 					break;
 			}
 
@@ -157,7 +157,7 @@ static void ListAllCvars(void)
 		}
 	}
 
-	Log_WriteSeq(LOG_INFO, "\t\tEnd of Cvar Dump");
+	Log_Write(LOG_INFO, "\t\tEnd of Cvar Dump");
 }
 
 /*
@@ -274,13 +274,13 @@ static void ReadCvarsFromFile(FILE *infile, const char *filename)
 
 		if (!cmdname)
 		{
-			Log_WriteSeq(LOG_ERROR, "Failed to read the command name from file: %s", filename);
+			Log_Writef(LOG_ERROR, "Failed to read the command name from file: %s", filename);
 			continue;
 		}
 
 		if (!args)
 		{
-			Log_WriteSeq(LOG_ERROR, "Failed to read the arguments from file: %s", filename);
+			Log_Writef(LOG_ERROR, "Failed to read the arguments from file: %s", filename);
 			continue;
 		}
 
@@ -289,7 +289,7 @@ static void ReadCvarsFromFile(FILE *infile, const char *filename)
 
 		if (!GetNameValue(args, Sys_Strlen(args, sizeof(line) - (cmdname - line)), name, value))
 		{
-			Log_WriteSeq(LOG_ERROR, "Failed to read cvar from file: %s", filename);
+			Log_Writef(LOG_ERROR, "Failed to read cvar from file: %s", filename);
 			continue;
 		}
 
@@ -322,7 +322,7 @@ static cvar_t *RegisterCvar(const char *name, const cvarvalue_t value, const cva
 	cvar_t *existing = Cvar_Find(name);	// check if the cvar already exists and update its params if it does
 	if (existing)
 	{
-		Log_Write(LOG_INFO, "Cvar already exists: (%s): updating new parameters", name);
+		Log_Writef(LOG_INFO, "Cvar already exists: (%s): updating new parameters", name);
 		existing->flags = flags;
 		existing->description = description;
 		return(existing);
@@ -331,14 +331,14 @@ static cvar_t *RegisterCvar(const char *name, const cvarvalue_t value, const cva
 	cvar_t *cvar = MemCache_Alloc(sizeof(*cvar));
 	if (!cvar)
 	{
-		Log_Write(LOG_ERROR, "Failed to allocate memory for cvar: %s", name);
+		Log_Writef(LOG_ERROR, "Failed to allocate memory for cvar: %s", name);
 		return(NULL);
 	}
 
 	char *dupname = MemCache_Alloc(CVAR_MAX_STR_LEN);
 	if (!dupname)
 	{
-		Log_Write(LOG_ERROR, "Failed to allocate memory for cvar name: %s", dupname);
+		Log_Writef(LOG_ERROR, "Failed to allocate memory for cvar name: %s", dupname);
 		MemCache_Free(cvar);
 		return(NULL);
 	}
@@ -354,7 +354,7 @@ static cvar_t *RegisterCvar(const char *name, const cvarvalue_t value, const cva
 	cvarentry_t *entry = MemCache_Alloc(sizeof(*entry));
 	if (!entry)
 	{
-		Log_Write(LOG_ERROR, "Failed to allocate memory for cvar entry: %s", name);
+		Log_Writef(LOG_ERROR, "Failed to allocate memory for cvar entry: %s", name);
 		MemCache_Free(cvar);
 		MemCache_Free(dupname);
 		return(NULL);
@@ -430,12 +430,12 @@ static void Seta_Cmd(const cmdargs_t *args)
 {
 	if (args->argc != 3)
 	{
-		Log_Write(LOG_INFO, "Usage: %s [cvarname] \"[value]\"", args->argv[0]);
+		Log_Writef(LOG_INFO, "Usage: %s [cvarname] \"[value]\"", args->argv[0]);
 		return;
 	}
 
 	if (!Cvar_RegisterString(args->argv[1], args->argv[2], CVAR_NONE, ""))
-		Log_Write(LOG_ERROR, "Failed to set cvar: %s", args->argv[1]);
+		Log_Writef(LOG_ERROR, "Failed to set cvar: %s", args->argv[1]);
 }
 
 /*
@@ -448,7 +448,7 @@ static void Seti_Cmd(const cmdargs_t *args)
 {
 	if (args->argc != 3)
 	{
-		Log_Write(LOG_INFO, "Usage: %s [cvarname] \"[value]\"", args->argv[0]);
+		Log_Writef(LOG_INFO, "Usage: %s [cvarname] \"[value]\"", args->argv[0]);
 		return;
 	}
 
@@ -459,7 +459,7 @@ static void Seti_Cmd(const cmdargs_t *args)
 	HandleConversionErrors(args->argv[2], end);
 
 	if (!Cvar_RegisterInt(args->argv[1], castval, CVAR_NONE, ""))
-		Log_Write(LOG_ERROR, "Failed to set cvar: %s", args->argv[1]);
+		Log_Writef(LOG_ERROR, "Failed to set cvar: %s", args->argv[1]);
 }
 
 /*
@@ -472,7 +472,7 @@ static void Setf_Cmd(const cmdargs_t *args)
 {
 	if (args->argc != 3)
 	{
-		Log_Write(LOG_INFO, "Usage: %s [cvarname] \"[value]\"", args->argv[0]);
+		Log_Writef(LOG_INFO, "Usage: %s [cvarname] \"[value]\"", args->argv[0]);
 		return;
 	}
 
@@ -483,7 +483,7 @@ static void Setf_Cmd(const cmdargs_t *args)
 	HandleConversionErrors(args->argv[2], end);
 
 	if (!Cvar_RegisterFloat(args->argv[1], castval, CVAR_NONE, ""))
-		Log_Write(LOG_ERROR, "Failed to set cvar: %s", args->argv[1]);
+		Log_Writef(LOG_ERROR, "Failed to set cvar: %s", args->argv[1]);
 }
 
 /*
@@ -496,7 +496,7 @@ static void Setb_Cmd(const cmdargs_t *args)
 {
 	if (args->argc != 3)
 	{
-		Log_Write(LOG_INFO, "Usage: %s [cvarname] \"[value]\"", args->argv[0]);
+		Log_Writef(LOG_INFO, "Usage: %s [cvarname] \"[value]\"", args->argv[0]);
 		return;
 	}
 
@@ -507,7 +507,7 @@ static void Setb_Cmd(const cmdargs_t *args)
 	HandleConversionErrors(args->argv[2], end);
 
 	if (!Cvar_RegisterBool(args->argv[1], castval, CVAR_NONE, ""))
-		Log_Write(LOG_ERROR, "Failed to set cvar: %s", args->argv[1]);
+		Log_Writef(LOG_ERROR, "Failed to set cvar: %s", args->argv[1]);
 }
 
 /*
@@ -529,7 +529,7 @@ bool Cvar_Init(void)
 	cvarmap = MemCache_Alloc(sizeof(*cvarmap));
 	if (!cvarmap)
 	{
-		Log_WriteSeq(LOG_ERROR, "Failed to allocate memory for cvar map");
+		Log_Write(LOG_ERROR, "Failed to allocate memory for cvar map");
 		fclose(cvarfile);
 		return(false);
 	}
@@ -540,7 +540,7 @@ bool Cvar_Init(void)
 	cvarmap->cvars = MemCache_Alloc(sizeof(*cvarmap->cvars) * cvarmap->capacity);
 	if (!cvarmap->cvars)
 	{
-		Log_WriteSeq(LOG_ERROR, "Failed to allocate memory for cvar map entries");
+		Log_Write(LOG_ERROR, "Failed to allocate memory for cvar map entries");
 		MemCache_Free(cvarmap);
 		fclose(cvarfile);
 		return(false);
@@ -560,7 +560,7 @@ bool Cvar_Init(void)
 		cvarfile = fopen(cvarfullname, "w+");	// try to just recreate file, will lose cvars if file cant be read properly
 		if (!cvarfile)
 		{
-			Log_WriteSeq(LOG_ERROR, "Cvar file does not exist and cannot be recreated: %s", cvarfullname);
+			Log_Writef(LOG_ERROR, "Cvar file does not exist and cannot be recreated: %s", cvarfullname);
 			return(false);
 		}
 
@@ -571,7 +571,7 @@ bool Cvar_Init(void)
 	cvarfile = fopen(cvarfullname, "r");
 	if (!cvarfile)
 	{
-		Log_WriteSeq(LOG_ERROR, "Failed to open cvar file: %s", cvarfullname);
+		Log_Writef(LOG_ERROR, "Failed to open cvar file: %s", cvarfullname);
 		return(false);
 	}
 
@@ -586,11 +586,11 @@ bool Cvar_Init(void)
 		FILE *overridesfile = fopen(overridefilename, "r");
 		if (!overridesfile)
 		{
-			Log_WriteSeq(LOG_ERROR, "Failed to open overrides file: %s", overridefilename);
+			Log_Writef(LOG_ERROR, "Failed to open overrides file: %s", overridefilename);
 			return(false);
 		}
 
-		Log_WriteSeq(LOG_INFO, "Reading data from the overrides file: %s", overridefilename);
+		Log_Writef(LOG_INFO, "Reading data from the overrides file: %s", overridefilename);
 
 		ReadCvarsFromFile(overridesfile, overridefilename);
 
@@ -612,7 +612,7 @@ void Cvar_Shutdown(void)
 	if (!initialized)
 		return;
 
-	Log_WriteSeq(LOG_INFO, "Shutting down cvar system");
+	Log_Write(LOG_INFO, "Shutting down cvar system");
 
 #if defined(MENGINE_DEBUG)
 	ListAllCvars();
@@ -623,7 +623,7 @@ void Cvar_Shutdown(void)
 	cvarfile = fopen(cvarfullname, "w");
 	if (!cvarfile)
 	{
-		Log_WriteSeq(LOG_ERROR, "Failed to open cvar file: %s", cvarfullname);
+		Log_Writef(LOG_ERROR, "Failed to open cvar file: %s", cvarfullname);
 		return;
 	}
 
