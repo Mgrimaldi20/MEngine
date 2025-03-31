@@ -75,7 +75,7 @@ void FileSys_Shutdown(void)
 	if (!initialized)
 		return;
 
-	Log_WriteSeq(LOG_INFO, "Shutting down filesystem");
+	Log_Write(LOG_INFO, "Shutting down filesystem");
 
 	initialized = false;
 }
@@ -165,7 +165,7 @@ filedata_t *FileSys_ListFiles(unsigned int *numfiles, const char *directory, con
 
 			if ((dirlen + filelen) > SYS_MAX_PATH)
 			{
-				Log_Write(LOG_WARN, "File path too long: %s/%s", directory, filename);
+				Log_Writef(LOG_WARN, "File path too long: %s/%s", directory, filename);
 				continue;
 			}
 

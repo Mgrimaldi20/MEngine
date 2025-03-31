@@ -21,12 +21,12 @@ bool EMGL_Init(const char *dllname)
 	if (gldllhandle)
 		return(true);
 
-	Log_Write(LOG_INFO, "Loading OpenGL library: %s", dllname);
+	Log_Writef(LOG_INFO, "Loading OpenGL library: %s", dllname);
 
 	gldllhandle = Sys_LoadDLL(dllname);
 	if (!gldllhandle)
 	{
-		Log_Write(LOG_INFO, "Failed to load OpenGL library: %s", dllname);
+		Log_Writef(LOG_INFO, "Failed to load OpenGL library: %s", dllname);
 		return(false);
 	}
 
@@ -42,7 +42,7 @@ bool EMGL_Init(const char *dllname)
 */
 void EMGL_Shutdown(void)
 {
-	Log_Write(LOG_INFO, "Shutting down OpenGL library");
+	Log_Writef(LOG_INFO, "Shutting down OpenGL library");
 
 	if (gldllhandle)
 	{

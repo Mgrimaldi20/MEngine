@@ -56,26 +56,26 @@ static bool GetVideoModeInfo(int *width, int *height, int mode)
 
 	if (mode == -1)
 	{
-		Log_WriteSeq(LOG_WARN, "Using a custom video mode, might not render correctly if aspect ratio is non standard");
+		Log_Write(LOG_WARN, "Using a custom video mode, might not render correctly if aspect ratio is non standard");
 
 		int w = 0;
 		if (!Cvar_GetInt(rwidth, &w))
 		{
-			Log_WriteSeq(LOG_WARN, "Failed to get r_width cvar, using the default width: %d", R_DEF_WIN_WIDTH);
+			Log_Writef(LOG_WARN, "Failed to get r_width cvar, using the default width: %d", R_DEF_WIN_WIDTH);
 			*width = R_DEF_WIN_WIDTH;
 		}
 
 		int h = 0;
 		if (!Cvar_GetInt(rheight, &h))
 		{
-			Log_WriteSeq(LOG_WARN, "Failed to get r_height cvar, using the default height: %d", R_DEF_WIN_HEIGHT);
+			Log_Writef(LOG_WARN, "Failed to get r_height cvar, using the default height: %d", R_DEF_WIN_HEIGHT);
 			*height = R_DEF_WIN_HEIGHT;
 		}
 
 		*width = w;
 		*height = h;
 
-		Log_WriteSeq(LOG_INFO, "Using custom video mode: %dx%d", *width, *height);
+		Log_Writef(LOG_INFO, "Using custom video mode: %dx%d", *width, *height);
 
 		return(true);
 	}
@@ -83,7 +83,7 @@ static bool GetVideoModeInfo(int *width, int *height, int mode)
 	*width = videomodes[mode].width;
 	*height = videomodes[mode].height;
 
-	Log_WriteSeq(LOG_INFO, "Using video mode: %s", videomodes[mode].mode);
+	Log_Writef(LOG_INFO, "Using video mode: %s", videomodes[mode].mode);
 
 	return(true);
 }
@@ -302,21 +302,21 @@ bool Render_Init(void)
 	bool fullscreen = false;
 	if (!Cvar_GetBool(rfullscreen, &fullscreen))
 	{
-		Log_WriteSeq(LOG_WARN, "Failed to get r_fullscreen cvar, using the default value: %d", R_DEF_FULLSCREEN);
+		Log_Writef(LOG_WARN, "Failed to get r_fullscreen cvar, using the default value: %d", R_DEF_FULLSCREEN);
 		fullscreen = R_DEF_FULLSCREEN;
 	}
 
 	int multisamples = 0;
 	if (!Cvar_GetInt(rmultisamples, &multisamples))
 	{
-		Log_WriteSeq(LOG_WARN, "Failed to get r_multisamples cvar, using the default value: %d", R_DEF_MULTISAMPLES);
+		Log_Writef(LOG_WARN, "Failed to get r_multisamples cvar, using the default value: %d", R_DEF_MULTISAMPLES);
 		multisamples = R_DEF_MULTISAMPLES;
 	}
 
 	int refreshrate = 0;
 	if (!Cvar_GetInt(rrefresh, &refreshrate))
 	{
-		Log_WriteSeq(LOG_WARN, "Failed to get r_refresh cvar, using the default value: %d", R_DEF_REFRESH_RATE);
+		Log_Writef(LOG_WARN, "Failed to get r_refresh cvar, using the default value: %d", R_DEF_REFRESH_RATE);
 		refreshrate = R_DEF_REFRESH_RATE;
 	}
 
@@ -336,27 +336,27 @@ bool Render_Init(void)
 	int vsync = 0;
 	if (!Cvar_GetInt(rvsync, &vsync))
 	{
-		Log_WriteSeq(LOG_WARN, "Failed to get r_vsync cvar, using the default value: %d", R_DEF_VSYNC);
+		Log_Writef(LOG_WARN, "Failed to get r_vsync cvar, using the default value: %d", R_DEF_VSYNC);
 		vsync = R_DEF_VSYNC;
 	}
 
 	float fov = 0.0f;
 	if (!Cvar_GetFloat(rfov, &fov))
 	{
-		Log_WriteSeq(LOG_WARN, "Failed to get r_fov cvar, using the default value: %f", R_DEF_FOV);
+		Log_Writef(LOG_WARN, "Failed to get r_fov cvar, using the default value: %f", R_DEF_FOV);
 		fov = R_DEF_FOV;
 	}
 
 	glstate.fov = (double)fov;
 
 	GLWnd_SetVSync(vsync);
-	Log_WriteSeq(LOG_INFO, "Using VSync, value set: %ld", vsync);
+	Log_Writef(LOG_INFO, "Using VSync, value set: %ld", vsync);
 
 	InitOpenGL();
 
-	Log_WriteSeq(LOG_INFO, "OpenGL version: %s", (const char *)glGetString(GL_VERSION));
-	Log_WriteSeq(LOG_INFO, "OpenGL renderer: %s", (const char *)glGetString(GL_RENDERER));
-	Log_WriteSeq(LOG_INFO, "OpenGL vendor: %s", (const char *)glGetString(GL_VENDOR));
+	Log_Writef(LOG_INFO, "OpenGL version: %s", (const char *)glGetString(GL_VERSION));
+	Log_Writef(LOG_INFO, "OpenGL renderer: %s", (const char *)glGetString(GL_RENDERER));
+	Log_Writef(LOG_INFO, "OpenGL vendor: %s", (const char *)glGetString(GL_VENDOR));
 
 	initialized = true;
 	glstate.initialized = initialized;
@@ -373,7 +373,7 @@ void Render_Shutdown(void)
 	if (!initialized)
 		return;
 
-	Log_WriteSeq(LOG_INFO, "Shutting down rendering system");
+	Log_Write(LOG_INFO, "Shutting down rendering system");
 
 	GLWnd_Shutdown();
 

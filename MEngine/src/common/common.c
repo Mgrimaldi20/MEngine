@@ -103,8 +103,9 @@ static void CreateMServices(void)
 	logsystem = (log_t)
 	{
 		.Write = Log_Write,
-		.WriteSeq = Log_WriteSeq,
-		.WriteLargeSeq = Log_WriteLargeSeq
+		.Writef = Log_Writef,
+		.WriteLarge = Log_WriteLarge,
+		.WriteLargef = Log_WriteLargef
 	};
 
 	memcache = (memcache_t)
@@ -200,21 +201,21 @@ static bool InitGame(void)
 
 	if (!gamedll)
 	{
-		Log_WriteSeq(LOG_ERROR, "Failed to find game DLL name in Cvar system");
+		Log_Write(LOG_ERROR, "Failed to find game DLL name in Cvar system");
 		return(false);
 	}
 
 	char gamedllname[SYS_MAX_PATH] = { 0 };
 	if (!Cvar_GetString(gamedll, gamedllname))
 	{
-		Log_WriteSeq(LOG_ERROR, "Failed to get game DLL name from Cvar system");
+		Log_Write(LOG_ERROR, "Failed to get game DLL name from Cvar system");
 		return(false);
 	}
 
 	gamedllhandle = Sys_LoadDLL(gamedllname);
 	if (!gamedllhandle)
 	{
-		Log_WriteSeq(LOG_ERROR, "Failed to load game DLL: %s", gamedllname);
+		Log_Writef(LOG_ERROR, "Failed to load game DLL: %s", gamedllname);
 		return(false);
 	}
 
@@ -236,21 +237,21 @@ static bool InitGame(void)
 
 	gameservices = *GetMServices(&mservices);
 
-	if (strcmp(gameservices.version, MENGINE_VERSION) != 0)
+	if (gameservices.version != MENGINE_VERSION)
 	{
-		Sys_Error(LOG_ERROR, "Game DLL version and Engine version mismatch: (Game: %s), (Engine: %s)", gameservices.version, MENGINE_VERSION);
+		Sys_Error("Game DLL version and Engine version mismatch: (Game: %d), (Engine: %d)", gameservices.version, MENGINE_VERSION);
 		return(false);
 	}
 
 	if (!Render_Init())
 	{
-		Log_WriteSeq(LOG_ERROR, "Failed to initialize renderer");
+		Log_Write(LOG_ERROR, "Failed to initialize renderer");
 		return(false);
 	}
 
 	if (!gameservices.Init())	// run the games startup code
 	{
-		Log_WriteSeq(LOG_ERROR, "Failed to initialize the game");
+		Log_Write(LOG_ERROR, "Failed to initialize the game");
 		return(false);
 	}
 
@@ -322,12 +323,12 @@ bool Common_Init(void)
 	}
 
 	if (!MemCache_UseCache())
-		Log_WriteSeq(LOG_WARN, "Not enough system memory for the memory cache, using the default allocator");
+		Log_Write(LOG_WARN, "Not enough system memory for the memory cache, using the default allocator");
 
 	else
-		Log_WriteSeq(LOG_INFO, "Memory Cache allocated [bytes: %zu]", MemCache_GetTotalMemory());
+		Log_Writef(LOG_INFO, "Memory Cache allocated [bytes: %zu]", MemCache_GetTotalMemory());
 
-	Log_WriteSeq(LOG_INFO, "Engine initialized successfully...");
+	Log_Write(LOG_INFO, "Engine initialized successfully...");
 
 	return(true);
 }
@@ -338,7 +339,7 @@ bool Common_Init(void)
 */
 void Common_Shutdown(void)
 {
-	Log_WriteSeq(LOG_INFO, "Engine shutting down...");
+	Log_Write(LOG_INFO, "Engine shutting down...");
 
 	ShutdownGame();
 	Event_Shutdown();

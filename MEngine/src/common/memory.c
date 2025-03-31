@@ -81,7 +81,7 @@ static void *DefaultAlloc(size_t size)
 
 	if (memcacheused >= (lastreported + (1024 * 1024))) // report every 1MB
 	{
-		Log_Write(LOG_INFO, "Memory Cache usage [bytes: %zu]", memcacheused);
+		Log_Writef(LOG_INFO, "Memory Cache usage [bytes: %zu]", memcacheused);
 		lastreported = memcacheused;
 	}
 
@@ -133,7 +133,7 @@ static void DefaultFree(void *ptr)
 */
 static void DefaultReset(void)
 {
-	Log_Write(LOG_INFO, "Resetting default allocator [last allocation: %zu bytes]", memcacheused);
+	Log_Writef(LOG_INFO, "Resetting default allocator [last allocation: %zu bytes]", memcacheused);
 
 	taglist_t *current = taglist;
 	while (current)
@@ -158,18 +158,18 @@ static void DefaultReset(void)
 */
 static void DefaultDump(void)
 {
-	Log_WriteSeq(LOG_INFO, "\t\tDefault Allocator Dump [bytes used by the default allocator: %zu]:", memcacheused);
+	Log_Writef(LOG_INFO, "\t\tDefault Allocator Dump [bytes used by the default allocator: %zu]:", memcacheused);
 
 	int count = 0;
 	taglist_t *current = taglist;
 	while (current)
 	{
-		Log_WriteSeq(LOG_INFO, "\t\t\talloc: %d, size: %zu", count, current->size);
+		Log_Writef(LOG_INFO, "\t\t\talloc: %d, size: %zu", count, current->size);
 		current = current->next;
 		count++;
 	}
 
-	Log_WriteSeq(LOG_INFO, "\t\tEnd of Default Allocator Dump");
+	Log_Write(LOG_INFO, "\t\tEnd of Default Allocator Dump");
 }
 
 /*
@@ -275,7 +275,7 @@ static void *CacheAlloc(size_t size)
 
 			if (memcacheused >= (lastreported + (1024 * 1024))) // report every 1MB
 			{
-				Log_Write(LOG_INFO, "Memory Cache usage [bytes: %zu]", memcacheused);
+				Log_Writef(LOG_INFO, "Memory Cache usage [bytes: %zu]", memcacheused);
 				lastreported = memcacheused;
 			}
 
@@ -372,7 +372,7 @@ static void CacheFree(void *ptr)
 */
 static void CacheReset(void)
 {
-	Log_Write(LOG_INFO, "Resetting memory cache [last allocation: %zu bytes]", memcacheused);
+	Log_Writef(LOG_INFO, "Resetting memory cache [last allocation: %zu bytes]", memcacheused);
 
 	freeblock_t *current = freeblocks;
 	while (current)
@@ -418,16 +418,16 @@ static void CacheReset(void)
 */
 static void CacheDump(void)
 {
-	Log_WriteSeq(LOG_INFO, "\t\tMemory Cache Dump [bytes used by the memory cache: %zu]:", memcacheused);
+	Log_Writef(LOG_INFO, "\t\tMemory Cache Dump [bytes used by the memory cache: %zu]:", memcacheused);
 
 	freeblock_t *current = freeblocks;
 	while (current)
 	{
-		Log_WriteSeq(LOG_INFO, "\t\t\tindex: %zu, size: %zu", current->index, current->size);
+		Log_Writef(LOG_INFO, "\t\t\tindex: %zu, size: %zu", current->index, current->size);
 		current = current->next;
 	}
 
-	Log_WriteSeq(LOG_INFO, "\t\tEnd of Memory Cache Dump");
+	Log_Writef(LOG_INFO, "\t\tEnd of Memory Cache Dump");
 }
 
 /*
@@ -545,12 +545,12 @@ void MemCache_Shutdown(void)
 	if (!initialized)
 		return;
 
-	Log_WriteSeq(LOG_INFO, "Shutting down memory cache");
+	Log_Write(LOG_INFO, "Shutting down memory cache");
 
 #if defined(MENGINE_DEBUG)
 	int diff = numallocs - numfrees;
 
-	Log_WriteSeq(LOG_INFO, "\t\tNum allocs: [%d], Num frees: [%d], Difference: [%d] - %s", numallocs, numfrees, diff,
+	Log_Writef(LOG_INFO, "\t\tNum allocs: [%d], Num frees: [%d], Difference: [%d] - %s", numallocs, numfrees, diff,
 		(diff == 0) ? "All allocations have been freed" : "Not all allocations have been freed"
 	);
 

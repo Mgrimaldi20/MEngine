@@ -9,6 +9,7 @@
 
 #define LOG_TIMESTR_LEN 32
 #define LOG_TIME_FMT "%Y-%m-%d %H:%M:%S"
+#define LOG_MSG_FMT "%s %s %s\n"
 #define MAX_LOG_ENTRIES 256
 #define MAX_LOG_FILES 5
 
@@ -17,6 +18,7 @@ typedef struct
 	logtype_t type;
 	time_t time;
 	char msg[LOG_MAX_LEN];
+	char *longmsg;
 } logentry_t;
 
 static const char *logmsgtype[] =
@@ -170,10 +172,16 @@ static void *ProcessLogQueue(void *args)
 				Sys_Localtime(&timeinfo, &entry->time);
 				strftime(timestr, LOG_TIMESTR_LEN, LOG_TIME_FMT, &timeinfo);
 
-				fprintf(logfile, "%s %s %s\n", timestr, logmsgtype[entry->type], entry->msg);
+				if (entry->longmsg)
+				{
+					fprintf(logfile, LOG_MSG_FMT, timestr, logmsgtype[entry->type], entry->longmsg);
+					MemCache_Free(entry->longmsg);
+				}
 
-				if (entry->type == LOG_ERROR)
-					fflush(logfile);
+				else
+					fprintf(logfile, LOG_MSG_FMT, timestr, logmsgtype[entry->type], entry->msg);
+
+				fflush(logfile);
 			}
 
 			logcount = 0;
@@ -192,7 +200,15 @@ static void *ProcessLogQueue(void *args)
 			Sys_Localtime(&timeinfo, &entry->time);
 			strftime(timestr, LOG_TIMESTR_LEN, LOG_TIME_FMT, &timeinfo);
 
-			fprintf(logfile, "%s %s %s\n", timestr, logmsgtype[entry->type], entry->msg);
+			if (entry->longmsg)
+			{
+				fprintf(logfile, LOG_MSG_FMT, timestr, logmsgtype[entry->type], entry->longmsg);
+				MemCache_Free(entry->longmsg);
+			}
+
+			else
+				fprintf(logfile, LOG_MSG_FMT, timestr, logmsgtype[entry->type], entry->msg);
+
 			fflush(logfile);
 
 			logcount--;
@@ -260,7 +276,7 @@ bool Log_Init(void)
 
 	initialized = true;
 
-	Log_WriteSeq(LOG_INFO, "Logs opened, logging started...");
+	Log_Write(LOG_INFO, "Logs opened, logging started...");
 
 	return(true);
 }
@@ -274,7 +290,7 @@ void Log_Shutdown(void)
 	if (!initialized)
 		return;
 
-	Log_WriteSeq(LOG_INFO, "Shutting down logging service...");
+	Log_Write(LOG_INFO, "Shutting down logging service...");
 
 	stopthreads = true;
 
@@ -304,11 +320,38 @@ void Log_Shutdown(void)
 /*
 * Function: Log_Write
 * Writes a log message to the log queue for processing by the log thread
-* 
+*
+* 	type: The type of log message
+* 	msg: The message to log, just a string
+*/
+void Log_Write(const logtype_t type, const char *msg)
+{
+	if ((logcount >= MAX_LOG_ENTRIES) || (!initialized))
+		return;
+
+	Sys_LockMutex(loglock);
+
+	logentry_t *entry = &logqueue[logcount];
+
+	entry->time = time(NULL);
+	entry->type = type;
+	snprintf(entry->msg, LOG_MAX_LEN, msg);
+
+	logcount++;
+
+	Sys_UnlockMutex(loglock);
+	Sys_SignalCondVar(logcond);
+}
+
+/*
+* Function: Log_Write
+* Writes a formatted log message to the log queue for processing by the log thread
+*
 * 	type: The type of log message
 * 	msg: The message to log, the log message format is the same as printf
+*	...: The arguments to the format string
 */
-void Log_Write(const logtype_t type, const char *msg, ...)
+void Log_Writef(const logtype_t type, const char *msg, ...)
 {
 	if ((logcount >= MAX_LOG_ENTRIES) || (!initialized))
 		return;
@@ -328,85 +371,75 @@ void Log_Write(const logtype_t type, const char *msg, ...)
 	logcount++;
 
 	Sys_UnlockMutex(loglock);
-
 	Sys_SignalCondVar(logcond);
 }
 
 /*
-* Function: Log_WriteSeq
-* Writes a log message to the log file sequentially
-* 
+* Function: Log_WriteLarge
+* Writes a log message to the log file, will allocate heap memory for large log messages that are over the max log length
+*
 * 	type: The type of log message
-* 	msg: The message to log, the log message format is the same as printf
+* 	msg: The message to log, just a string
 */
-void Log_WriteSeq(const logtype_t type, const char *msg, ...)
+void Log_WriteLarge(const logtype_t type, const char *msg)
 {
-	if (!initialized)
+	if ((logcount >= MAX_LOG_ENTRIES) || (!initialized))
 		return;
 
 	Sys_LockMutex(loglock);
 
-	struct tm timeinfo;
-	char timestr[LOG_TIMESTR_LEN] = { 0 };
-	char logmsg[LOG_MAX_LEN] = { 0 };
+	logentry_t *entry = &logqueue[logcount];
 
-	time_t timer = time(NULL);
-	Sys_Localtime(&timeinfo, &timer);
-	strftime(timestr, LOG_TIMESTR_LEN, LOG_TIME_FMT, &timeinfo);
+	int len = snprintf(NULL, 0, msg);
 
-	va_list arg;
-	va_start(arg, msg);
-	vsnprintf(logmsg, LOG_MAX_LEN, msg, arg);
-	va_end(arg);
+	entry->time = time(NULL);
+	entry->type = type;
+	entry->longmsg = MemCache_Alloc(len + 1);
 
-	fprintf(logfile, "%s %s %s\n", timestr, logmsgtype[type], logmsg);
+	if (entry->longmsg)
+		snprintf(entry->longmsg, len + 1, msg);
 
-	if (type == LOG_ERROR)
-		fflush(logfile);
+	logcount++;
 
 	Sys_UnlockMutex(loglock);
+	Sys_SignalCondVar(logcond);
 }
 
 /*
-* Function: Log_WriteLargeSeq
-* Writes a log message to the log file sequentially, will allocate heap memory for large log messages that are over the max log length
-* 
+* Function: Log_WriteLargef
+* Writes a formatted log message to the log file, will allocate heap memory for large log messages that are over the max log length
+*
 * 	type: The type of log message
 * 	msg: The message to log, the log message format is the same as printf
+*	...: The arguments to the format string
 */
-void Log_WriteLargeSeq(const logtype_t type, const char *msg, ...)
+void Log_WriteLargef(const logtype_t type, const char *msg, ...)
 {
-	if (!initialized)
+	if ((logcount >= MAX_LOG_ENTRIES) || (!initialized))
 		return;
 
 	Sys_LockMutex(loglock);
+
+	logentry_t *entry = &logqueue[logcount];
 
 	va_list arg;
 	va_start(arg, msg);
 	int len = vsnprintf(NULL, 0, msg, arg);
 	va_end(arg);
 
-	char *logmsg = MemCache_Alloc(len + 1);
-	if (logmsg)
+	entry->time = time(NULL);
+	entry->type = type;
+	entry->longmsg = MemCache_Alloc(len + 1);
+
+	if (entry->longmsg)
 	{
 		va_start(arg, msg);
-		vsnprintf(logmsg, len + 1, msg, arg);
+		vsnprintf(entry->longmsg, len + 1, msg, arg);
 		va_end(arg);
-
-		struct tm timeinfo;
-		char timestr[LOG_TIMESTR_LEN] = { 0 };
-
-		time_t timer = time(NULL);
-		Sys_Localtime(&timeinfo, &timer);
-		strftime(timestr, LOG_TIMESTR_LEN, LOG_TIME_FMT, &timeinfo);
-
-		fprintf(logfile, "%s %s %s\n", timestr, logmsgtype[type], logmsg);
-
-		if (type == LOG_ERROR)
-			fflush(logfile);
-
-		MemCache_Free(logmsg);
 	}
 
+	logcount++;
+
 	Sys_UnlockMutex(loglock);
+	Sys_SignalCondVar(logcond);
 }

@@ -158,7 +158,7 @@ void ShutdownConsole(void)
 
 	if (!FreeConsole())
 	{
-		Log_WriteSeq(LOG_ERROR, "Failed to free the console");	// just log it and move on, no need to force exit, this is prolly happening during shutdown anyway
+		Log_Write(LOG_ERROR, "Failed to free the console");	// just log it and move on, no need to force exit, this is prolly happening during shutdown anyway
 		return;
 	}
 }

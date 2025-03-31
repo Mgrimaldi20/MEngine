@@ -238,7 +238,7 @@ static void SetBinding(const keycode_t key, const char *binding)
 			char *newbinding = MemCache_Alloc(len + 1);
 			if (!newbinding)
 			{
-				Log_WriteSeq(LOG_ERROR, "failed to allocate memory for new key binding");
+				Log_Write(LOG_ERROR, "failed to allocate memory for new key binding");
 				return;
 			}
 
@@ -256,7 +256,7 @@ static void SetBinding(const keycode_t key, const char *binding)
 		keys[key].binding = MemCache_Alloc(len + 1);
 		if (!keys[key].binding)
 		{
-			Log_WriteSeq(LOG_ERROR, "failed to allocate memory for new key binding");
+			Log_Write(LOG_ERROR, "failed to allocate memory for new key binding");
 			return;
 		}
 
@@ -322,14 +322,14 @@ static void Bind_Cmd(const cmdargs_t *args)
 {
 	if (args->argc != 3)
 	{
-		Log_Write(LOG_INFO, "Usage: %s [keyname] [action]", args->argv[0]);
+		Log_Writef(LOG_INFO, "Usage: %s [keyname] [action]", args->argv[0]);
 		return;
 	}
 
 	keycode_t key = GetKeyFromName(args->argv[1]);
 	if (key == KEY_UNKNOWN)
 	{
-		Log_Write(LOG_ERROR, "Failed to bind key, invalid key name: %s", args->argv[1]);
+		Log_Writef(LOG_ERROR, "Failed to bind key, invalid key name: %s", args->argv[1]);
 		return;
 	}
 
@@ -350,7 +350,7 @@ bool Input_Init(void)
 	keys = MemCache_Alloc(sizeof(key_t) * KEY_FINAL);
 	if (!keys)
 	{
-		Log_WriteSeq(LOG_ERROR, "failed to allocate memory for keys");
+		Log_Write(LOG_ERROR, "failed to allocate memory for keys");
 		return(false);
 	}
 
@@ -375,7 +375,7 @@ bool Input_Init(void)
 		bindingsfile = fopen(bindingsfullname, "w+");
 		if (!bindingsfile)
 		{
-			Log_WriteSeq(LOG_ERROR, "bindings file does not exist and cannot be recreated: %s", bindingsfullname);
+			Log_Writef(LOG_ERROR, "bindings file does not exist and cannot be recreated: %s", bindingsfullname);
 			return(false);
 		}
 
@@ -386,7 +386,7 @@ bool Input_Init(void)
 	bindingsfile = fopen(bindingsfullname, "r");
 	if (!bindingsfile)
 	{
-		Log_WriteSeq(LOG_ERROR, "failed to open bindings file: %s", bindingsfullname);
+		Log_Writef(LOG_ERROR, "failed to open bindings file: %s", bindingsfullname);
 		return(false);
 	}
 
@@ -409,12 +409,12 @@ void Input_Shutdown(void)
 	if (!initialized)
 		return;
 
-	Log_WriteSeq(LOG_INFO, "Shutting down input system");
+	Log_Write(LOG_INFO, "Shutting down input system");
 
 	bindingsfile = fopen(bindingsfullname, "w");
 	if (!bindingsfile)
 	{
-		Log_WriteSeq(LOG_ERROR, "failed to open bindings file for writing: %s", bindingsfullname);
+		Log_Writef(LOG_ERROR, "failed to open bindings file for writing: %s", bindingsfullname);
 		return;
 	}
 

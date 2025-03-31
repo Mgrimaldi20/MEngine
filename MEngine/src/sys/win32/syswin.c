@@ -65,7 +65,7 @@ bool Sys_Init(void)
 		| VER_SERVICEPACKMINOR, dwlcondmask))
 		WindowsError();
 
-	Log_WriteSeq(LOG_INFO, "Windows version: %d.%d.%d.%d",
+	Log_Writef(LOG_INFO, "Windows version: %d.%d.%d.%d",
 		win32state.osver.dwMajorVersion,
 		win32state.osver.dwMinorVersion,
 		win32state.osver.wServicePackMajor,
@@ -73,7 +73,7 @@ bool Sys_Init(void)
 	);
 
 	if (Common_IgnoreOSVer())
-		Log_WriteSeq(LOG_WARN, "Ignoring OS version check... "
+		Log_Writef(LOG_WARN, "Ignoring OS version check... "
 			"This code has only been tested on Win10 and version 6.2 "
 			"but should work on older OS versions, use with caution");
 
@@ -83,8 +83,8 @@ bool Sys_Init(void)
 		return(false);
 	}
 
-	Log_WriteSeq(LOG_INFO, "System memory: %lluMB", Sys_GetSystemMemory());
-	Log_WriteSeq(LOG_INFO, "System supports max threads: %lu", Sys_GetMaxThreads());
+	Log_Writef(LOG_INFO, "System memory: %lluMB", Sys_GetSystemMemory());
+	Log_Writef(LOG_INFO, "System supports max threads: %lu", Sys_GetMaxThreads());
 
 	ULONG_PTR lowlimit = 0;
 	ULONG_PTR highlimit = 0;
@@ -93,8 +93,8 @@ bool Sys_Init(void)
 
 	uintmax_t stacksize = (uintmax_t)(highlimit - lowlimit);
 
-	Log_WriteSeq(LOG_INFO, "Thread stack limits: Low: %llu, High: %llu", lowlimit, highlimit);
-	Log_WriteSeq(LOG_INFO, "Stack size: %juMB", stacksize / (1024 * 1024));
+	Log_Writef(LOG_INFO, "Thread stack limits: Low: %llu, High: %llu", lowlimit, highlimit);
+	Log_Writef(LOG_INFO, "Stack size: %juMB", stacksize / (1024 * 1024));
 
 	Cvar_RegisterString("g_gamedll", "DemoGame.dll", CVAR_GAME, "The name of the game DLL for Windows systems");
 	Cvar_RegisterString("g_demogamedll", "DemoGame.dll", CVAR_GAME | CVAR_READONLY, "The name of the game DLL for Windows systems");
@@ -113,7 +113,7 @@ void Sys_Shutdown(void)
 	if (!initialized)
 		return;
 
-	Log_WriteSeq(LOG_INFO, "Shutting down system");
+	Log_Write(LOG_INFO, "Shutting down system");
 
 	initialized = false;
 }
@@ -133,7 +133,7 @@ void Sys_Error(const char *error, ...)
 	vsnprintf(text, LOG_MAX_LEN, error, argptr);
 	va_end(argptr);
 
-	Log_WriteSeq(LOG_ERROR, text);
+	Log_Write(LOG_ERROR, text);
 
 	wchar_t wtext[LOG_MAX_LEN] = { 0 };
 	if (!MultiByteToWideChar(CP_UTF8, 0, text, (int)sizeof(text), wtext, LOG_MAX_LEN))
@@ -214,7 +214,7 @@ void Sys_Stat(const char *filepath, filedata_t *filedata)
 	struct _stat st;
 	if (_stat(filepath, &st) == -1)
 	{
-		Log_Write(LOG_ERROR, "%s, Failed to make a call to stat(): %s", __func__, filepath);
+		Log_Writef(LOG_ERROR, "%s, Failed to make a call to stat(): %s", __func__, filepath);
 		return;
 	}
 
