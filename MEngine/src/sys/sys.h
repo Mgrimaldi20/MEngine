@@ -13,6 +13,7 @@ void Sys_Shutdown(void);
 void Sys_Error(const char *error, ...);
 void Sys_ParseCommandLine(cmdline_t *cmdline);
 
+bool Sys_IsTTY(void);
 bool Sys_Mkdir(const char *path);
 void Sys_Stat(const char *filepath, filedata_t *filedata);
 char *Sys_Strtok(char *string, const char *delimiter, char **context);

@@ -75,7 +75,8 @@ bool Sys_Init(void)
 	if (Common_IgnoreOSVer())
 		Log_Writef(LOG_WARN, "Ignoring OS version check... "
 			"This code has only been tested on Win10 and version 6.2 "
-			"but should work on older OS versions, use with caution");
+			"but should work on older OS versions, use with caution"
+		);
 
 	else if ((win32state.osver.dwMajorVersion < 6) || (win32state.osver.dwMajorVersion == 6 && win32state.osver.dwMinorVersion < 2))
 	{
@@ -178,6 +179,17 @@ void Sys_ParseCommandLine(cmdline_t *cmdline)
 
 	cmdline->count = argc;
 	cmdline->args = argv;
+}
+
+/*
+* Function: Sys_IsTTY
+* Checks if the console is available, will usually be set if the engine was launched from a console or if the console was created in debug mode
+* 
+* Returns: A boolean if the console is available or not, will return true if the console is created and is not hidden
+*/
+bool Sys_IsTTY(void)
+{
+	return(win32state.conshow);
 }
 
 /*
