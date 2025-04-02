@@ -40,8 +40,9 @@ typedef void (*cmdfunction_t)(const cmdargs_t *args);
 
 typedef struct		// logging service
 {
-	void (*Write)(logtype_t type, const char *msg);				// write a log message
-	void (*Writef)(logtype_t type, const char *msg, ...);		// write a formatted log message
+	void (*Write)(logtype_t type, const char *msg);						// write a log message
+	void (*Writef)(logtype_t type, const char *msg, ...);				// write a formatted log message
+	void (*Writefv)(logtype_t type, const char *msg, va_list argptr);	// write a formatted log message with a va_list
 } log_t;
 
 typedef struct		// memory cache allocator and manager

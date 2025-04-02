@@ -27,8 +27,7 @@ bool Log_Init(void);
 void Log_Shutdown(void);
 void Log_Write(const logtype_t type, const char *msg);
 void Log_Writef(const logtype_t type, const char *msg, ...);
-void Log_WriteLarge(const logtype_t type, const char *msg);
-void Log_WriteLargef(const logtype_t type, const char *msg, ...);
+void Log_Writefv(const logtype_t type, const char *msg, va_list argptr);
 
 bool MemCache_Init(void);
 void MemCache_Shutdown(void);
