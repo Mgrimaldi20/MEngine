@@ -289,9 +289,6 @@ static void ShutdownGame(void)
 */
 bool Common_Init(void)
 {
-	outfp = NULL;
-	errfp = NULL;
-
 #if defined(MENGINE_DEBUG)
 	if (Sys_Mkdir("logs"))		// if this cant be done, just forget about this
 	{
@@ -380,29 +377,30 @@ void Common_Frame(void)
 * 
 * Returns: The number of characters printed
 */
-int Common_Printf(const char *msg, ...)
+void Common_Printf(const char *msg, ...)
 {
 	va_list argptr;
 	va_start(argptr, msg);
-	int res = vprintf(msg, argptr);			// TODO: remove later
-	printf("\n");
-
-	va_list argptrcpy;
-	va_copy(argptrcpy, argptr);
-	Log_Writefv(LOG_INFO, msg, argptrcpy);
-	va_end(argptrcpy);
+	Log_Writefv(LOG_INFO, msg, argptr);
 
 	if (outfp)
 	{
+		va_list argptrcpy;
 		va_copy(argptrcpy, argptr);
 		vfprintf(outfp, msg, argptrcpy);
 		fprintf(outfp, "\n");
 		va_end(argptrcpy);
 	}
 
-	va_end(argptr);
+#if defined(MENGINE_DEBUG)
+	va_list argptrcpy;
+	va_copy(argptrcpy, argptr);
+	vprintf(msg, argptrcpy);
+	printf("\n");
+	va_end(argptrcpy);
+#endif
 
-	return(res);
+	va_end(argptr);
 }
 
 /*
@@ -413,29 +411,30 @@ int Common_Printf(const char *msg, ...)
 * 
 * Returns: The number of characters printed
 */
-int Common_Warnf(const char *msg, ...)
+void Common_Warnf(const char *msg, ...)
 {
 	va_list argptr;
 	va_start(argptr, msg);
-	int res = vprintf(msg, argptr);			// TODO: remove later
-	printf("\n");
-
-	va_list argptrcpy;
-	va_copy(argptrcpy, argptr);
-	Log_Writefv(LOG_WARN, msg, argptrcpy);
-	va_end(argptrcpy);
+	Log_Writefv(LOG_WARN, msg, argptr);
 
 	if (outfp)
 	{
+		va_list argptrcpy;
 		va_copy(argptrcpy, argptr);
 		vfprintf(outfp, msg, argptrcpy);
 		fprintf(outfp, "\n");
 		va_end(argptrcpy);
 	}
 
-	va_end(argptr);
+#if defined(MENGINE_DEBUG)
+	va_list argptrcpy;
+	va_copy(argptrcpy, argptr);
+	vprintf(msg, argptrcpy);
+	printf("\n");
+	va_end(argptrcpy);
+#endif
 
-	return(res);
+	va_end(argptr);
 }
 
 /*
@@ -446,20 +445,15 @@ int Common_Warnf(const char *msg, ...)
 * 
 * Returns: The number of characters printed
 */
-int Common_Errorf(const char *msg, ...)
+void Common_Errorf(const char *msg, ...)
 {
 	va_list argptr;
 	va_start(argptr, msg);
-	int res = vfprintf(stderr, msg, argptr);			// TODO: remove later
-	fprintf(stderr, "\n");
+	Log_Writefv(LOG_ERROR, msg, argptr);
 
-	va_list argptrcpy;
-	va_copy(argptrcpy, argptr);
-	Log_Writefv(LOG_ERROR, msg, argptrcpy);
-	va_end(argptrcpy);
-
-	if (outfp)
+	if (errfp)
 	{
+		va_list argptrcpy;
 		va_copy(argptrcpy, argptr);
 		vfprintf(errfp, msg, argptrcpy);
 		fprintf(errfp, "\n");
@@ -467,9 +461,15 @@ int Common_Errorf(const char *msg, ...)
 		va_end(argptrcpy);
 	}
 
-	va_end(argptr);
+#if defined(MENGINE_DEBUG)
+	va_list argptrcpy;
+	va_copy(argptrcpy, argptr);
+	vfprintf(stderr, msg, argptrcpy);
+	fprintf(stderr, "\n");
+	va_end(argptrcpy);
+#endif
 
-	return(res);
+	va_end(argptr);
 }
 
 /*
