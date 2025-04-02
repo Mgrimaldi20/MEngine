@@ -103,7 +103,8 @@ static void CreateMServices(void)
 	logsystem = (log_t)
 	{
 		.Write = Log_Write,
-		.Writef = Log_Writef
+		.Writef = Log_Writef,
+		.Writefv = Log_Writefv
 	};
 
 	memcache = (memcache_t)
@@ -382,17 +383,15 @@ void Common_Frame(void)
 int Common_Printf(const char *msg, ...)
 {
 	va_list argptr;
-	char buffer[LOG_MAX_LEN] = { 0 };
-
 	va_start(argptr, msg);
-	vsnprintf(buffer, sizeof(buffer), msg, argptr);
-	va_end(argptr);
 
-	int res = printf("%s\n", buffer);		// TODO: remove later
-	Log_Write(LOG_INFO, buffer);
+	int res = vprintf(msg, argptr);			// TODO: remove later
+	Log_Writefv(LOG_INFO, msg, argptr);
 
 	if (outfp)
-		fprintf(outfp, "%s\n", buffer);
+		vfprintf(outfp, msg, argptr);
+
+	va_end(argptr);
 
 	return(res);
 }
@@ -408,17 +407,15 @@ int Common_Printf(const char *msg, ...)
 int Common_Warnf(const char *msg, ...)
 {
 	va_list argptr;
-	char buffer[LOG_MAX_LEN] = { 0 };
-
 	va_start(argptr, msg);
-	vsnprintf(buffer, sizeof(buffer), msg, argptr);
-	va_end(argptr);
 
-	int res = printf("%s\n", buffer);		// TODO: remove later
-	Log_Write(LOG_WARN, buffer);
+	int res = vprintf(msg, argptr);			// TODO: remove later
+	Log_Writefv(LOG_WARN, msg, argptr);
 
 	if (outfp)
-		fprintf(outfp, "%s\n", buffer);
+		vfprintf(outfp, msg, argptr);
+
+	va_end(argptr);
 
 	return(res);
 }
@@ -434,17 +431,15 @@ int Common_Warnf(const char *msg, ...)
 int Common_Errorf(const char *msg, ...)
 {
 	va_list argptr;
-	char buffer[LOG_MAX_LEN] = { 0 };
-
 	va_start(argptr, msg);
-	vsnprintf(buffer, sizeof(buffer), msg, argptr);
-	va_end(argptr);
 
-	int res = fprintf(stderr, "%s\n", buffer);		// TODO: remove later
-	Log_Write(LOG_ERROR, buffer);
+	int res = vfprintf(stderr, msg, argptr);		// TODO: remove later
+	Log_Writefv(LOG_ERROR, msg, argptr);
 
 	if (errfp)
-		fprintf(errfp, "%s\n", buffer);
+		vfprintf(errfp, msg, argptr);
+
+	va_end(argptr);
 
 	return(res);
 }

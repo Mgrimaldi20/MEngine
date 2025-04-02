@@ -340,6 +340,7 @@ void Log_Write(const logtype_t type, const char *msg)
 	if (len > LOG_MAX_LEN)
 	{
 		entry->longmsg = MemCache_Alloc(len + 1);
+
 		if (entry->longmsg)
 			snprintf(entry->longmsg, len + 1, msg);
 	}
@@ -384,6 +385,42 @@ void Log_Writef(const logtype_t type, const char *msg, ...)
 			vsnprintf(entry->longmsg, len + 1, msg, arg);
 			va_end(arg);
 		}
+	}
+
+	logcount++;
+
+	Sys_UnlockMutex(loglock);
+	Sys_SignalCondVar(logcond);
+}
+
+/*
+* Function: Log_Writefv
+* Writes a formatted log message to the log queue for processing by the log thread, if you already have a VA list, or for passthrough
+* 
+*	type: The type of log message
+*	msg: The message to log, the log message format is the same as printf
+*	argptr: The VA list of arguments, as a va_list
+*/
+void Log_Writefv(const logtype_t type, const char *msg, va_list argptr)
+{
+	if ((logcount >= MAX_LOG_ENTRIES) || !initialized)
+		return;
+
+	Sys_LockMutex(loglock);
+
+	logentry_t *entry = &logqueue[logcount];
+
+	entry->time = time(NULL);
+	entry->type = type;
+
+	int len = vsnprintf(entry->msg, LOG_MAX_LEN, msg, argptr);
+
+	if (len > LOG_MAX_LEN)
+	{
+		entry->longmsg = MemCache_Alloc(len + 1);
+
+		if (entry->longmsg)
+			vsnprintf(entry->longmsg, len + 1, msg, argptr);
 	}
 
 	logcount++;
