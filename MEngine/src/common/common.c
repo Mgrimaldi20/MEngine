@@ -384,12 +384,21 @@ int Common_Printf(const char *msg, ...)
 {
 	va_list argptr;
 	va_start(argptr, msg);
-
 	int res = vprintf(msg, argptr);			// TODO: remove later
-	Log_Writefv(LOG_INFO, msg, argptr);
+	printf("\n");
+
+	va_list argptrcpy;
+	va_copy(argptrcpy, argptr);
+	Log_Writefv(LOG_INFO, msg, argptrcpy);
+	va_end(argptrcpy);
 
 	if (outfp)
-		vfprintf(outfp, msg, argptr);
+	{
+		va_copy(argptrcpy, argptr);
+		vfprintf(outfp, msg, argptrcpy);
+		fprintf(outfp, "\n");
+		va_end(argptrcpy);
+	}
 
 	va_end(argptr);
 
@@ -408,12 +417,21 @@ int Common_Warnf(const char *msg, ...)
 {
 	va_list argptr;
 	va_start(argptr, msg);
-
 	int res = vprintf(msg, argptr);			// TODO: remove later
-	Log_Writefv(LOG_WARN, msg, argptr);
+	printf("\n");
+
+	va_list argptrcpy;
+	va_copy(argptrcpy, argptr);
+	Log_Writefv(LOG_WARN, msg, argptrcpy);
+	va_end(argptrcpy);
 
 	if (outfp)
-		vfprintf(outfp, msg, argptr);
+	{
+		va_copy(argptrcpy, argptr);
+		vfprintf(outfp, msg, argptrcpy);
+		fprintf(outfp, "\n");
+		va_end(argptrcpy);
+	}
 
 	va_end(argptr);
 
@@ -432,12 +450,22 @@ int Common_Errorf(const char *msg, ...)
 {
 	va_list argptr;
 	va_start(argptr, msg);
+	int res = vfprintf(stderr, msg, argptr);			// TODO: remove later
+	fprintf(stderr, "\n");
 
-	int res = vfprintf(stderr, msg, argptr);		// TODO: remove later
-	Log_Writefv(LOG_ERROR, msg, argptr);
+	va_list argptrcpy;
+	va_copy(argptrcpy, argptr);
+	Log_Writefv(LOG_ERROR, msg, argptrcpy);
+	va_end(argptrcpy);
 
-	if (errfp)
-		vfprintf(errfp, msg, argptr);
+	if (outfp)
+	{
+		va_copy(argptrcpy, argptr);
+		vfprintf(errfp, msg, argptrcpy);
+		fprintf(errfp, "\n");
+		fflush(errfp);
+		va_end(argptrcpy);
+	}
 
 	va_end(argptr);
 

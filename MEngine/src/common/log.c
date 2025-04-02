@@ -413,14 +413,21 @@ void Log_Writefv(const logtype_t type, const char *msg, va_list argptr)
 	entry->time = time(NULL);
 	entry->type = type;
 
-	int len = vsnprintf(entry->msg, LOG_MAX_LEN, msg, argptr);
+	va_list argptrcpy;
+	va_copy(argptrcpy, argptr);
+	int len = vsnprintf(entry->msg, LOG_MAX_LEN, msg, argptrcpy);
+	va_end(argptrcpy);
 
 	if (len > LOG_MAX_LEN)
 	{
 		entry->longmsg = MemCache_Alloc(len + 1);
 
 		if (entry->longmsg)
+		{
+			va_copy(argptrcpy, argptr);
 			vsnprintf(entry->longmsg, len + 1, msg, argptr);
+			va_end(argptrcpy);
+		}
 	}
 
 	logcount++;
