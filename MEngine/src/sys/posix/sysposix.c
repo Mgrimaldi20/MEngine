@@ -125,6 +125,35 @@ void Sys_ParseCommandLine(cmdline_t *cmdline)
 }
 
 /*
+* Function: Sys_IsTTY
+* Checks if the console is available, will usually be set if the engine was launched from a console
+* 
+* Returns: A boolean if the console is available or not
+*/
+bool Sys_IsTTY(void)
+{
+	errno = 0;
+	bool res = isatty(fileno(stdin);
+
+	if (errno == EBADF)
+		Common_Errorf("%s: FD is invalid: %s", __func__, strerror(errno));
+
+	if (errno == ENOTTY)
+		Common_Warnf("%s: No TTY, will not print output, terminal might be required for error output: %s",
+			__func__,
+			strerror(errno)
+		);
+
+	if (errno == EINVAL)
+		Common_Warnf("%s: This is not POSIX compliant! But I am nice enough to give you the warning anyway: %s",
+			__func__,
+			strerror(errno)
+		);
+
+	return(res);
+}
+
+/*
 * Function: Sys_Mkdir
 * Creates a directory if it does not exist
 * 

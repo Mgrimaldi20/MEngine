@@ -113,6 +113,7 @@ void InitConsole(void)
 {
 	if (!AllocConsole())
 	{
+		win32state.conshow = false;
 		WindowsError();
 		return;
 	}
@@ -131,6 +132,8 @@ void InitConsole(void)
 
 		if (infp)
 			fclose(infp);
+
+		win32state.conshow = false;
 
 		return;
 	}
@@ -157,7 +160,7 @@ void ShutdownConsole(void)
 
 	if (!FreeConsole())
 	{
-		Log_Write(LOG_ERROR, "Failed to free the console");	// just log it and move on, no need to force exit, this is prolly happening during shutdown anyway
+		Common_Errorf("Failed to free the console");	// just log it and move on, no need to force exit, this is prolly happening during shutdown anyway
 		return;
 	}
 }

@@ -37,6 +37,7 @@ static void *gamedllhandle;
 
 static FILE *outfp;
 static FILE *errfp;
+static bool isatty;
 
 static bool gameinitialized;
 
@@ -303,6 +304,8 @@ bool Common_Init(void)
 	}
 #endif
 
+	isatty = Sys_IsTTY();
+
 	if (!ProcessCommandLine()
 		|| !MemCache_Init()
 		|| !Log_Init()
@@ -393,11 +396,14 @@ void Common_Printf(const char *msg, ...)
 	}
 
 #if defined(MENGINE_DEBUG)
-	va_list argptrcpy;
-	va_copy(argptrcpy, argptr);
-	vprintf(msg, argptrcpy);
-	printf("\n");
-	va_end(argptrcpy);
+	if (isatty)
+	{
+		va_list argptrcpy;
+		va_copy(argptrcpy, argptr);
+		vprintf(msg, argptrcpy);
+		printf("\n");
+		va_end(argptrcpy);
+	}
 #endif
 
 	va_end(argptr);
@@ -427,11 +433,14 @@ void Common_Warnf(const char *msg, ...)
 	}
 
 #if defined(MENGINE_DEBUG)
-	va_list argptrcpy;
-	va_copy(argptrcpy, argptr);
-	vprintf(msg, argptrcpy);
-	printf("\n");
-	va_end(argptrcpy);
+	if (isatty)
+	{
+		va_list argptrcpy;
+		va_copy(argptrcpy, argptr);
+		vprintf(msg, argptrcpy);
+		printf("\n");
+		va_end(argptrcpy);
+	}
 #endif
 
 	va_end(argptr);
@@ -461,11 +470,14 @@ void Common_Errorf(const char *msg, ...)
 		va_end(argptrcpy);
 	}
 
-	va_list argptrcpy;
-	va_copy(argptrcpy, argptr);
-	vfprintf(stderr, msg, argptrcpy);
-	fprintf(stderr, "\n");
-	va_end(argptrcpy);
+	if (isatty)
+	{
+		va_list argptrcpy;
+		va_copy(argptrcpy, argptr);
+		vfprintf(stderr, msg, argptrcpy);
+		fprintf(stderr, "\n");
+		va_end(argptrcpy);
+	}
 
 	va_end(argptr);
 }
