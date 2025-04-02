@@ -122,7 +122,7 @@ void Sys_Shutdown(void)
 * Function: Sys_Error
 * Displays an error message popup window and shuts down the engine, used for fatal errors and exceptions
 * 
-* 	error: The error message to display
+* 	error: The error message to display, can be a formatted string, max length is LOG_MAX_LEN
 */
 void Sys_Error(const char *error, ...)
 {
@@ -130,7 +130,7 @@ void Sys_Error(const char *error, ...)
 	char text[LOG_MAX_LEN] = { 0 };
 
 	va_start(argptr, error);
-	vsnprintf(text, LOG_MAX_LEN, error, argptr);
+	vsnprintf(text, sizeof(text), error, argptr);
 	va_end(argptr);
 
 	Log_Write(LOG_ERROR, text);

@@ -461,13 +461,11 @@ void Common_Errorf(const char *msg, ...)
 		va_end(argptrcpy);
 	}
 
-#if defined(MENGINE_DEBUG)
 	va_list argptrcpy;
 	va_copy(argptrcpy, argptr);
 	vfprintf(stderr, msg, argptrcpy);
 	fprintf(stderr, "\n");
 	va_end(argptrcpy);
-#endif
 
 	va_end(argptr);
 }

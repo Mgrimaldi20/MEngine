@@ -95,7 +95,7 @@ void Sys_Shutdown(void)
 void Sys_Error(const char *error, ...)
 {
 	va_list argptr;
-	char buffer[1024] = { 0 };
+	char buffer[LOG_MAX_LEN] = { 0 };
 
 	va_start(argptr, error);
 	vsnprintf(buffer, sizeof(buffer), error, argptr);
