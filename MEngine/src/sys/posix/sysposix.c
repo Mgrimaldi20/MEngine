@@ -46,28 +46,28 @@ bool SysInitCommon(void)
 {
 	if (uname(&posixstate.osinfo) == -1) 	// get the OS version information, only run if the OS version is high enough
 	{
-		Log_WriteSeq(LOG_ERROR, "Failed to get OS version information");
+		Log_Write(LOG_ERROR, "Failed to get OS version information");
 		return(false);
 	}
 
-	Log_WriteSeq(LOG_INFO, "OS: %s %s %s %s",
+	Log_Writef(LOG_INFO, "OS: %s %s %s %s",
 		posixstate.osinfo.sysname,
 		posixstate.osinfo.nodename,
 		posixstate.osinfo.release,
 		posixstate.osinfo.version
 	);
 
-	Log_WriteSeq(LOG_INFO, "System memory: %lluMB", Sys_GetSystemMemory());
-	Log_WriteSeq(LOG_INFO, "System supports max threads: %lu", Sys_GetMaxThreads());
+	Log_Writef(LOG_INFO, "System memory: %lluMB", Sys_GetSystemMemory());
+	Log_Writef(LOG_INFO, "System supports max threads: %lu", Sys_GetMaxThreads());
 
 	struct rlimit rl;
 	if (getrlimit(RLIMIT_STACK, &rl) != 0)
 	{
-		Log_WriteSeq(LOG_ERROR, "Failed to get the stack size");
+		Log_Write(LOG_ERROR, "Failed to get the stack size");
 		return(false);
 	}
 
-	Log_WriteSeq(LOG_INFO, "Stack size: %juMB", (uintmax_t)(rl.rlim_cur / (1024 * 1024)));
+	Log_Writef(LOG_INFO, "Stack size: %juMB", (uintmax_t)(rl.rlim_cur / (1024 * 1024)));
 
 	return(true);
 }
@@ -81,7 +81,7 @@ void Sys_Shutdown(void)
 	if (!posixstate.initialized)
 		return;
 
-	Log_WriteSeq(LOG_INFO, "Shutting down system");
+	Log_Write(LOG_INFO, "Shutting down system");
 
 	posixstate.initialized = false;
 }
@@ -187,7 +187,7 @@ void Sys_Stat(const char *filepath, filedata_t *filedata)
 	struct stat st;
 	if (stat(filepath, &st) == -1)
 	{
-		Log_Write(LOG_ERROR, "%s, Failed to make a call to stat(): %s", __func__, filepath);
+		Log_Writef(LOG_ERROR, "%s, Failed to make a call to stat(): %s", __func__, filepath);
 		return;
 	}
 
@@ -526,10 +526,10 @@ void Sys_SignalCondVar(condvar_t *condvar)
 */
 void *Sys_LoadDLL(const char *dllname)
 {
-	void *handle = dlopen(dllname, RTLD_NOW);	// get from LD path if not found in bin dir
+	void *handle = dlopen(dllname, RTLD_NOW);
 	if (!handle)
 	{
-		Log_WriteSeq(LOG_ERROR, "Failed to load DLL: %s", dlerror());
+		Log_Writef(LOG_ERROR, "Failed to load DLL: %s", dlerror());
 		dlerror();		// clear the error
 		return(NULL);
 	}
@@ -563,7 +563,7 @@ void *Sys_GetProcAddress(void *handle, const char *procname)
 	void *proc = dlsym(handle, procname);
 	if (!proc)
 	{
-		Log_WriteSeq(LOG_ERROR, "Failed to get procedure address: %s", dlerror());
+		Log_Writef(LOG_ERROR, "Failed to get procedure address: %s", dlerror());
 		dlerror();		// clear the error
 		return(NULL);
 	}

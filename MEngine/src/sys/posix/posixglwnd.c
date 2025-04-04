@@ -1,3 +1,4 @@
+#include "sys/sys.h"
 #include "common/common.h"
 #include "posixlocal.h"
 #include "renderer/renderer.h"
@@ -19,14 +20,14 @@ bool GLWnd_Init(glwndparams_t params)
 
 	if (!glfwInit())
 	{
-		Log_WriteSeq(LOG_ERROR, "Failed to initialise GLFW");
+		Log_Write(LOG_ERROR, "Failed to initialise GLFW");
 		return(false);
 	}
 
 	GLFWmonitor *monitor = glfwGetPrimaryMonitor();
 	if (!monitor)
 	{
-		Log_WriteSeq(LOG_ERROR, "Failed to get primary monitor");
+		Log_Write(LOG_ERROR, "Failed to get primary monitor");
 		posixstate.fullscreen = false;
 		return(false);
 	}
@@ -34,7 +35,7 @@ bool GLWnd_Init(glwndparams_t params)
 	const GLFWvidmode *mode = glfwGetVideoMode(monitor);
 	if (!mode)
 	{
-		Log_WriteSeq(LOG_ERROR, "Failed to get video mode");
+		Log_Write(LOG_ERROR, "Failed to get video mode for primary monitor");
 		return(false);
 	}
 
@@ -69,7 +70,7 @@ bool GLWnd_Init(glwndparams_t params)
 	posixstate.window = glfwCreateWindow(320, 240, params.wndname, monitor, NULL);	// create with a small resolution at first
 	if (!posixstate.window)
 	{
-		Log_WriteSeq(LOG_ERROR, "Failed to create window");
+		Log_Write(LOG_ERROR, "Failed to create window");
 		glfwTerminate();
 		return(false);
 	}
@@ -84,7 +85,7 @@ bool GLWnd_Init(glwndparams_t params)
 
 	RegisterCallbacks(posixstate.window);			// register all the window callbacks
 
-	Log_WriteSeq(LOG_INFO, "OpenGL initalised and created window");
+	Log_Write(LOG_INFO, "OpenGL initalised and created window");
 
 	initialized = true;
 
@@ -100,7 +101,7 @@ void GLWnd_Shutdown(void)
 	if (!initialized)
 		return;
 
-	Log_WriteSeq(LOG_INFO, "Shutting down OpenGL system");
+	Log_Write(LOG_INFO, "Shutting down OpenGL system");
 
 	if (posixstate.window)
 	{
@@ -126,7 +127,7 @@ bool GLWnd_ChangeScreenParams(glwndparams_t params)
 {
 	if (!posixstate.window)
 	{
-		Log_WriteSeq(LOG_ERROR, "Window not created, cannot change screen parameters");
+		Log_Write(LOG_ERROR, "Window not created, cannot change screen parameters");
 		return(false);
 	}
 
@@ -139,7 +140,7 @@ bool GLWnd_ChangeScreenParams(glwndparams_t params)
 
 		if (!monitor)
 		{
-			Log_WriteSeq(LOG_WARN, "Failed to get primary monitor, cannot make fullscreen window, starting in windowed mode instead");
+			Log_Write(LOG_WARN, "Failed to get primary monitor, cannot make fullscreen window, starting in windowed mode instead");
 			posixstate.fullscreen = false;
 			monitor = NULL;		// just in case
 		}

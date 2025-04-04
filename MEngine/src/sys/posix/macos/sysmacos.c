@@ -18,10 +18,11 @@ bool Sys_Init(void)
 		return(false);
 
 	if (Common_IgnoreOSVer())
-		Log_WriteSeq(LOG_WARN, "Ignoring OS version check... "
+		Log_Write(LOG_WARN, "Ignoring OS version check... "
 			"This code has only been tested on MacOS Darwin Kernel Version 24.1.0 "
 			"but most the common and shared code should work the same, use with caution, "
-			"some of the system frameworks might not work as expected");
+			"some of the system frameworks might not work as expected"
+		);
 
 	else if (strcmp(posixstate.osinfo.sysname, "Darwin") != 0)
 	{
