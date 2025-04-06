@@ -525,33 +525,7 @@ void Sys_SignalCondVar(condvar_t *condvar)
 */
 void *Sys_LoadDLL(const char *dllname)
 {
-	cvar_t *fsbasepath = Cvar_Find("fs_basepath");
-	if (!fsbasepath)
-	{
-		Log_Write(LOG_ERROR, "Failed to find the basepath in Cvar system");
-		return(NULL);
-	}
-
-	char basepathname[SYS_MAX_PATH] = { 0 };
-	if (!Cvar_GetString(fsbasepath, basepathname))
-	{
-		Log_Write(LOG_ERROR, "Failed to get basepath string from Cvar system");
-		return(NULL);
-	}
-
-	char fullpath[SYS_MAX_PATH] = { 0 };
-
-	int ret = snprintf(fullpath, SYS_MAX_PATH, "%s/%s", basepathname, dllname);
-	if (ret >= SYS_MAX_PATH)
-	{
-		Log_Write(LOG_ERROR, "Path truncated when trying to resolve DLL path");
-		return(NULL);
-	}
-
-	void *handle = dlopen(fullpath, RTLD_NOW);
-	if (!handle)
-		handle = dlopen(dllname, RTLD_NOW);	// check the LD path if not found on *nix systems
-
+	handle = dlopen(dllname, RTLD_NOW);
 	if (!handle)
 	{
 		Log_Writef(LOG_ERROR, "Failed to load DLL: %s", dlerror());

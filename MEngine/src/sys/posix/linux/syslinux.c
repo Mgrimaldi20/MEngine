@@ -30,8 +30,8 @@ bool Sys_Init(void)
 		return(false);
 	}
 
-	Cvar_RegisterString("g_gamedll", "DemoGame.so", CVAR_GAME, "The name of the game DLL for Linux systems");
-	Cvar_RegisterString("g_demogamedll", "DemoGame.so", CVAR_GAME | CVAR_READONLY, "The name of the demo game DLL for Linux systems");
+	Cvar_RegisterString("g_gamedll", "./DemoGame.so", CVAR_GAME, "The name of the game DLL for Linux systems");
+	Cvar_RegisterString("g_demogamedll", "./DemoGame.so", CVAR_GAME | CVAR_READONLY, "The name of the demo game DLL for Linux systems");
 
 	posixstate.initialized = true;
 
