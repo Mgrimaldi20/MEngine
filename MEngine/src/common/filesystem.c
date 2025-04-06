@@ -58,7 +58,7 @@ bool FileSys_Init(void)
 	if (initialized)
 		return(true);
 
-	fsbasepath = Cvar_RegisterString("fs_basepath", "/", CVAR_FILESYSTEM | CVAR_READONLY, "The base path for the engine. Path to the installation");
+	fsbasepath = Cvar_RegisterString("fs_basepath", "", CVAR_FILESYSTEM | CVAR_READONLY, "The base path for the engine. Path to the installation");
 	fssavepath = Cvar_RegisterString("fs_savepath", "save", CVAR_FILESYSTEM, "The path to the games save files, relative to the base path");
 
 	initialized = true;
