@@ -8,6 +8,12 @@ typedef gameservices_t *(*getmservices_t)(mservices_t *services);
 
 extern gameservices_t gameservices;
 
+typedef union		// this is needed because casting to and from object pointers and function pointers is not really well defined on some systems
+{
+	void *obj;
+	void (*func)(void);
+} prochandle_t;
+
 bool Common_Init(void);
 void Common_Shutdown(void);
 void Common_Frame(void);

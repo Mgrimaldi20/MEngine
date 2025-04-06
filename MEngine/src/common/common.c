@@ -16,12 +16,6 @@ typedef enum
 	CMD_USE_DEF_ALLOC = 1 << 4
 } cmdlineflags_t;
 
-typedef union
-{
-	void *obj;
-	getmservices_t func;
-} funcptrobj_t;
-
 gameservices_t gameservices;
 
 static mservices_t mservices;
@@ -221,14 +215,10 @@ static bool InitGame(void)
 
 	CreateMServices();		// populate the mservices struct with the function pointers
 
-	void *procaddr = Sys_GetProcAddress(gamedllhandle, "GetMServices");
-	funcptrobj_t conv =
-	{
-		.obj = procaddr
-	};
-
-	getmservices_t GetMServices = conv.func;
-
+	prochandle_t proc;
+	proc.obj = Sys_GetProcAddress(gamedllhandle, "GetMServices");
+	
+	getmservices_t GetMServices = (getmservices_t)proc.func;	// fun type punning
 	if (!GetMServices)
 	{
 		Sys_Error("Failed to get GetMServices function, handshake failed, could not load function pointers");

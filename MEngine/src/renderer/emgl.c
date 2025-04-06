@@ -5,6 +5,9 @@
 
 static void *gldllhandle;
 
+static prochandle_t emgldebugmessagecallback;
+static prochandle_t emgldebugmessagecontrol;
+
 PFNGLDEBUGMESSAGECALLBACKPROC glDebugMessageCallback;
 PFNGLDEBUGMESSAGECONTROLPROC glDebugMessageControl;
 
@@ -30,8 +33,11 @@ bool EMGL_Init(const char *dllname)
 		return(false);
 	}
 
-	glDebugMessageCallback = (PFNGLDEBUGMESSAGECALLBACKPROC)GLWnd_GetProcAddressGL(gldllhandle, "glDebugMessageCallback");
-	glDebugMessageControl = (PFNGLDEBUGMESSAGECONTROLPROC)GLWnd_GetProcAddressGL(gldllhandle, "glDebugMessageControl");
+	emgldebugmessagecallback.obj = GLWnd_GetProcAddressGL(gldllhandle, "glDebugMessageCallback");
+	emgldebugmessagecontrol.obj = GLWnd_GetProcAddressGL(gldllhandle, "glDebugMessageControl");
+
+	glDebugMessageCallback = (PFNGLDEBUGMESSAGECALLBACKPROC)emgldebugmessagecallback.func;
+	glDebugMessageControl = (PFNGLDEBUGMESSAGECONTROLPROC)emgldebugmessagecontrol.func;
 
 	return(true);
 }

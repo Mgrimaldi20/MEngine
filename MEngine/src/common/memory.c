@@ -556,6 +556,7 @@ void MemCache_Shutdown(void)
 
 	DumpAllocData();
 #endif
+	(void)DumpAllocData;
 
 	if (memcache)
 	{

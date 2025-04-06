@@ -27,7 +27,7 @@ static void KeyCallback(GLFWwindow *window, int key, int scancode, int action, i
 			if (key == KEY_PRINTSCREEN)
 				break;
 
-			Event_QueueEvent(EVENT_KEY, keycode, EVENT_TYPE_KEYDOWN);
+			Event_QueueEvent(EVENT_KEY, keycode, EVENT_STATE_KEYDOWN);
 			break;
 		}
 
@@ -38,13 +38,13 @@ static void KeyCallback(GLFWwindow *window, int key, int scancode, int action, i
 			if (key == KEY_PRINTSCREEN)
 				break;
 
-			Event_QueueEvent(EVENT_KEY, keycode, EVENT_TYPE_KEYUP);
+			Event_QueueEvent(EVENT_KEY, keycode, EVENT_STATE_KEYUP);
 			break;
 		}
 
 		case GLFW_REPEAT:
 			keycode = MapGLFWKey(key);
-			Event_QueueEvent(EVENT_KEY, keycode, EVENT_TYPE_KEYDOWN);
+			Event_QueueEvent(EVENT_KEY, keycode, EVENT_STATE_KEYDOWN);
 			break;
 	}
 }
@@ -121,7 +121,7 @@ static void MouseButtonCallback(GLFWwindow *window, int button, int action, int 
 					return;
 			}
 
-			Event_QueueEvent(EVENT_KEY, keycode, EVENT_TYPE_KEYDOWN);
+			Event_QueueEvent(EVENT_KEY, keycode, EVENT_STATE_KEYDOWN);
 			break;
 		}
 
@@ -165,7 +165,7 @@ static void MouseButtonCallback(GLFWwindow *window, int button, int action, int 
 					return;
 			}
 
-			Event_QueueEvent(EVENT_KEY, keycode, EVENT_TYPE_KEYUP);
+			Event_QueueEvent(EVENT_KEY, keycode, EVENT_STATE_KEYUP);
 			break;
 		}
 	}
@@ -186,8 +186,8 @@ static void MouseScrollCallback(GLFWwindow *window, double xoffset, double yoffs
 
 	while (delta-- > 0)
 	{
-		Event_QueueEvent(EVENT_KEY, key, EVENT_TYPE_KEYDOWN);
-		Event_QueueEvent(EVENT_KEY, key, EVENT_TYPE_KEYUP);
+		Event_QueueEvent(EVENT_KEY, key, EVENT_STATE_KEYDOWN);
+		Event_QueueEvent(EVENT_KEY, key, EVENT_STATE_KEYUP);
 	}
 }
 

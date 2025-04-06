@@ -67,6 +67,10 @@ bool GLWnd_Init(glwndparams_t params)
 		glstate.height = posixstate.desktopheight;
 	}
 
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
+
 	posixstate.window = glfwCreateWindow(320, 240, params.wndname, monitor, NULL);	// create with a small resolution at first
 	if (!posixstate.window)
 	{
@@ -195,21 +199,23 @@ int GLWnd_GetVSync(void)
 *
 * Returns: The function pointer for the proc name
 */
-void *GLWnd_GetProcAddressGL(const void *dllhandle, const char *procname)
+void *GLWnd_GetProcAddressGL(void *dllhandle, const char *procname)
 {
 	if (!dllhandle || !procname)
 		return(NULL);
 
-	void *proc = glfwGetProcAddress(procname);
-	if (!proc)
+	prochandle_t proc;
+
+	proc.func = glfwGetProcAddress(procname);
+	if (!proc.func)
 	{
-		proc = Sys_GetProcAddress(dllhandle, procname);
-		if (!proc)
+		proc.obj = Sys_GetProcAddress(dllhandle, procname);
+		if (!proc.obj)
 		{
-			Log_Write(LOG_ERROR, "Could not get proc address for %s", procname);
+			Log_Writef(LOG_ERROR, "Could not get proc address for %s", procname);
 			return(NULL);
 		}
 	}
 
-	return(proc);
+	return(proc.obj);
 }

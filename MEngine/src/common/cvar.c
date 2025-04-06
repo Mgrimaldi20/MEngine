@@ -618,7 +618,7 @@ void Cvar_Shutdown(void)
 	ListAllCvars();
 #endif
 
-	(void)ListAllCvars;		// gets rid of unused function warning
+	(void)ListAllCvars;
 
 	cvarfile = fopen(cvarfullname, "w");
 	if (!cvarfile)
