@@ -525,7 +525,7 @@ void Sys_SignalCondVar(condvar_t *condvar)
 */
 void *Sys_LoadDLL(const char *dllname)
 {
-	handle = dlopen(dllname, RTLD_NOW);
+	void *handle = dlopen(dllname, RTLD_NOW);
 	if (!handle)
 	{
 		Log_Writef(LOG_ERROR, "Failed to load DLL: %s", dlerror());
