@@ -101,7 +101,6 @@ void Sys_Error(const char *error, ...)
 	vsnprintf(buffer, sizeof(buffer), error, argptr);
 	va_end(argptr);
 
-	Log_WriteSeq(LOG_ERROR, buffer);
 	Common_Errorf("Error: %s", buffer);
 
 	Common_Shutdown();
@@ -133,7 +132,7 @@ void Sys_ParseCommandLine(cmdline_t *cmdline)
 bool Sys_IsTTY(void)
 {
 	errno = 0;
-	bool res = isatty(fileno(stdin);
+	bool res = isatty(fileno(stdin));
 
 	if (errno == EBADF)
 		Common_Errorf("%s: FD is invalid: %s", __func__, strerror(errno));
@@ -526,7 +525,33 @@ void Sys_SignalCondVar(condvar_t *condvar)
 */
 void *Sys_LoadDLL(const char *dllname)
 {
-	void *handle = dlopen(dllname, RTLD_NOW);
+	cvar_t *fsbasepath = Cvar_Find("fs_basepath");
+	if (!fsbasepath)
+	{
+		Log_Write(LOG_ERROR, "Failed to find the basepath in Cvar system");
+		return(NULL);
+	}
+
+	char basepathname[SYS_MAX_PATH] = { 0 };
+	if (!Cvar_GetString(fsbasepath, basepathname))
+	{
+		Log_Write(LOG_ERROR, "Failed to get basepath string from Cvar system");
+		return(NULL);
+	}
+
+	char fullpath[SYS_MAX_PATH] = { 0 };
+
+	int ret = snprintf(fullpath, SYS_MAX_PATH, "%s/%s", basepathname, dllname);
+	if (ret >= SYS_MAX_PATH)
+	{
+		Log_Write(LOG_ERROR, "Path truncated when trying to resolve DLL path");
+		return(NULL);
+	}
+
+	void *handle = dlopen(fullpath, RTLD_NOW);
+	if (!handle)
+		handle = dlopen(dllname, RTLD_NOW);	// check the LD path if not found on *nix systems
+
 	if (!handle)
 	{
 		Log_Writef(LOG_ERROR, "Failed to load DLL: %s", dlerror());

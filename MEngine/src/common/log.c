@@ -335,14 +335,14 @@ void Log_Write(const logtype_t type, const char *msg)
 
 	entry->time = time(NULL);
 	entry->type = type;
-	int len = snprintf(entry->msg, LOG_MAX_LEN, msg);
+	int len = snprintf(entry->msg, LOG_MAX_LEN, "%s", msg);
 
 	if (len > LOG_MAX_LEN)
 	{
 		entry->longmsg = MemCache_Alloc(len + 1);
 
 		if (entry->longmsg)
-			snprintf(entry->longmsg, len + 1, msg);
+			snprintf(entry->longmsg, len + 1, "%s", msg);
 	}
 
 	logcount++;
