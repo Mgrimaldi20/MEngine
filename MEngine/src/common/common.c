@@ -12,8 +12,7 @@ typedef enum
 	CMD_MODE_EDITOR = 1 << 0,
 	CMD_MODE_DEBUG = 1 << 1,
 	CMD_IGNORE_OSVER = 1 << 2,
-	CMD_RUN_DEMO_GAME = 1 << 3,
-	CMD_USE_DEF_ALLOC = 1 << 4
+	CMD_USE_DEF_ALLOC = 1 << 3
 } cmdlineflags_t;
 
 gameservices_t gameservices;
@@ -60,7 +59,6 @@ static bool ProcessCommandLine(void)
 				"\t-help\t\tPrint this help message\n"
 				"\t-editor\t\tRun the editor\n"
 				"\t-debug\t\tRun the game in debug mode\n"
-				"\t-demo\t\tRun the demo game\n"
 				"\t-ignoreosver\tIgnore OS version check\n"
 				"\t-nocache\tDo not use the memory cache allocator\n";
 
@@ -78,9 +76,6 @@ static bool ProcessCommandLine(void)
 
 		else if (strcmp(cmdline.args[i], "-ignoreosver") == 0)
 			cmdlineflags |= CMD_IGNORE_OSVER;
-
-		else if (strcmp(cmdline.args[i], "-demo") == 0)
-			cmdlineflags |= CMD_RUN_DEMO_GAME;
 
 		else if (strcmp(cmdline.args[i], "-nocache") == 0)
 			cmdlineflags |= CMD_USE_DEF_ALLOC;
@@ -185,14 +180,7 @@ static void CreateMServices(void)
 */
 static bool InitGame(void)
 {
-	cvar_t *gamedll = NULL;
-
-	if (Common_RunDemoGame())
-		gamedll = Cvar_Find("g_demogamedll");
-
-	else
-		gamedll = Cvar_Find("g_gamedll");	// get the game DLL name from the Cvar system, designed to be overriden by the client
-
+	cvar_t *gamedll = Cvar_Find("g_gamedll");	// get the game DLL name from the Cvar system, designed to be overriden by the client
 	if (!gamedll)
 	{
 		Log_Write(LOG_ERROR, "Failed to find game DLL name in Cvar system");
@@ -497,15 +485,6 @@ bool Common_DebugMode(void)
 bool Common_IgnoreOSVer(void)
 {
 	return((cmdlineflags & CMD_IGNORE_OSVER));
-}
-
-/*
-* Function: Common_RunDemoGame
-* Returns if the engine is running the demo game
-*/
-bool Common_RunDemoGame(void)
-{
-	return((cmdlineflags & CMD_RUN_DEMO_GAME));
 }
 
 /*

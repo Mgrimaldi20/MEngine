@@ -547,15 +547,16 @@ void MemCache_Shutdown(void)
 
 	Log_Write(LOG_INFO, "Shutting down memory cache");
 
-#if defined(MENGINE_DEBUG)
 	int diff = numallocs - numfrees;
 
-	Log_Writef(LOG_INFO, "\t\tNum allocs: [%d], Num frees: [%d], Difference: [%d] - %s", numallocs, numfrees, diff,
+	Log_Writef(LOG_INFO, "Num allocs: [%d], Num frees: [%d], Difference: [%d] - %s", numallocs, numfrees, diff,
 		(diff == 0) ? "All allocations have been freed" : "Not all allocations have been freed"
 	);
 
+#if defined(MENGINE_DEBUG)
 	DumpAllocData();
 #endif
+
 	(void)DumpAllocData;
 
 	if (memcache)
