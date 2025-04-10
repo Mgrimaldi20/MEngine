@@ -169,8 +169,8 @@ filedata_t *FileSys_ListFiles(unsigned int *numfiles, const char *directory, con
 				continue;
 			}
 
-			char filepath[SYS_MAX_PATH] = { 0 };
-			snprintf(filepath, SYS_MAX_PATH, "%s/%s", directory, filename);
+			char filepath[SYS_MAX_PATH + 1] = { 0 };
+			snprintf(filepath, SYS_MAX_PATH + 1, "%s/%s", directory, filename);
 
 			Sys_Stat(filepath, &filelist[index]);
 			index++;
