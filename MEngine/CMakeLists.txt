@@ -135,7 +135,7 @@ if(MSVC)
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")																	# CLANG compiler options
 	target_compile_options(MEngine PRIVATE "-Wall" "-Werror" "-Wpedantic" "-ffast-math" "-fanalyzer")			# Common options for all build types
 	if(CMAKE_BUILD_TYPE STREQUAL "Debug")																		# Debug build compiler options
-		target_compile_options(MEngine PRIVATE "-g" "-fsanitize=address" "-O0")
+		target_compile_options(MEngine PRIVATE "-g" "-O0")
 	elseif(CMAKE_BUILD_TYPE STREQUAL "Release")																	# Release build compiler options
 		target_compile_options(MEngine PRIVATE "-O3" "-flto")
 	endif()
@@ -143,7 +143,7 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")																	# CLANG compiler 
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")																	# GCC compiler options
 	target_compile_options(MEngine PRIVATE "-Wall" "-Werror" "-Wpedantic" "-ffast-math" "-fanalyzer")			# Common options for all build types
 	if(CMAKE_BUILD_TYPE STREQUAL "Debug")																		# Debug build compiler options
-		target_compile_options(MEngine PRIVATE "-g" "-fsanitize=address" "-O0")
+		target_compile_options(MEngine PRIVATE "-g" "-O0")
 	elseif(CMAKE_BUILD_TYPE STREQUAL "Release")																	# Release build compiler options
 		target_compile_options(MEngine PRIVATE "-O3" "-flto")
 	endif()
