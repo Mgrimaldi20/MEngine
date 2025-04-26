@@ -2,7 +2,7 @@
 # project specific logic here.
 #
 
-# Add source to this project's executable.
+# Add source to this project's executable
 add_executable(MEngine)
 
 if(CMAKE_VERSION VERSION_GREATER 3.25)
