@@ -109,5 +109,9 @@ int WINAPI wWinMain(HINSTANCE hinst, HINSTANCE hprevinst, PWSTR pcmdline, int nc
 		}
 	}
 
+	UnmapViewOfFile(emstatus);
+	CloseHandle(mapfile);
+	fclose(logfile);
+
 	return(0);
 }
