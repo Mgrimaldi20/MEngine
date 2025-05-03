@@ -80,14 +80,21 @@ int WINAPI wWinMain(HINSTANCE hinst, HINSTANCE hprevinst, PWSTR pcmdline, int nc
 
 	while (1)
 	{
-		if (emstatus->status == EMSTATUS_OK)
+		if (emstatus->status == EMSTATUS_EXIT_OK)
 		{
 			fprintf(logfile, "No errors occurred during engine runtime, exiting successfully\n");
 			fflush(logfile);
 			break;
 		}
 
-		if (emstatus->status == EMSTATUS_ERROR)
+		if (emstatus->status == EMSTATUS_EXIT_ERROR)
+		{
+			fprintf(logfile, "The engine has exited due to a known error, please check the main engine logs for information\n");
+			fflush(logfile);
+			break;
+		}
+
+		if (emstatus->status != EMSTATUS_OK)
 		{
 			wchar_t wlpmsgbuf[1024] = { 0 };
 			_snwprintf(wlpmsgbuf, 1023, L"An error has occurred during engine runtime, please check file [%s] for stack trace\n", logfullpath);
