@@ -39,9 +39,22 @@ elseif(LINUX OR APPLE)
 endif()
 
 # Common source files, all this code is Operating System independent
-target_sources(MEngine PRIVATE
+target_sources(EMCrashHandler PRIVATE
 	"src/emstatus.h"
 )
+
+# Set up all the linker options here
+if(WIN32)
+	target_compile_definitions(EMCrashHandler PRIVATE UNICODE _UNICODE)				# Make sure Windows uses Unicode
+
+	if(MSVC)
+		target_link_options(EMCrashHandler PRIVATE "/SUBSYSTEM:WINDOWS")
+	elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+		set_target_properties(EMCrashHandler PROPERTIES LINK_FLAGS "-mwindows")
+	elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+		set_target_properties(EMCrashHandler PROPERTIES LINK_FLAGS "-mwindows")
+	endif()
+endif()
 
 # Set up all the compiler options here
 if(MSVC)
