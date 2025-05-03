@@ -6,8 +6,9 @@
 
 typedef enum
 {
-	EMSTATUS_OK = 0,
-	EMSTATUS_ERROR = 1
+	EMSTATUS_OK = 0,		// heartbeat signal, the engine is running fine
+	EMSTATUS_EXIT_OK,		// exit code, the engine has exited successfully and with no errors
+	EMSTATUS_EXIT_ERROR		// exit code, the engine has exited with a known error
 } emstatuscode_t;
 
 typedef struct
