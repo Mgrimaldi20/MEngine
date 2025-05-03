@@ -12,13 +12,6 @@ int main(int argc, char **argv)
 		return(1);
 	}
 
-	if (ftruncate(fd, sizeof(emstatus_t)) == -1)
-	{
-		perror("ftruncate");
-		close(fd);
-		return(1);
-	}
-
 	emstatus_t *emstatus = mmap(NULL, sizeof(emstatus_t), PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
 	if (emstatus == MAP_FAILED)
 	{
