@@ -96,11 +96,11 @@ int WINAPI wWinMain(HINSTANCE hinst, HINSTANCE hprevinst, PWSTR pcmdline, int nc
 			MessageBox(NULL, wlpmsgbuf, L"EMCrashHandler: ERROR", MB_OK | MB_ICONINFORMATION);
 			fwprintf(logfile, wlpmsgbuf);
 
-			for (int i=0; i<EMTRACE_MAX_LINES; i++)
+			for (int i=0; i<EMTRACE_MAX_FRAMES; i++)
 			{
 				if (emstatus->stacktrace[i][0] != '\0')
 				{
-					fprintf(logfile, "[EMSTATUS_ERROR] %s\n", emstatus->stacktrace[i]);
+					fprintf(logfile, "[EMSTATUS_ERROR] | %s\n", emstatus->stacktrace[i]);
 					fflush(logfile);
 				}
 			}
