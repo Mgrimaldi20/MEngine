@@ -9,6 +9,7 @@
 #include "sys/sys.h"
 #include "common/common.h"
 #include "winlocal.h"
+#include "../../../../EMCrashHandler/src/emstatus.h"
 
 struct thread
 {
@@ -31,6 +32,12 @@ struct condvar
 static thread_t threads[SYS_MAX_THREADS];
 static mutex_t mutexes[SYS_MAX_MUTEXES];
 static condvar_t condvars[SYS_MAX_CONDVARS];
+
+static HANDLE emchmapfile;
+static emstatus_t *emchstatus;
+
+static STARTUPINFO si;
+static PROCESS_INFORMATION pi;
 
 static bool initialized;
 
@@ -78,11 +85,9 @@ bool Sys_Init(void)
 			"but should work on older OS versions, use with caution"
 		);
 
-	else if ((win32state.osver.dwMajorVersion < 6) || (win32state.osver.dwMajorVersion == 6 && win32state.osver.dwMinorVersion < 2))
-	{
+	else if ((win32state.osver.dwMajorVersion < 6)
+		|| (win32state.osver.dwMajorVersion == 6 && win32state.osver.dwMinorVersion < 2))
 		Sys_Error("Requires Windows 8 or greater");
-		return(false);
-	}
 
 	Log_Writef(LOG_INFO, "System memory: %lluMB", Sys_GetSystemMemory());
 	Log_Writef(LOG_INFO, "System supports max threads: %lu", Sys_GetMaxThreads());
@@ -99,6 +104,69 @@ bool Sys_Init(void)
 
 	Cvar_RegisterString("g_gamedll", "DemoGame.dll", CVAR_GAME, "The name of the game DLL for Windows systems");
 
+	// create the crash handler shm region and start the process
+	emchmapfile = CreateFileMapping(
+		INVALID_HANDLE_VALUE,
+		NULL,
+		PAGE_READWRITE,
+		0,
+		sizeof(emstatus_t),
+		L"EMCrashHandlerFileMapping"
+	);
+
+	if (!emchmapfile)
+	{
+		Log_Write(LOG_ERROR, "Failed to create file mapping for crash handler");
+		WindowsError();
+	}
+
+	if (emchmapfile)	// should always be valid, WindowsError() will call exit()
+	{
+		emchstatus = MapViewOfFile(
+			emchmapfile,
+			FILE_MAP_ALL_ACCESS,
+			0,
+			0,
+			sizeof(emstatus_t)
+		);
+	}
+
+	if (!emchstatus)
+	{
+		Log_Write(LOG_ERROR, "Failed to map view of file for crash handler");
+		WindowsError();
+	}
+
+	ZeroMemory(&si, sizeof(si));
+	si.cb = sizeof(si);
+	ZeroMemory(&pi, sizeof(pi));
+
+	static wchar_t *emchargv[] =	// static so it doesnt disappear
+	{
+		L"logs",
+		NULL
+	};
+
+	if (!CreateProcess(
+		L"EMCrashHandler.exe",
+		emchargv[0],
+		NULL,
+		NULL,
+		FALSE,
+		0,
+		NULL,
+		NULL,
+		&si,
+		&pi
+	))
+	{
+		Log_Write(LOG_ERROR, "Failed to create Crash Handler process");
+		WindowsError();
+	}
+
+	if (emchstatus)		// this will also always be valid due to the above check and WindowsError() call if error
+		emchstatus->status = EMSTATUS_EXIT_OK;
+
 	initialized = true;
 
 	return(true);
@@ -110,10 +178,31 @@ bool Sys_Init(void)
 */
 void Sys_Shutdown(void)
 {
-	if (!initialized)
-		return;
-
 	Log_Write(LOG_INFO, "Shutting down system");
+
+	if (pi.hProcess)
+	{
+		CloseHandle(pi.hProcess);
+		pi.hProcess = NULL;
+	}
+
+	if (pi.hThread)
+	{
+		CloseHandle(pi.hThread);
+		pi.hThread = NULL;
+	}
+
+	if (emchstatus)
+	{
+		UnmapViewOfFile(emchstatus);
+		emchstatus = NULL;
+	}
+
+	if (emchmapfile)
+	{
+		CloseHandle(emchmapfile);
+		emchmapfile = NULL;
+	}
 
 	initialized = false;
 }

@@ -180,21 +180,21 @@ static bool CreateFakeWindowExt(void)
 	);
 
 	if (!hwnd)
-	{
 		Sys_Error("%s: Could not create fake window for WGL extensions", __func__);
-		return(false);
+
+	if (hwnd)	// Sys_Error calls exit(), but for some reason MSVC brokenly complains
+	{
+		HDC hdc = GetDC(hwnd);
+		HGLRC hglrc = wglCreateContext(hdc);
+		wglMakeCurrent(hdc, hglrc);
+
+		GetWGLExtensions(hdc);
+
+		wglDeleteContext(hglrc);
+		ReleaseDC(hwnd, hdc);
+
+		DestroyWindow(hwnd);
 	}
-
-	HDC hdc = GetDC(hwnd);
-	HGLRC hglrc = wglCreateContext(hdc);
-	wglMakeCurrent(hdc, hglrc);
-
-	GetWGLExtensions(hdc);
-
-	wglDeleteContext(hglrc);
-	ReleaseDC(hwnd, hdc);
-
-	DestroyWindow(hwnd);
 
 	MSG msg;
 	while (GetMessage(&msg, NULL, 0, 0))
@@ -659,7 +659,7 @@ bool GLWnd_Init(glwndparams_t params)
 	if (!EMGL_Init("opengl32.dll"))	// initialize the gl function calls and load the OpenGL library
 		return(false);
 
-	Log_Write(LOG_INFO, "OpenGL initalised and created window");
+	Log_Write(LOG_INFO, "OpenGL initalised and window has been created");
 
 	return(true);
 }

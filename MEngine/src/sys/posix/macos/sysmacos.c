@@ -25,10 +25,7 @@ bool Sys_Init(void)
 		);
 
 	else if (strcmp(posixstate.osinfo.sysname, "Darwin") != 0)
-	{
 		Sys_Error("Requires MacOS to run, you are using: %s", posixstate.osinfo.sysname);
-		return(false);
-	}
 
 	Cvar_RegisterString("g_gamedll", "./DemoGame.dylib", CVAR_GAME, "The name of the game DLL for MacOS systems");
 

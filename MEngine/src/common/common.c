@@ -208,18 +208,13 @@ static bool InitGame(void)
 	
 	getmservices_t GetMServices = (getmservices_t)proc.func;	// fun type punning
 	if (!GetMServices)
-	{
 		Sys_Error("Failed to get GetMServices function, handshake failed, could not load function pointers");
-		return(false);
-	}
 
-	gameservices = *GetMServices(&mservices);
+	if (GetMServices)	// again should be valid as Sys_Error throws an exception
+		gameservices = *GetMServices(&mservices);
 
 	if (gameservices.version != MENGINE_VERSION)
-	{
 		Sys_Error("Game DLL version and Engine version mismatch: (Game: %d), (Engine: %d)", gameservices.version, MENGINE_VERSION);
-		return(false);
-	}
 
 	if (!Render_Init())
 	{

@@ -3,6 +3,7 @@
 
 #include <shellapi.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include "../emstatus.h"
 
 #pragma warning(disable: 28251)		// disables windows annotations warning
@@ -29,10 +30,11 @@ int WINAPI wWinMain(HINSTANCE hinst, HINSTANCE hprevinst, PWSTR pcmdline, int nc
 {
 	(HINSTANCE)hinst;
 	(HINSTANCE)hprevinst;
+	(PWSTR)pcmdline;
 	(int)ncmdshow;
 
 	int argc = 0;
-	LPWSTR *argv = CommandLineToArgvW(pcmdline, &argc);	// quirky function that will not return the exe name in the string if pcmdline is not NULL
+	LPWSTR *argv = CommandLineToArgvW(GetCommandLine(), &argc);	// quirky function that will not return the exe name in the string if pcmdline is not NULL
 	if (!argv)
 	{
 		WindowsError();
@@ -47,8 +49,6 @@ int WINAPI wWinMain(HINSTANCE hinst, HINSTANCE hprevinst, PWSTR pcmdline, int nc
 	if (pcmdline)
 		_snwprintf(logfullpath, MAX_PATH - 1, L"%s\\%s", argv[0], logfilename);
 
-	LocalFree(argv);	// CommandLineToArgvW allocates memory for argv
-
 	logfullpath[MAX_PATH - 1] = L'\0';
 	FILE *logfile = _wfopen(logfullpath, L"w+");
 	if (!logfile)
@@ -58,8 +58,75 @@ int WINAPI wWinMain(HINSTANCE hinst, HINSTANCE hprevinst, PWSTR pcmdline, int nc
 		errormsg[1023] = L'\0';
 
 		MessageBox(NULL, errormsg, L"EMCrashHandler: Cannot Open Log File", MB_OK | MB_ICONINFORMATION);
+		LocalFree(argv);
 		return(1);
 	}
+
+	fprintf(logfile, "Starting crash handler\n");
+
+	char logfullpatha[MAX_PATH] = { 0 };
+	if (!WideCharToMultiByte(CP_UTF8, 0, logfullpath, -1, logfullpatha, MAX_PATH, NULL, NULL))
+	{
+		fprintf(logfile, "Failed to convert command line to UTF-8\n");
+		fclose(logfile);
+		LocalFree(argv);
+		return(1);
+	}
+
+	fprintf(logfile, "Opening logs at: %s\n", logfullpatha);
+
+	if (!pcmdline)
+		fprintf(logfile, "Command line is NULL\n");
+
+	fflush(logfile);
+
+	LPSTR *argva = malloc(sizeof(LPSTR) * argc);
+	if (!argva)
+	{
+		fprintf(logfile, "Failed to allocate memory for command line arguments\n");
+		fclose(logfile);
+		LocalFree(argv);
+		return(1);
+	}
+
+	for (int i=0; i<argc; i++)
+	{
+		argva[i] = malloc(MAX_PATH);
+		if (!argva[i])
+		{
+			fprintf(logfile, "Failed to allocate memory for argument %d\n", i);
+			fclose(logfile);
+
+			for (int j=0; j<i; j++)
+				free(argva[j]);
+
+			free(argva);
+			LocalFree(argv);
+			return(1);
+		}
+
+		if (!WideCharToMultiByte(CP_UTF8, 0, argv[i], -1, argva[i], MAX_PATH, NULL, NULL))
+		{
+			fprintf(logfile, "Failed to convert command line argument to UTF-8\n");
+			fclose(logfile);
+
+			for (int j=0; j<=i; j++)
+				free(argva[j]);
+
+			free(argva);
+			LocalFree(argv);
+			return(1);
+		}
+	}
+
+	fprintf(logfile, "Command line arguments: Argc = [%d]:\n", argc);
+	for (int i=0; i<argc; i++)
+	{
+		fprintf(logfile, "\tArgv[%d]: %s\n", i, argva[i]);
+		fflush(logfile);
+	}
+
+	LocalFree(argv);	// CommandLineToArgvW allocates memory for argv
 
 	HANDLE mapfile = OpenFileMapping(FILE_MAP_ALL_ACCESS, FALSE, L"EMCrashHandlerFileMapping");
 	if (!mapfile)
@@ -101,7 +168,12 @@ int WINAPI wWinMain(HINSTANCE hinst, HINSTANCE hprevinst, PWSTR pcmdline, int nc
 			wlpmsgbuf[1023] = L'\0';
 
 			MessageBox(NULL, wlpmsgbuf, L"EMCrashHandler: ERROR", MB_OK | MB_ICONINFORMATION);
-			fwprintf(logfile, wlpmsgbuf);
+
+			char msgbuf[1024] = { 0 };
+			WideCharToMultiByte(CP_UTF8, 0, wlpmsgbuf, -1, msgbuf, 1023, NULL, NULL);
+			msgbuf[1023] = '\0';
+
+			fprintf(logfile, "[EMSTATUS_ERROR] | %s\n", msgbuf);
 
 			for (int i=0; i<EMTRACE_MAX_FRAMES; i++)
 			{
