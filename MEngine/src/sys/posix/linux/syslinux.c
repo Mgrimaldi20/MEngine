@@ -25,10 +25,7 @@ bool Sys_Init(void)
 		);
 
 	else if (strcmp(posixstate.osinfo.sysname, "Linux") != 0)
-	{
 		Sys_Error("Requires a Linux OS to run, you are using: %s", posixstate.osinfo.sysname);
-		return(false);
-	}
 
 	Cvar_RegisterString("g_gamedll", "./DemoGame.so", CVAR_GAME, "The name of the game DLL for Linux systems");
 

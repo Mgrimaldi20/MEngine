@@ -3,7 +3,7 @@
 #include "common/common.h"
 #include "sys/sys.h"
 
-static void *gldllhandle;
+static void *dllhandle;
 
 static prochandle_t emgldebugmessagecallback;
 static prochandle_t emgldebugmessagecontrol;
@@ -21,20 +21,20 @@ PFNGLDEBUGMESSAGECONTROLPROC glDebugMessageControl;
 */
 bool EMGL_Init(const char *dllname)
 {
-	if (gldllhandle)
+	if (dllhandle)
 		return(true);
 
 	Log_Writef(LOG_INFO, "Loading OpenGL library: %s", dllname);
 
-	gldllhandle = Sys_LoadDLL(dllname);
-	if (!gldllhandle)
+	dllhandle = Sys_LoadDLL(dllname);
+	if (!dllhandle)
 	{
 		Log_Writef(LOG_INFO, "Failed to load OpenGL library: %s", dllname);
 		return(false);
 	}
 
-	emgldebugmessagecallback.obj = GLWnd_GetProcAddressGL(gldllhandle, "glDebugMessageCallback");
-	emgldebugmessagecontrol.obj = GLWnd_GetProcAddressGL(gldllhandle, "glDebugMessageControl");
+	emgldebugmessagecallback.obj = GLWnd_GetProcAddressGL(dllhandle, "glDebugMessageCallback");
+	emgldebugmessagecontrol.obj = GLWnd_GetProcAddressGL(dllhandle, "glDebugMessageControl");
 
 	glDebugMessageCallback = (PFNGLDEBUGMESSAGECALLBACKPROC)emgldebugmessagecallback.func;
 	glDebugMessageControl = (PFNGLDEBUGMESSAGECONTROLPROC)emgldebugmessagecontrol.func;
@@ -50,10 +50,10 @@ void EMGL_Shutdown(void)
 {
 	Log_Writef(LOG_INFO, "Shutting down OpenGL library");
 
-	if (gldllhandle)
+	if (dllhandle)
 	{
-		Sys_UnloadDLL(gldllhandle);
-		gldllhandle = NULL;
+		Sys_UnloadDLL(dllhandle);
+		dllhandle = NULL;
 	}
 
 	glDebugMessageCallback = NULL;
