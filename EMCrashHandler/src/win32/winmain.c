@@ -168,7 +168,7 @@ int WINAPI wWinMain(HINSTANCE hinst, HINSTANCE hprevinst, PWSTR pcmdline, int nc
 			break;
 		}
 
-		if (emstatus || emstatus->status != EMSTATUS_OK)
+		if (!emstatus || emstatus->status != EMSTATUS_OK)
 		{
 			wchar_t wlpmsgbuf[1024] = { 0 };
 			_snwprintf(wlpmsgbuf, 1023, L"An error has occurred during engine runtime, please check file [%s] for stack trace\n", logfullpath);

@@ -6,7 +6,8 @@
 
 typedef enum
 {
-	EMSTATUS_OK = 0,		// heartbeat signal, the engine is running fine
+	EMSTATUS_NONE = 0,		// this is what the engine will reset the heartbeat to
+	EMSTATUS_OK,			// heartbeat signal, the engine is running fine
 	EMSTATUS_EXIT_OK,		// exit code, the engine has exited successfully and with no errors
 	EMSTATUS_EXIT_ERROR		// exit code, the engine has exited with a known error
 } emstatuscode_t;
