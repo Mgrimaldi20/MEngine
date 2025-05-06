@@ -10,9 +10,12 @@
 #include <pthread.h>
 #include <dirent.h>
 #include <fnmatch.h>
+#include <fcntl.h>
+#include <sys/mman.h>
 #include "sys/sys.h"
 #include "common/common.h"
 #include "posixlocal.h"
+#include "../../../../EMCrashHandler/src/emstatus.h"
 
 struct thread
 {
@@ -35,6 +38,11 @@ struct condvar
 static thread_t threads[SYS_MAX_THREADS];
 static mutex_t mutexes[SYS_MAX_MUTEXES];
 static condvar_t condvars[SYS_MAX_CONDVARS];
+
+static int emchfd;
+static emstatus_t *emchstatus;
+
+static pid_t emchpid;
 
 /*
 * Function: SysInitCommon
@@ -61,13 +69,33 @@ bool SysInitCommon(void)
 	Log_Writef(LOG_INFO, "System supports max threads: %lu", Sys_GetMaxThreads());
 
 	struct rlimit rl;
-	if (getrlimit(RLIMIT_STACK, &rl) != 0)
-	{
-		Log_Write(LOG_ERROR, "Failed to get the stack size");
-		return(false);
-	}
+	if (getrlimit(RLIMIT_STACK, &rl) == 0)
+		Log_Writef(LOG_INFO, "Stack size: %juMB", (uintmax_t)(rl.rlim_cur / (1024 * 1024)));
 
-	Log_Writef(LOG_INFO, "Stack size: %juMB", (uintmax_t)(rl.rlim_cur / (1024 * 1024)));
+	emchfd = shm_open("/EMCrashHandlerFileMapping", O_CREAT | O_EXCL | O_RDWR, 0600);
+	if (emchfd == -1)
+		Sys_Error("Failed to create shared memory file mapping: %s", strerror(errno));
+
+	if (ftruncate(emchfd, sizeof(emstatus_t)) == -1)
+		Sys_Error("Failed to set the size of the shared memory file mapping: %s", strerror(errno));
+
+	emchstatus = mmap(NULL, sizeof(emstatus_t), PROT_READ | PROT_WRITE, MAP_SHARED, emchfd, 0);
+	if (emchstatus == MAP_FAILED)
+		Sys_Error("Failed to map the shared memory file mapping: %s", strerror(errno));
+
+	switch (fork())
+	{
+		case -1:
+			Sys_Error("Failed to fork the process to start the crash handler: %s", strerror(errno));	// calls exit(), no need to break
+
+		case 0:		// child process
+			if (execl("EMCrashHandler", "logs", NULL) == -1)
+				Sys_Error("Failed to start the crash handler process: %s", strerror(errno));
+
+		default:	// parent process, fallthrough
+			emchpid = getpid();
+			break;
+	}
 
 	return(true);
 }
@@ -78,10 +106,26 @@ bool SysInitCommon(void)
 */
 void Sys_Shutdown(void)
 {
-	if (!posixstate.initialized)
-		return;
-
 	Log_Write(LOG_INFO, "Shutting down system");
+
+	if (emchstatus)
+	{
+		munmap(emchstatus, sizeof(emstatus_t));
+		emchstatus = NULL;
+	}
+
+	if (emchfd != -1)
+	{
+		close(emchfd);
+		shm_unlink("/EMCrashHandlerFileMapping");
+		emchfd = -1;
+	}
+
+	if (emchpid != -1)
+	{
+		kill(emchpid, SIGKILL);
+		emchpid = -1;
+	}
 
 	posixstate.initialized = false;
 }
