@@ -42,7 +42,7 @@ int main(int argc, char **argv)
 	}
 
 	emstatus_t *emstatus = mmap(NULL, sizeof(emstatus_t), PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-	if (emstatus == MAP_FAILED)
+	if (emstatus == MAP_FAILED || !emstatus)
 	{
 		PrintError("Error mapping the shared memory file");
 		close(fd);
@@ -52,27 +52,27 @@ int main(int argc, char **argv)
 
 	while (1)
 	{
-		if (emstatus && emstatus->userdata[0] != '\0')
+		if (emstatus->userdata[0] != '\0')
 		{
 			fprintf(logfile, "Writing User Data:\n\t%s\n", emstatus->userdata);
 			fflush(logfile);
 		}
 
-		if (emstatus && emstatus->status == EMSTATUS_EXIT_OK)
+		if (emstatus->status == EMSTATUS_EXIT_OK)
 		{
 			fprintf(logfile, "No errors occurred during engine runtime, exiting successfully\n");
 			fflush(logfile);
 			break;
 		}
 
-		if (emstatus && emstatus->status == EMSTATUS_EXIT_ERROR)
+		if (emstatus->status == EMSTATUS_EXIT_ERROR)
 		{
 			fprintf(logfile, "The engine has exited due to a known error, please check the main engine logs for information\n");
 			fflush(logfile);
 			break;
 		}
 
-		if (emstatus || emstatus->status != EMSTATUS_OK)
+		if (emstatus->status != EMSTATUS_OK)
 		{
 			fprintf(logfile, "[EMSTATUS_ERROR] | An error has occurred during engine runtime, please check file[%s] for stack trace\n", logfullpath);
 
@@ -87,6 +87,8 @@ int main(int argc, char **argv)
 
 			break;
 		}
+
+		emstatus->status = EMSTATUS_NONE;	// reset back to none and wait for the next heartbeat
 	}
 
 	if (munmap(emstatus, sizeof(emstatus_t)) != 0)

@@ -9,6 +9,7 @@
 #include "sys/sys.h"
 #include "common/common.h"
 #include "winlocal.h"
+#include <DbgHelp.h>
 #include "../../../../EMCrashHandler/src/emstatus.h"
 
 struct thread
@@ -39,7 +40,58 @@ static emstatus_t *emchstatus;
 static STARTUPINFO si;
 static PROCESS_INFORMATION pi;
 
+static thread_t *emchthread;
+static volatile bool stopthreads;
+
 static bool initialized;
+
+/*
+* Function: CrashHandlerLoop
+* Sends signals and stack trace information to the EMCrashHandler process in a loop on its own thread
+* 
+*	args: The arguments to pass to the function, unused for this function
+* 
+* Returns: NULL, the thread will exit when the function returns
+*/
+static void *CrashHandlerLoop(void *args)
+{
+	while (!stopthreads)
+	{
+		HANDLE process = (HANDLE)args;
+		SymInitialize(process, NULL, TRUE);
+
+		void *stack[EMTRACE_MAX_FRAMES] = { 0 };
+		unsigned short frames = CaptureStackBackTrace(0, EMTRACE_MAX_FRAMES, stack, NULL);
+
+		SYMBOL_INFO *symbol = calloc(sizeof(SYMBOL_INFO) + EMTRACE_MAX_FRAME_LEN, sizeof(char));
+		if (!symbol)
+		{
+			Log_Write(LOG_WARN, "Failed to allocate memory for symbol, cannot produce backtrace for this itteration");
+			break;
+		}
+
+		symbol->SizeOfStruct = sizeof(SYMBOL_INFO);
+		symbol->MaxNameLen = EMTRACE_MAX_FRAME_LEN - 1;
+
+		for (unsigned int i=0; i<frames; i++)
+		{
+			if (SymFromAddr(process, (DWORD64)(stack[i]), 0, symbol))
+			{
+				snprintf(emchstatus->stacktrace[i], EMTRACE_MAX_FRAME_LEN, "Frame %u: %s - 0x%llx", i, symbol->Name, (DWORD64)symbol->Address);
+				emchstatus->stacktrace[i][EMTRACE_MAX_FRAME_LEN - 1] = '\0';
+				continue;
+			}
+
+			Log_Writef(LOG_WARN, "Failed to get symbol information for stack frame %u", i);
+			snprintf(emchstatus->stacktrace[i], EMTRACE_MAX_FRAME_LEN, "Frame %u: Unknown - 0x%llx", i, (DWORD64)stack[i]);
+		}
+
+		free(symbol);
+		SymCleanup(process);
+	}
+
+	return(NULL);
+}
 
 /*
 * Function: Sys_Init
@@ -129,12 +181,24 @@ bool Sys_Init(void)
 			0,
 			sizeof(emstatus_t)
 		);
+
+		if (!emchstatus)
+		{
+			Log_Write(LOG_ERROR, "Failed to map view of file for crash handler");
+			WindowsError();
+		}
 	}
 
-	if (!emchstatus)
+	if (emchstatus)
+		emchstatus->status = EMSTATUS_OK;
+
+	emchthread = Sys_CreateThread(CrashHandlerLoop, OpenThread(THREAD_ALL_ACCESS, FALSE, GetCurrentThreadId()));
+	if (!emchthread)
 	{
-		Log_Write(LOG_ERROR, "Failed to map view of file for crash handler");
-		WindowsError();
+		if (emchstatus)
+			emchstatus->status = EMSTATUS_EXIT_ERROR;
+
+		Sys_Error("Failed to create Crash Handler thread");
 	}
 
 	ZeroMemory(&si, sizeof(si));
@@ -164,8 +228,8 @@ bool Sys_Init(void)
 		WindowsError();
 	}
 
-	if (emchstatus)		// this will also always be valid due to the above check and WindowsError() call if error
-		emchstatus->status = EMSTATUS_EXIT_OK;
+	if (emchstatus)
+		emchstatus->status = EMSTATUS_NONE;
 
 	initialized = true;
 
@@ -179,6 +243,13 @@ bool Sys_Init(void)
 void Sys_Shutdown(void)
 {
 	Log_Write(LOG_INFO, "Shutting down system");
+
+	if (emchthread)
+	{
+		stopthreads = true;
+		Sys_JoinThread(emchthread);
+		emchthread = NULL;
+	}
 
 	if (pi.hProcess)
 	{

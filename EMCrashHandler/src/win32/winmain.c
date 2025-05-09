@@ -147,28 +147,28 @@ int WINAPI wWinMain(HINSTANCE hinst, HINSTANCE hprevinst, PWSTR pcmdline, int nc
 
 	while (1)
 	{
-		if (emstatus && emstatus->userdata[0] != '\0')
+		if (emstatus->userdata[0] != '\0')
 		{
 			fprintf(logfile, "Writing User Data:\n");
 			fprintf(logfile, "\t%s\n", emstatus->userdata);
 			fflush(logfile);
 		}
 
-		if (emstatus && emstatus->status == EMSTATUS_EXIT_OK)
+		if (emstatus->status == EMSTATUS_EXIT_OK)
 		{
 			fprintf(logfile, "No errors occurred during engine runtime, exiting successfully\n");
 			fflush(logfile);
 			break;
 		}
 
-		if (emstatus && emstatus->status == EMSTATUS_EXIT_ERROR)
+		if (emstatus->status == EMSTATUS_EXIT_ERROR)
 		{
 			fprintf(logfile, "The engine has exited due to a known error, please check the main engine logs for information\n");
 			fflush(logfile);
 			break;
 		}
 
-		if (!emstatus || emstatus->status != EMSTATUS_OK)
+		if (emstatus->status != EMSTATUS_OK)
 		{
 			wchar_t wlpmsgbuf[1024] = { 0 };
 			_snwprintf(wlpmsgbuf, 1023, L"An error has occurred during engine runtime, please check file [%s] for stack trace\n", logfullpath);
@@ -180,7 +180,7 @@ int WINAPI wWinMain(HINSTANCE hinst, HINSTANCE hprevinst, PWSTR pcmdline, int nc
 			WideCharToMultiByte(CP_UTF8, 0, wlpmsgbuf, -1, msgbuf, 1023, NULL, NULL);
 			msgbuf[1023] = '\0';
 
-			fprintf(logfile, "[EMSTATUS_ERROR] | %s\n", msgbuf);
+			fprintf(logfile, "\n[EMSTATUS_ERROR] | %s\n", msgbuf);
 
 			for (int i=0; i<EMTRACE_MAX_FRAMES; i++)
 			{
@@ -193,6 +193,8 @@ int WINAPI wWinMain(HINSTANCE hinst, HINSTANCE hprevinst, PWSTR pcmdline, int nc
 
 			break;
 		}
+
+		//emstatus->status = EMSTATUS_NONE;	// reset back to none and wait for the next heartbeat
 	}
 
 	UnmapViewOfFile(emstatus);
