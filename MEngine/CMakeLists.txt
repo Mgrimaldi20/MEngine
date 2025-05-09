@@ -98,6 +98,11 @@ if(WIN32)
 	endif()
 endif()
 
+# Add the Win32 DbgHelp library to the project and link to target
+if(WIN32)
+	target_link_libraries(MEngine PRIVATE Dbghelp)
+endif()
+
 # Add the OpenGL GLU library to the project and link to target
 if(WIN32)
 	target_link_libraries(MEngine PRIVATE opengl32 glu32)

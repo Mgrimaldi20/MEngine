@@ -72,9 +72,13 @@ bool SysInitCommon(void)
 	if (getrlimit(RLIMIT_STACK, &rl) == 0)
 		Log_Writef(LOG_INFO, "Stack size: %juMB", (uintmax_t)(rl.rlim_cur / (1024 * 1024)));
 
+	// create the crash handler shm region and start the process
 	emchfd = shm_open("/EMCrashHandlerFileMapping", O_CREAT | O_EXCL | O_RDWR, 0600);
 	if (emchfd == -1)
 		Sys_Error("Failed to create shared memory file mapping: %s", strerror(errno));
+
+	if (shm_unlink("/EMCrashHandlerFileMapping") == -1)
+		Sys_Error("Failed to unlink the shared memory file mapping: %s", strerror(errno));
 
 	if (ftruncate(emchfd, sizeof(emstatus_t)) == -1)
 		Sys_Error("Failed to set the size of the shared memory file mapping: %s", strerror(errno));
@@ -117,7 +121,6 @@ void Sys_Shutdown(void)
 	if (emchfd != -1)
 	{
 		close(emchfd);
-		shm_unlink("/EMCrashHandlerFileMapping");
 		emchfd = -1;
 	}
 

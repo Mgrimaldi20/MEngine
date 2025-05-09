@@ -148,6 +148,8 @@ static void FormatSessionEntry(const char *logfullname)
 * Processes the log queue and writes the log entries to the log file in another thread
 * 
 *	args: The arguments to the thread function, unused for this function
+* 
+* Returns: NULL, the thread will exit when the function returns
 */
 static void *ProcessLogQueue(void *args)
 {
