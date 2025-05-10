@@ -124,12 +124,6 @@ void Sys_Shutdown(void)
 		emchfd = -1;
 	}
 
-	if (emchpid != -1)
-	{
-		kill(emchpid, SIGKILL);
-		emchpid = -1;
-	}
-
 	posixstate.initialized = false;
 }
 
