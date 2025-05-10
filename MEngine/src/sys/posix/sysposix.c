@@ -113,6 +113,9 @@ void Sys_Shutdown(void)
 	Log_Write(LOG_INFO, "Shutting down system");
 
 	if (emchstatus)
+		emchstatus->status = EMSTATUS_EXIT_OK;
+
+	if (emchstatus)
 	{
 		munmap(emchstatus, sizeof(emstatus_t));
 		emchstatus = NULL;

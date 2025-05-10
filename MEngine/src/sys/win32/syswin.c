@@ -244,6 +244,9 @@ void Sys_Shutdown(void)
 {
 	Log_Write(LOG_INFO, "Shutting down system");
 
+	if (emchstatus)
+		emchstatus->status = EMSTATUS_EXIT_OK;
+
 	if (emchthread)
 	{
 		stopthreads = true;
