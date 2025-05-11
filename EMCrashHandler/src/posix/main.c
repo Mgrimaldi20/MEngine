@@ -77,14 +77,14 @@ int main(int argc, char **argv)
 		{
 			fprintf(logfile, "[EMSTATUS_ERROR] | An error has occurred during engine runtime, please check file[%s] for stack trace\n", logfullpath);
 
-			/*for (int i=0; i<EMTRACE_MAX_FRAMES; i++)
+			for (int i=0; i<EMCH_MAX_FRAMES; i++)
 			{
 				if (emstatus->stacktrace[i][0] != '\0')
 				{
 					fprintf(logfile, "[EMSTATUS_ERROR] | %s\n", emstatus->stacktrace[i]);
 					fflush(logfile);
 				}
-			}*/
+			}
 
 			break;
 		}
