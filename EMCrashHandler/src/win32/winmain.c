@@ -200,14 +200,14 @@ int WINAPI wWinMain(HINSTANCE hinst, HINSTANCE hprevinst, PWSTR pcmdline, int nc
 
 			fprintf(logfile, "\n[EMSTATUS_ERROR] | %s\n", msgbuf);
 
-			/*for (int i=0; i<EMTRACE_MAX_FRAMES; i++)
+			for (int i=0; i<EMCH_MAX_FRAMES; i++)
 			{
 				if (emstatus->stacktrace[i][0] != '\0')
 				{
 					fprintf(logfile, "[EMSTATUS_ERROR] | %s\n", emstatus->stacktrace[i]);
 					fflush(logfile);
 				}
-			}*/
+			}
 
 			break;
 		}
