@@ -35,6 +35,10 @@ static mutex_t mutexes[SYS_MAX_MUTEXES];
 static condvar_t condvars[SYS_MAX_CONDVARS];
 
 static HANDLE emchmapfile;
+static HANDLE emchcloseevent;
+static HANDLE emchconnevent;
+static HANDLE emchmutexhb;
+
 static emstatus_t *emchstatus;
 
 static STARTUPINFO si;
@@ -44,54 +48,6 @@ static thread_t *emchthread;
 static volatile bool stopthreads;
 
 static bool initialized;
-
-/*
-* Function: CrashHandlerLoop
-* Sends signals and stack trace information to the EMCrashHandler process in a loop on its own thread
-* 
-*	args: The arguments to pass to the function, unused for this function
-* 
-* Returns: NULL, the thread will exit when the function returns
-*/
-static void *CrashHandlerLoop(void *args)
-{
-	while (!stopthreads)
-	{
-		HANDLE process = (HANDLE)args;
-		SymInitialize(process, NULL, TRUE);
-
-		void *stack[EMTRACE_MAX_FRAMES] = { 0 };
-		unsigned short frames = CaptureStackBackTrace(0, EMTRACE_MAX_FRAMES, stack, NULL);
-
-		SYMBOL_INFO *symbol = calloc(sizeof(SYMBOL_INFO) + EMTRACE_MAX_FRAME_LEN, sizeof(char));
-		if (!symbol)
-		{
-			Log_Write(LOG_WARN, "Failed to allocate memory for symbol, cannot produce backtrace for this itteration");
-			break;
-		}
-
-		symbol->SizeOfStruct = sizeof(SYMBOL_INFO);
-		symbol->MaxNameLen = EMTRACE_MAX_FRAME_LEN - 1;
-
-		for (unsigned int i=0; i<frames; i++)
-		{
-			if (SymFromAddr(process, (DWORD64)(stack[i]), 0, symbol))
-			{
-				snprintf(emchstatus->stacktrace[i], EMTRACE_MAX_FRAME_LEN, "Frame %u: %s - 0x%llx", i, symbol->Name, (DWORD64)symbol->Address);
-				emchstatus->stacktrace[i][EMTRACE_MAX_FRAME_LEN - 1] = '\0';
-				continue;
-			}
-
-			Log_Writef(LOG_WARN, "Failed to get symbol information for stack frame %u", i);
-			snprintf(emchstatus->stacktrace[i], EMTRACE_MAX_FRAME_LEN, "Frame %u: Unknown - 0x%llx", i, (DWORD64)stack[i]);
-		}
-
-		free(symbol);
-		SymCleanup(process);
-	}
-
-	return(NULL);
-}
 
 /*
 * Function: Sys_Init
@@ -189,16 +145,25 @@ bool Sys_Init(void)
 		}
 	}
 
-	if (emchstatus)
-		emchstatus->status = EMSTATUS_OK;
-
-	emchthread = Sys_CreateThread(CrashHandlerLoop, OpenThread(THREAD_ALL_ACCESS, FALSE, GetCurrentThreadId()));
-	if (!emchthread)
+	emchcloseevent = CreateEvent(NULL, TRUE, FALSE, L"EMCrashHandlerCloseEvent");
+	if (!emchcloseevent)
 	{
-		if (emchstatus)
-			emchstatus->status = EMSTATUS_EXIT_ERROR;
+		Log_Write(LOG_ERROR, "Failed to create close event for crash handler");
+		WindowsError();
+	}
 
-		Sys_Error("Failed to create Crash Handler thread");
+	emchconnevent = CreateEvent(NULL, FALSE, FALSE, L"EMCrashHandlerConnectEvent");
+	if (!emchconnevent)
+	{
+		Log_Write(LOG_ERROR, "Failed to create connect event for crash handler");
+		WindowsError();
+	}
+
+	emchmutexhb = CreateMutex(NULL, FALSE, L"EMCrashHandlerHeartbeatMutex");
+	if (!emchmutexhb)
+	{
+		Log_Write(LOG_ERROR, "Failed to create heartbeat mutex for crash handler");
+		WindowsError();
 	}
 
 	ZeroMemory(&si, sizeof(si));
@@ -228,8 +193,8 @@ bool Sys_Init(void)
 		WindowsError();
 	}
 
-	if (emchstatus)
-		emchstatus->status = EMSTATUS_NONE;
+	if (emchconnevent)
+		SetEvent(emchconnevent);
 
 	initialized = true;
 
@@ -244,8 +209,15 @@ void Sys_Shutdown(void)
 {
 	Log_Write(LOG_INFO, "Shutting down system");
 
+	SetEvent(emchcloseevent);
+
 	if (emchstatus)
+	{
 		emchstatus->status = EMSTATUS_EXIT_OK;
+
+		if (!win32state.errorindicator)
+			emchstatus->status = EMSTATUS_EXIT_ERROR;
+	}
 
 	if (emchthread)
 	{
@@ -278,6 +250,24 @@ void Sys_Shutdown(void)
 		emchmapfile = NULL;
 	}
 
+	if (emchcloseevent)
+	{
+		CloseHandle(emchcloseevent);
+		emchcloseevent = NULL;
+	}
+
+	if (emchconnevent)
+	{
+		CloseHandle(emchconnevent);
+		emchconnevent = NULL;
+	}
+
+	if (emchmutexhb)
+	{
+		CloseHandle(emchmutexhb);
+		emchmutexhb = NULL;
+	}
+
 	initialized = false;
 }
 
@@ -289,6 +279,8 @@ void Sys_Shutdown(void)
 */
 void Sys_Error(const char *error, ...)
 {
+	win32state.errorindicator = true;
+
 	va_list argptr;
 	char text[LOG_MAX_LEN] = { 0 };
 

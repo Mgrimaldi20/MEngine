@@ -16,6 +16,7 @@
 
 typedef struct
 {
+	bool errorindicator;
 	bool wndclassregistered;
 	bool fullscreen;
 	bool conshow;

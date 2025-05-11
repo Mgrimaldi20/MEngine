@@ -113,7 +113,12 @@ void Sys_Shutdown(void)
 	Log_Write(LOG_INFO, "Shutting down system");
 
 	if (emchstatus)
+	{
 		emchstatus->status = EMSTATUS_EXIT_OK;
+
+		if (!posixstate.errorindicator)
+			emchstatus->status = EMSTATUS_EXIT_ERROR;
+	}
 
 	if (emchstatus)
 	{

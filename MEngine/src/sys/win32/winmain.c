@@ -82,6 +82,8 @@ int WINAPI wWinMain(HINSTANCE hinst, HINSTANCE hprevinst, PWSTR pcmdline, int nc
 */
 void WindowsError(void)
 {
+	win32state.errorindicator = true;
+
 	LPVOID wlpmsgbuf;
 
 	FormatMessage(

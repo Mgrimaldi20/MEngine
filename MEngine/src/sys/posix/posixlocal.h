@@ -12,6 +12,7 @@
 
 typedef struct
 {
+	bool errorindicator;
 	bool initialized;
 	bool fullscreen;
 	int swapinterval;

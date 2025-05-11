@@ -145,6 +145,37 @@ int WINAPI wWinMain(HINSTANCE hinst, HINSTANCE hprevinst, PWSTR pcmdline, int nc
 		return(1);
 	}
 
+	HANDLE closeevent = OpenEvent(EVENT_ALL_ACCESS, FALSE, L"EMCrashHandlerCloseEvent");
+	if (!closeevent)
+	{
+		WindowsError();
+		UnmapViewOfFile(emstatus);
+		CloseHandle(mapfile);
+		fclose(logfile);
+		return(1);
+	}
+
+	HANDLE connevent = OpenEvent(EVENT_ALL_ACCESS, FALSE, L"EMCrashHandlerConnectEvent");
+	if (!connevent)
+	{
+		WindowsError();
+		CloseHandle(closeevent);
+		UnmapViewOfFile(emstatus);
+		CloseHandle(mapfile);
+		fclose(logfile);
+		return(1);
+	}
+
+	fprintf(logfile, "Waiting for engine to connect...\n");
+
+	if (WaitForSingleObject(connevent, INFINITE) == WAIT_OBJECT_0)
+	{
+		fprintf(logfile, "Engine connected\n");
+		fflush(logfile);
+
+		emstatus->connected = true;
+	}
+
 	while (1)
 	{
 		if (emstatus->userdata[0] != '\0')
@@ -154,21 +185,8 @@ int WINAPI wWinMain(HINSTANCE hinst, HINSTANCE hprevinst, PWSTR pcmdline, int nc
 			fflush(logfile);
 		}
 
-		if (emstatus->status == EMSTATUS_EXIT_OK)
-		{
-			fprintf(logfile, "No errors occurred during engine runtime, exiting successfully\n");
-			fflush(logfile);
-			break;
-		}
-
-		if (emstatus->status == EMSTATUS_EXIT_ERROR)
-		{
-			fprintf(logfile, "The engine has exited due to a known error, please check the main engine logs for information\n");
-			fflush(logfile);
-			break;
-		}
-
-		if (emstatus->status != EMSTATUS_OK)
+		HANDLE hbmutex = OpenMutex(SYNCHRONIZE, FALSE, L"EMCrashHandlerHeartbeatMutex");
+		if (!hbmutex)
 		{
 			wchar_t wlpmsgbuf[1024] = { 0 };
 			_snwprintf(wlpmsgbuf, 1023, L"An error has occurred during engine runtime, please check file [%s] for stack trace\n", logfullpath);
@@ -182,23 +200,36 @@ int WINAPI wWinMain(HINSTANCE hinst, HINSTANCE hprevinst, PWSTR pcmdline, int nc
 
 			fprintf(logfile, "\n[EMSTATUS_ERROR] | %s\n", msgbuf);
 
-			for (int i=0; i<EMTRACE_MAX_FRAMES; i++)
+			/*for (int i=0; i<EMTRACE_MAX_FRAMES; i++)
 			{
 				if (emstatus->stacktrace[i][0] != '\0')
 				{
 					fprintf(logfile, "[EMSTATUS_ERROR] | %s\n", emstatus->stacktrace[i]);
 					fflush(logfile);
 				}
-			}
+			}*/
 
 			break;
 		}
 
-		//emstatus->status = EMSTATUS_NONE;	// reset back to none and wait for the next heartbeat
+		CloseHandle(hbmutex);
+
+		if (WaitForSingleObject(closeevent, 0) == WAIT_OBJECT_0)
+		{
+			if (emstatus->status == EMSTATUS_EXIT_OK)
+				fprintf(logfile, "No errors occurred during engine runtime, exiting successfully\n");
+
+			if (emstatus->status == EMSTATUS_EXIT_ERROR)
+				fprintf(logfile, "The engine has exited due to a known error, please check the main engine logs for information\n");
+
+			fflush(logfile);
+			break;
+		}
 	}
 
 	UnmapViewOfFile(emstatus);
 	CloseHandle(mapfile);
+	CloseHandle(closeevent);
 	fclose(logfile);
 
 	return(0);
