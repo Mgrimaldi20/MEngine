@@ -56,11 +56,6 @@ if(WIN32)
 	endif()
 endif()
 
-# Add the Win32 DbgHelp library to the project and link to target
-if(WIN32)
-	target_link_libraries(EMCrashHandler PRIVATE Dbghelp)
-endif()
-
 # Set up all the compiler options here
 if(MSVC)
 	target_compile_options(EMCrashHandler PRIVATE "/W4" "/WX" "/permissive-" "/analyze" "/fp:fast" "/FAs")		# Common options for all build types
