@@ -145,28 +145,17 @@ int WINAPI wWinMain(HINSTANCE hinst, HINSTANCE hprevinst, PWSTR pcmdline, int nc
 		return(1);
 	}
 
-	HANDLE closeevent = OpenEvent(EVENT_ALL_ACCESS, FALSE, L"EMCrashHandlerCloseEvent");
-	if (!closeevent)
-	{
-		WindowsError();
-		UnmapViewOfFile(emstatus);
-		CloseHandle(mapfile);
-		fclose(logfile);
-		return(1);
-	}
-
 	HANDLE connevent = OpenEvent(EVENT_ALL_ACCESS, FALSE, L"EMCrashHandlerConnectEvent");
 	if (!connevent)
 	{
 		WindowsError();
-		CloseHandle(closeevent);
 		UnmapViewOfFile(emstatus);
 		CloseHandle(mapfile);
 		fclose(logfile);
 		return(1);
 	}
 
-	fprintf(logfile, "Waiting for engine to connect...\n");
+	fprintf(logfile, "\nWaiting for engine to connect...\n");
 
 	if (WaitForSingleObject(connevent, INFINITE) == WAIT_OBJECT_0)
 	{
@@ -180,16 +169,27 @@ int WINAPI wWinMain(HINSTANCE hinst, HINSTANCE hprevinst, PWSTR pcmdline, int nc
 	{
 		if (emstatus->userdata[0] != '\0')
 		{
-			fprintf(logfile, "Writing User Data:\n");
-			fprintf(logfile, "\t%s\n", emstatus->userdata);
+			fprintf(logfile, "Writing User Data:\n\t%s\n", emstatus->userdata);
 			fflush(logfile);
+			memset(emstatus->userdata, '\0', EMCH_MAX_USERDATA_SIZE);
 		}
 
-		HANDLE hbmutex = OpenMutex(SYNCHRONIZE, FALSE, L"EMCrashHandlerHeartbeatMutex");
-		if (!hbmutex)
+		if (emstatus->status == EMSTATUS_EXIT_OK)
+		{
+			fprintf(logfile, "\nNo errors occurred during engine runtime, exiting successfully\n");
+			break;
+		}
+
+		if (emstatus->status == EMSTATUS_EXIT_ERROR)
+		{
+			fprintf(logfile, "\nThe engine has exited due to a known error, please check the main engine logs for information\n");
+			break;
+		}
+
+		if (emstatus->status == EMSTATUS_EXIT_CRASH)
 		{
 			wchar_t wlpmsgbuf[1024] = { 0 };
-			_snwprintf(wlpmsgbuf, 1023, L"An error has occurred during engine runtime, please check file [%s] for stack trace\n", logfullpath);
+			_snwprintf(wlpmsgbuf, 1023, L"\nAn error has occurred during engine runtime, please check file [%s] for stack trace\n", logfullpath);
 			wlpmsgbuf[1023] = L'\0';
 
 			MessageBox(NULL, wlpmsgbuf, L"EMCrashHandler: ERROR", MB_OK | MB_ICONINFORMATION);
@@ -211,25 +211,10 @@ int WINAPI wWinMain(HINSTANCE hinst, HINSTANCE hprevinst, PWSTR pcmdline, int nc
 
 			break;
 		}
-
-		CloseHandle(hbmutex);
-
-		if (WaitForSingleObject(closeevent, 0) == WAIT_OBJECT_0)
-		{
-			if (emstatus->status == EMSTATUS_EXIT_OK)
-				fprintf(logfile, "No errors occurred during engine runtime, exiting successfully\n");
-
-			if (emstatus->status == EMSTATUS_EXIT_ERROR)
-				fprintf(logfile, "The engine has exited due to a known error, please check the main engine logs for information\n");
-
-			fflush(logfile);
-			break;
-		}
 	}
 
 	UnmapViewOfFile(emstatus);
 	CloseHandle(mapfile);
-	CloseHandle(closeevent);
 	fclose(logfile);
 
 	return(0);
