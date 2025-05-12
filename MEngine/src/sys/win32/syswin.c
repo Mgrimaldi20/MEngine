@@ -35,19 +35,76 @@ static mutex_t mutexes[SYS_MAX_MUTEXES];
 static condvar_t condvars[SYS_MAX_CONDVARS];
 
 static HANDLE emchmapfile;
-static HANDLE emchcloseevent;
 static HANDLE emchconnevent;
-static HANDLE emchmutexhb;
+static PVOID vehhandler;
 
 static emstatus_t *emchstatus;
 
-static STARTUPINFO si;
-static PROCESS_INFORMATION pi;
-
-static thread_t *emchthread;
-static volatile bool stopthreads;
+static STARTUPINFO emsi;
+static PROCESS_INFORMATION empi;
 
 static bool initialized;
+
+/*
+* Function: VEHCrashHandler
+* Executes upon an engine crash, sends the callstack and some signals or messages to the crash handler
+* 
+*	ei: Pointer to the exception information
+* 
+* Returns: A signal to the VEH handler to continue searching for the exception
+*/
+static LONG WINAPI VEHCrashHandler(EXCEPTION_POINTERS *ei)
+{
+	(EXCEPTION_POINTERS *)ei;
+
+	if (!emchstatus)
+		return(EXCEPTION_CONTINUE_EXECUTION);
+
+	HANDLE process = GetCurrentProcess();
+
+	if (!SymInitialize(process, NULL, TRUE))
+	{
+		snprintf(emchstatus->userdata, EMCH_MAX_USERDATA_SIZE - 1, "Failed to initialize symbol handler");
+		emchstatus->userdata[EMCH_MAX_USERDATA_SIZE - 1] = '\0';
+		return(EXCEPTION_CONTINUE_EXECUTION);
+	}
+
+	PVOID stack[EMCH_MAX_FRAMES] = { 0 };
+	WORD frames = CaptureStackBackTrace(0, EMCH_MAX_FRAMES, stack, NULL);
+
+	SYMBOL_INFO *symbol = calloc(sizeof(SYMBOL_INFO) + EMCH_MAX_FRAME_SIZE, sizeof(char));
+	if (!symbol)
+	{
+		snprintf(emchstatus->userdata, EMCH_MAX_USERDATA_SIZE - 1, "Failed to allocate memory for symbol, cannot produce backtrace for this itteration");
+		emchstatus->userdata[EMCH_MAX_USERDATA_SIZE - 1] = '\0';
+		return(EXCEPTION_CONTINUE_EXECUTION);
+	}
+
+	symbol->SizeOfStruct = sizeof(SYMBOL_INFO);
+	symbol->MaxNameLen = EMCH_MAX_FRAME_SIZE - 1;
+
+	for (WORD i=0; i<frames; i++)
+	{
+		if (SymFromAddr(process, (DWORD64)(stack[i]), 0, symbol))
+		{
+			snprintf(emchstatus->stacktrace[i], EMCH_MAX_FRAME_SIZE, "Frame %u: %s - 0x%llx", i, symbol->Name, (DWORD64)symbol->Address);
+			emchstatus->stacktrace[i][EMCH_MAX_FRAME_SIZE - 1] = '\0';
+			continue;
+		}
+
+		snprintf(emchstatus->userdata, EMCH_MAX_USERDATA_SIZE - 1, "Failed to get symbol information for stack frame %u", i);
+		emchstatus->userdata[EMCH_MAX_USERDATA_SIZE - 1] = '\0';
+
+		snprintf(emchstatus->stacktrace[i], EMCH_MAX_FRAME_SIZE, "Frame %u: Unknown - 0x%llx", i, (DWORD64)stack[i]);
+	}
+
+	free(symbol);
+	SymCleanup(process);
+
+	emchstatus->status = EMSTATUS_EXIT_CRASH;
+
+	return(EXCEPTION_CONTINUE_EXECUTION);
+}
 
 /*
 * Function: Sys_Init
@@ -145,13 +202,6 @@ bool Sys_Init(void)
 		}
 	}
 
-	emchcloseevent = CreateEvent(NULL, TRUE, FALSE, L"EMCrashHandlerCloseEvent");
-	if (!emchcloseevent)
-	{
-		Log_Write(LOG_ERROR, "Failed to create close event for crash handler");
-		WindowsError();
-	}
-
 	emchconnevent = CreateEvent(NULL, FALSE, FALSE, L"EMCrashHandlerConnectEvent");
 	if (!emchconnevent)
 	{
@@ -159,16 +209,16 @@ bool Sys_Init(void)
 		WindowsError();
 	}
 
-	emchmutexhb = CreateMutex(NULL, FALSE, L"EMCrashHandlerHeartbeatMutex");
-	if (!emchmutexhb)
+	vehhandler = AddVectoredExceptionHandler(1, VEHCrashHandler);
+	if (!vehhandler)
 	{
-		Log_Write(LOG_ERROR, "Failed to create heartbeat mutex for crash handler");
+		Log_Write(LOG_ERROR, "Failed to add VEH handler for crash handler");
 		WindowsError();
 	}
 
-	ZeroMemory(&si, sizeof(si));
-	si.cb = sizeof(si);
-	ZeroMemory(&pi, sizeof(pi));
+	ZeroMemory(&emsi, sizeof(emsi));
+	emsi.cb = sizeof(emsi);
+	ZeroMemory(&empi, sizeof(empi));
 
 	static wchar_t *emchargv[] =	// static so it doesnt disappear
 	{
@@ -185,8 +235,8 @@ bool Sys_Init(void)
 		0,
 		NULL,
 		NULL,
-		&si,
-		&pi
+		&emsi,
+		&empi
 	))
 	{
 		Log_Write(LOG_ERROR, "Failed to create Crash Handler process");
@@ -209,33 +259,24 @@ void Sys_Shutdown(void)
 {
 	Log_Write(LOG_INFO, "Shutting down system");
 
-	SetEvent(emchcloseevent);
-
 	if (emchstatus)
 	{
 		emchstatus->status = EMSTATUS_EXIT_OK;
 
-		if (!win32state.errorindicator)
+		if (win32state.errorindicator)
 			emchstatus->status = EMSTATUS_EXIT_ERROR;
 	}
 
-	if (emchthread)
+	if (empi.hProcess)
 	{
-		stopthreads = true;
-		Sys_JoinThread(emchthread);
-		emchthread = NULL;
+		CloseHandle(empi.hProcess);
+		empi.hProcess = NULL;
 	}
 
-	if (pi.hProcess)
+	if (empi.hThread)
 	{
-		CloseHandle(pi.hProcess);
-		pi.hProcess = NULL;
-	}
-
-	if (pi.hThread)
-	{
-		CloseHandle(pi.hThread);
-		pi.hThread = NULL;
+		CloseHandle(empi.hThread);
+		empi.hThread = NULL;
 	}
 
 	if (emchstatus)
@@ -250,22 +291,16 @@ void Sys_Shutdown(void)
 		emchmapfile = NULL;
 	}
 
-	if (emchcloseevent)
-	{
-		CloseHandle(emchcloseevent);
-		emchcloseevent = NULL;
-	}
-
 	if (emchconnevent)
 	{
 		CloseHandle(emchconnevent);
 		emchconnevent = NULL;
 	}
 
-	if (emchmutexhb)
+	if (vehhandler)
 	{
-		CloseHandle(emchmutexhb);
-		emchmutexhb = NULL;
+		RemoveVectoredExceptionHandler(vehhandler);
+		vehhandler = NULL;
 	}
 
 	initialized = false;

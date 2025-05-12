@@ -8,14 +8,16 @@
 
 typedef enum
 {
-	EMSTATUS_EXIT_OK = 0,	// the engine has exited successfully and with no errors
-	EMSTATUS_EXIT_ERROR		// the engine has exited with a known error
+	EMSTATUS_NONE = 0,		// the engine is running and has not exited
+	EMSTATUS_EXIT_OK,		// the engine has exited successfully and with no errors
+	EMSTATUS_EXIT_ERROR,	// the engine has exited with a known error
+	EMSTATUS_EXIT_CRASH		// the engine has crashed, signal the crash handler to dump the stacktrace
 } emexitcode_t;
 
 typedef struct
 {
 	bool connected;
 	emexitcode_t status;
-	unsigned char userdata[EMCH_MAX_USERDATA_SIZE];
+	char userdata[EMCH_MAX_USERDATA_SIZE];
 	char stacktrace[EMCH_MAX_FRAMES][EMCH_MAX_FRAME_SIZE];
 } emstatus_t;
