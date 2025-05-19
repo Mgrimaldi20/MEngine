@@ -86,7 +86,7 @@ typedef struct
 {
 	bool (*FileExists)(const char *filename);
 	filedata_t *(*ListFiles)(unsigned int *numfiles, const char *directory, const char *filter);
-	void (*FreeFileList)(filedata_t *filelist);
+	void (*FreeFileList)(filedata_t **filelist);
 } filesystem_t;
 
 typedef struct		// system services

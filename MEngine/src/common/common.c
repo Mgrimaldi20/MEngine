@@ -180,7 +180,7 @@ static void CreateMServices(void)
 */
 static bool InitGame(void)
 {
-	cvar_t *gamedll = Cvar_Find("g_gamedll");	// get the game DLL name from the Cvar system, designed to be overriden by the client
+	cvar_t * const gamedll = Cvar_Find("g_gamedll");	// get the game DLL name from the Cvar system, designed to be overriden by the client
 	if (!gamedll)
 	{
 		Log_Write(LOG_ERROR, "Failed to find game DLL name in Cvar system");
@@ -443,6 +443,7 @@ void Common_Errorf(const char *msg, ...)
 		va_end(argptrcpy);
 	}
 
+#if defined(MENGINE_DEBUG)
 	if (isatty)
 	{
 		va_list argptrcpy;
@@ -451,6 +452,7 @@ void Common_Errorf(const char *msg, ...)
 		fprintf(stderr, "\n");
 		va_end(argptrcpy);
 	}
+#endif
 
 	va_end(argptr);
 }

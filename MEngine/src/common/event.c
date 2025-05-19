@@ -129,18 +129,11 @@ void Event_QueueEvent(const eventtype_t type, int var1, int var2)
 */
 void Event_RunEventLoop(void)
 {
-	event_t event =
-	{
-		.type = EVENT_NONE,
-		.evar1 = 0,
-		.evar2 = 0
-	};
-
 	while (1)
 	{
 		Cmd_ExecuteCommandBuffer();
 
-		event = GetEvent();
+		event_t event = GetEvent();
 
 		if (event.type == EVENT_NONE)
 			break;

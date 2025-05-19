@@ -84,7 +84,7 @@ void WindowsError(void)
 {
 	win32state.errorindicator = true;
 
-	LPVOID wlpmsgbuf;
+	LPVOID wlpmsgbuf = NULL;
 
 	FormatMessage(
 		FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
@@ -120,9 +120,19 @@ void InitConsole(void)
 		return;
 	}
 
-	freopen_s(&outfp, "CONOUT$", "w", stdout);
-	freopen_s(&errfp, "CONOUT$", "w", stderr);
-	freopen_s(&infp, "CONIN$", "r", stdin);
+	errno_t err = 0;
+
+	err = freopen_s(&outfp, "CONOUT$", "w", stdout);
+	if (err)
+		Common_Errorf("Failed to redirect stdout to console");
+
+	err = freopen_s(&errfp, "CONOUT$", "w", stderr);
+	if (err)
+		Common_Errorf("Failed to redirect stderr to console");
+
+	err = freopen_s(&infp, "CONIN$", "r", stdin);
+	if (err)
+		Common_Errorf("Failed to redirect stdin to console");
 
 	if (!outfp || !errfp || !infp)
 	{

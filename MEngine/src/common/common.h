@@ -89,7 +89,7 @@ bool FileSys_Init(void);
 void FileSys_Shutdown(void);
 bool FileSys_FileExists(const char *filename);
 filedata_t *FileSys_ListFiles(unsigned int *numfiles, const char *directory, const char *filter);
-void FileSys_FreeFileList(filedata_t *filelist);
+void FileSys_FreeFileList(filedata_t **filelist);
 
 bool Input_Init(void);
 void Input_Shutdown(void);

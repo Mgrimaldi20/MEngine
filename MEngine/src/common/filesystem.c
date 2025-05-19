@@ -187,11 +187,11 @@ filedata_t *FileSys_ListFiles(unsigned int *numfiles, const char *directory, con
 * 
 * 	filelist: The list of filedata_t structs
 */
-void FileSys_FreeFileList(filedata_t *filelist)
+void FileSys_FreeFileList(filedata_t **filelist)
 {
-	if (filelist)
+	if (filelist && *filelist)
 	{
-		MemCache_Free(filelist);
-		filelist = NULL;
+		MemCache_Free(*filelist);
+		*filelist = NULL;
 	}
 }

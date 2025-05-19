@@ -67,7 +67,7 @@ static bool RemoveOldLogFiles(const char *dir)
 
 	filedata_t *filelist = FileSys_ListFiles(&filecount, dir, logfilter);
 
-	if (filecount <= 0)
+	if (filecount == 0)
 		return(true);		// return true if filecount is 0, next function will create log	files
 
 	else if (!filelist)
@@ -84,7 +84,7 @@ static bool RemoveOldLogFiles(const char *dir)
 			filecount--;
 	}
 
-	FileSys_FreeFileList(filelist);
+	FileSys_FreeFileList(&filelist);
 	return(true);
 }
 

@@ -330,7 +330,7 @@ void *Sys_OpenDir(const char *directory)
 */
 bool Sys_ReadDir(void *directory, char *filename, size_t filenamelen)
 {
-	struct dirent *entry = readdir((DIR *)directory);
+	struct dirent * const entry = readdir((DIR *)directory);
 	if (!entry)
 		return(false);
 

@@ -103,7 +103,7 @@ static bool HandleConversionErrors(const char *value, const char *end)
 		return(false);
 	}
 
-	if ((errno == 0) && end && (end != 0) && (strcmp(end, "") != 0))
+	if ((errno == 0) && end && (strcmp(end, "") != 0))
 	{
 		Log_Writef(LOG_ERROR, "Invalid characters in string, additional characters remain: %s", value);
 		return(false);
@@ -172,7 +172,7 @@ static void ListAllCvars(void)
 *
 * Returns: A boolean if it's acceptable or not
 */
-static bool GetNameValue(char *line, const size_t length, char *name, char *value)
+static bool GetNameValue(const char *line, const size_t length, char *name, char *value)
 {
 	bool acceptable = true;
 	bool readingvalue = false;	// this changes to true when we are inside quotes
@@ -270,7 +270,7 @@ static void ReadCvarsFromFile(FILE *infile, const char *filename)
 			continue;
 
 		char *args = NULL;
-		char *cmdname = Sys_Strtok(line, " ", &args);
+		char * const cmdname = Sys_Strtok(line, " ", &args);
 
 		if (!cmdname)
 		{
@@ -633,7 +633,7 @@ void Cvar_Shutdown(void)
 		cvarentry_t *current = cvarmap->cvars[i];
 		while (current)
 		{
-			cvar_t *cvar = current->value;
+			cvar_t * const cvar = current->value;
 
 			if (cvar->flags & CVAR_ARCHIVE)
 			{
