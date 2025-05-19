@@ -223,11 +223,10 @@ static void SetBinding(const keycode_t key, const char *binding)
 		return;
 
 	size_t len = Sys_Strlen(binding, CMD_MAX_STR_LEN);
-	size_t currentlen = 0;
 
 	if (keys[key].binding)
 	{
-		currentlen = Sys_Strlen(keys[key].binding, CMD_MAX_STR_LEN);
+		size_t currentlen = Sys_Strlen(keys[key].binding, CMD_MAX_STR_LEN);
 
 		if (strcmp(keys[key].binding, binding) == 0)
 			return;
@@ -265,27 +264,9 @@ static void SetBinding(const keycode_t key, const char *binding)
 }
 
 /*
-* Function: WriteBindings
-* Writes the key bindings to a file
-* 
-* 	bindings: The file to write the bindings to
-*/
-void WriteBindings(FILE *bindings)
-{
-	if (!bindings)
-		return;
-
-	for (int i=0; i<KEY_FINAL; i++)
-	{
-		if (keys[i].binding && keys[i].binding[0])
-			fprintf(bindings, "bind %s %s\n", GetKeyName(i), keys[i].binding);
-	}
-}
-
-/*
 * Function: ReadBindings
 * Reads the key bindings from a file
-* 
+*
 * 	bindings: The file to read the bindings from
 */
 static void ReadBindings(FILE *bindings)
@@ -303,12 +284,30 @@ static void ReadBindings(FILE *bindings)
 
 		char *saveptr = NULL;
 
-		char *cmdname = Sys_Strtok(line, " ", &saveptr);
-		char *args = Sys_Strtok(NULL, "\n\r", &saveptr);
+		char * const cmdname = Sys_Strtok(line, " ", &saveptr);
+		char * const args = Sys_Strtok(NULL, "\n\r", &saveptr);
 
 		snprintf(cmdline, sizeof(cmdline), "%s %s", cmdname, args);
 
 		Cmd_BufferCommand(CMD_EXEC_NOW, cmdline);
+	}
+}
+
+/*
+* Function: WriteBindings
+* Writes the key bindings to a file
+* 
+* 	bindings: The file to write the bindings to
+*/
+void WriteBindings(FILE *bindings)
+{
+	if (!bindings)
+		return;
+
+	for (int i=0; i<KEY_FINAL; i++)
+	{
+		if (keys[i].binding && keys[i].binding[0])
+			fprintf(bindings, "bind %s \"%s\"\n", GetKeyName(i), keys[i].binding);
 	}
 }
 
@@ -322,7 +321,7 @@ static void Bind_Cmd(const cmdargs_t *args)
 {
 	if (args->argc != 3)
 	{
-		Log_Writef(LOG_INFO, "Usage: %s [keyname] [action]", args->argv[0]);
+		Log_Writef(LOG_INFO, "Usage: %s [keyname] \"[action]\"", args->argv[0]);
 		return;
 	}
 

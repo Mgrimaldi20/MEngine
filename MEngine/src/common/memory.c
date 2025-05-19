@@ -58,7 +58,7 @@ static bool initialized;
 static void *DefaultAlloc(size_t size)
 {
 	assert(size > 0);
-	if (!size || (size < 0))
+	if (!size)
 		return(NULL);
 
 	void *ptr = malloc(size);
@@ -236,7 +236,7 @@ static void ReturnFreeBlock(freeblock_t *block)
 static void *CacheAlloc(size_t size)
 {
 	assert(size > 0);
-	if (!size || (size < 0))
+	if (!size)
 		return(NULL);
 
 	size_t totalsize = size + sizeof(size_t);		// include the space for storing the size itself

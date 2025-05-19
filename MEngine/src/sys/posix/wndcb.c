@@ -191,7 +191,7 @@ static void MouseScrollCallback(GLFWwindow *window, double xoffset, double yoffs
 	}
 }
 
-static void CharCallback(GLFWwindow *window, unsigned int codepoint)
+static void CharCallback(GLFWwindow * const window, unsigned int codepoint)
 {
 }
 
@@ -254,7 +254,7 @@ static void WindowCloseCallback(GLFWwindow *window)
 * 	window: The window that received the event
 * 	focused: A boolean if the window is focused or not
 */
-static void WindowFocusCallback(GLFWwindow *window, int focused)
+static void WindowFocusCallback(GLFWwindow * const window, int focused)
 {
 	Input_ClearKeyStates();
 }
@@ -266,7 +266,7 @@ static void WindowFocusCallback(GLFWwindow *window, int focused)
 * 	window: The window that received the event
 * 	iconified: A boolean if the window is iconified or not
 */
-static void WindowIconifyCallback(GLFWwindow *window, int iconified)
+static void WindowIconifyCallback(GLFWwindow * const window, int iconified)
 {
 	Input_ClearKeyStates();
 }

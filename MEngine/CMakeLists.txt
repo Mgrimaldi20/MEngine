@@ -134,7 +134,7 @@ if(MSVC)
 		target_compile_options(MEngine PRIVATE "/Zi" "/fsanitize=address" "/Od" "/MDd" "/JMC")
 		target_link_options(MEngine PRIVATE "/DEBUG")															# Ensure PDB file is generated
 	elseif(CMAKE_BUILD_TYPE STREQUAL "Release")																	# Release build compiler options
-		target_compile_options(MEngine PRIVATE "/O2" "/MD" "/GL" "/Gw")
+		target_compile_options(MEngine PRIVATE "/Z7" "/O2" "/MD" "/GL" "/Gw")
 	endif()
 
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")																	# CLANG compiler options
