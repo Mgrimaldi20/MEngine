@@ -424,7 +424,7 @@ static cvar_t *RegisterCvar(const char *name, const cvarvalue_t value, const cva
 * Function: Seta_Cmd
 * Sets a cvar to a string value from the command line
 * 
-*	args: The command arguments
+*	args: The command arguments, argv[1] is the cvar name, argv[2] is the value
 */
 static void Seta_Cmd(const cmdargs_t *args)
 {
@@ -442,7 +442,7 @@ static void Seta_Cmd(const cmdargs_t *args)
 * Function: Seti_Cmd
 * Sets a cvar to an integer value from the command line
 * 
-* 	args: The command arguments
+* 	args: The command arguments, argv[1] is the cvar name, argv[2] is the value
 */
 static void Seti_Cmd(const cmdargs_t *args)
 {
@@ -466,7 +466,7 @@ static void Seti_Cmd(const cmdargs_t *args)
 * Function: Setf_Cmd
 * Sets a cvar to a float value from the command line
 * 
-* 	args: The command arguments
+* 	args: The command arguments, argv[1] is the cvar name, argv[2] is the value
 */
 static void Setf_Cmd(const cmdargs_t *args)
 {
@@ -490,7 +490,7 @@ static void Setf_Cmd(const cmdargs_t *args)
 * Function: Setb_Cmd
 * Sets a cvar to a boolean value from the command line
 * 
-* 	args: The command arguments
+* 	args: The command arguments, argv[1] is the cvar name, argv[2] is the value
 */
 static void Setb_Cmd(const cmdargs_t *args)
 {
