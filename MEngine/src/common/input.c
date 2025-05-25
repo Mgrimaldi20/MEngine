@@ -315,7 +315,7 @@ void WriteBindings(FILE *bindings)
 * Function: Bind_Cmd
 * Binds a command to a key from the command line
 * 
-* 	args: The command arguments
+* 	args: The command arguments, argv[1] is the key name, argv[2] is the command to bind, can be a string
 */
 static void Bind_Cmd(const cmdargs_t *args)
 {

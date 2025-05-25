@@ -166,7 +166,7 @@ static void ExecuteCommand(const char *cmdstr)
 * Function: Help_Cmd
 * The help command function, prints out the standard help message, or the description of a specific command
 * 
-* 	args: The command arguments
+* 	args: The command arguments, argv[1] is the command to get the description of
 */
 static void Help_Cmd(const cmdargs_t *args)
 {
