@@ -43,6 +43,8 @@ static emstatus_t *emchstatus;
 static STARTUPINFO emsi;
 static PROCESS_INFORMATION empi;
 
+static cmdline_t cmdline;
+
 static bool initialized;
 
 /*
@@ -311,6 +313,7 @@ void Sys_Shutdown(void)
 * Displays an error message popup window and shuts down the engine, used for fatal errors and exceptions
 * 
 * 	error: The error message to display, can be a formatted string, max length is LOG_MAX_LEN
+*	...: The arguments to the format string, same as printf
 */
 void Sys_Error(const char *error, ...)
 {
@@ -341,33 +344,55 @@ void Sys_Error(const char *error, ...)
 * Function: Sys_ParseCommandLine
 * Processes the command line arguments and stores them in a command line struct, turns the wide char command line into argc and argv
 * 
-*	cmdline: The command line struct to store the arguments in
+* Returns: A pointer to the command line struct, will be NULL if the command line is not set or if it fails to parse, statically allocated struct
 */
-void Sys_ParseCommandLine(cmdline_t *cmdline)
+cmdline_t *Sys_ParseCommandLine(void)
 {
-	if (!cmdline)
-		return;
+	const int maxcmdlinelen = SYS_MAX_CMD_ARGS * SYS_MAX_CMD_LEN;
 
-	int len = WideCharToMultiByte(CP_UTF8, 0, win32state.pcmdline, -1, win32state.cmdline, MAX_CMDLINE, NULL, NULL);
+	static char cmdargs[SYS_MAX_CMD_ARGS][SYS_MAX_CMD_LEN];
+	static char cmdargsbuf[SYS_MAX_CMD_LEN * SYS_MAX_CMD_ARGS];
+
+	memset(&cmdline, 0, sizeof(cmdline));	// zero it out to avoid issues if this function is called multiple times
+
+	int len = WideCharToMultiByte(CP_UTF8, 0, win32state.pcmdline, -1, cmdargsbuf, maxcmdlinelen, NULL, NULL);
 	if (len == 0)
-		Sys_Error("Failed to convert command line to UTF-8");
+	{
+		Common_Errorf("Failed to convert command line to UTF-8");
+		return(NULL);
+	}
+
+	if (len >= maxcmdlinelen)
+	{
+		Common_Errorf("Command line is too long, max length is %d characters", maxcmdlinelen);
+		return(NULL);
+	}
 
 	int argc = 0;
-	char *argv[MAX_CMDLINE] = { 0 };
 
 	char *context = NULL;
-	char *token = Sys_Strtok(win32state.cmdline, " ", &context);
+	char *token = Sys_Strtok(cmdargsbuf, " ", &context);
 	while (token)
 	{
-		if (argc >= MAX_CMDLINE)
-			Sys_Error("Too many command line arguments");
+		if (argc >= SYS_MAX_CMD_ARGS)
+		{
+			Common_Errorf("Too many command line arguments, max is %d", SYS_MAX_CMD_ARGS);
+			return(NULL);
+		}
 
-		argv[argc++] = token;
+		snprintf(cmdline.args[argc++], SYS_MAX_CMD_LEN, "%s", token);
 		token = Sys_Strtok(NULL, " ", &context);
 	}
 
-	cmdline->count = argc;
-	cmdline->args = argv;
+	cmdline.count = argc;
+
+	if (argc == 0)
+	{
+		Common_Printf("No command line arguments found");
+		return(NULL);
+	}
+
+	return(&cmdline);
 }
 
 /*
