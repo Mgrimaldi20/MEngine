@@ -2,16 +2,20 @@
 
 #include "common/common.h"
 
-typedef struct
-{
-	char **args;
-	int count;
-} cmdline_t;
-
 bool Sys_Init(void);
 void Sys_Shutdown(void);
 void Sys_Error(const char *error, ...);
-void Sys_ParseCommandLine(cmdline_t *cmdline);
+
+#define SYS_MAX_CMD_ARGS 64
+#define SYS_MAX_CMD_LEN 512
+
+typedef struct
+{
+	char args[SYS_MAX_CMD_ARGS][SYS_MAX_CMD_LEN];
+	int count;
+} cmdline_t;
+
+cmdline_t *Sys_ParseCommandLine(void);
 
 bool Sys_IsTTY(void);
 bool Sys_Mkdir(const char *path);

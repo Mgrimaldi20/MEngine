@@ -12,8 +12,6 @@
 
 #define WINDOW_STYLE (WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_VISIBLE | WS_SIZEBOX)
 
-#define MAX_CMDLINE 1024
-
 typedef struct
 {
 	bool errorindicator;
@@ -34,7 +32,6 @@ typedef struct
 	HDC hdc;
 	HGLRC hglrc;
 	PWSTR pcmdline;
-	char cmdline[MAX_CMDLINE];
 	OSVERSIONINFOEX osver;
 	PIXELFORMATDESCRIPTOR pfd;
 } win32vars_t;

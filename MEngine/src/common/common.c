@@ -42,16 +42,16 @@ static bool gameinitialized;
 */
 static bool ProcessCommandLine(void)
 {
-	cmdline_t cmdline = { 0 };
-
-	Sys_ParseCommandLine(&cmdline);
-
-	for (int i=0; i<cmdline.count; i++)
+	cmdline_t *cmdline = Sys_ParseCommandLine();
+	if (!cmdline)
 	{
-		if (!cmdline.args[i][0])
-			break;
+		Common_Warnf("No command line parsed, or parse failed");
+		return(false);
+	}
 
-		if (strcmp(cmdline.args[i], "-help") == 0)
+	for (int i=0; i<cmdline->count; i++)
+	{
+		if (strcmp(cmdline->args[i], "-help") == 0)
 		{
 			static const char *helpmsg = "MEngine\n"
 				"Usage: MEngine [options]\n"
@@ -68,16 +68,16 @@ static bool ProcessCommandLine(void)
 			return(false);
 		}
 
-		else if (strcmp(cmdline.args[i], "-editor") == 0)
+		else if (strcmp(cmdline->args[i], "-editor") == 0)
 			cmdlineflags |= CMD_MODE_EDITOR;
 
-		else if (strcmp(cmdline.args[i], "-debug") == 0)
+		else if (strcmp(cmdline->args[i], "-debug") == 0)
 			cmdlineflags |= CMD_MODE_DEBUG;
 
-		else if (strcmp(cmdline.args[i], "-ignoreosver") == 0)
+		else if (strcmp(cmdline->args[i], "-ignoreosver") == 0)
 			cmdlineflags |= CMD_IGNORE_OSVER;
 
-		else if (strcmp(cmdline.args[i], "-nocache") == 0)
+		else if (strcmp(cmdline->args[i], "-nocache") == 0)
 			cmdlineflags |= CMD_USE_DEF_ALLOC;
 	}
 
@@ -350,6 +350,7 @@ void Common_Frame(void)
 * Prints a message to the console and to the log file
 * 
 *	msg: The message to print
+*	...: The arguments to the format string, same as printf
 * 
 * Returns: The number of characters printed
 */
@@ -387,6 +388,7 @@ void Common_Printf(const char *msg, ...)
 * Prints a warning message to the console and to the log file
 * 
 *	msg: The message to print
+*	...: The arguments to the format string, same as printf
 * 
 * Returns: The number of characters printed
 */
@@ -424,6 +426,7 @@ void Common_Warnf(const char *msg, ...)
 * Prints an error message to the console and to the log file
 * 
 *	msg: The message to print
+*	...: The arguments to the format string, same as printf
 * 
 * Returns: The number of characters printed
 */
