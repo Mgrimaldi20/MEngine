@@ -42,6 +42,8 @@ static condvar_t condvars[SYS_MAX_CONDVARS];
 static int emchfd;
 static emstatus_t *emchstatus;
 
+static cmdline_t cmdline;
+
 static pid_t emchpid;
 
 /*
@@ -159,17 +161,32 @@ void Sys_Error(const char *error, ...)
 
 /*
 * Function: Sys_ParseCommandLine
-* Processes the command line arguments and turns the arguments into a command line structure, argc and argv
+* Processes the command line arguments and stores them in a command line struct, turns the wide char command line into argc and argv
 * 
-*	cmdline: The command line structure to fill
+* Returns: A pointer to the command line struct, will be NULL if the command line is not set or if it fails to parse, statically allocated struct
 */
-void Sys_ParseCommandLine(cmdline_t *cmdline)
+cmdline_t *Sys_ParseCommandLine(void)
 {
-	if (!cmdline)
-		return;
+	memset(&cmdline, 0, sizeof(cmdline));	// zero it out to avoid issues if this function is called multiple times
 
-	cmdline->count = posixstate.argc;
-	cmdline->args = posixstate.argv;
+	if (posixstate.argc == 0)
+	{
+		Common_Printf("No command line arguments found");
+		return(NULL);
+	}
+
+	if (posixstate.argc > SYS_MAX_CMD_ARGS)
+	{
+		Common_Errorf("Too many command line arguments, maximum is %d", SYS_MAX_CMD_ARGS);
+		return(NULL);
+	}
+
+	cmdline.count = posixstate.argc;
+
+	for (int i=0; i<cmdline.count; i++)
+		snprintf(cmdline.args[i], SYS_MAX_CMD_LEN, "%s", posixstate.argv[i]);
+
+	return(&cmdline);
 }
 
 /*

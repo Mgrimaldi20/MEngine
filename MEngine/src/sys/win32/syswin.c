@@ -66,8 +66,7 @@ static LONG WINAPI VEHCrashHandler(EXCEPTION_POINTERS *ei)
 
 	if (!SymInitialize(process, NULL, TRUE))
 	{
-		snprintf(emchstatus->userdata, EMCH_MAX_USERDATA_SIZE - 1, "Failed to initialize symbol handler");
-		emchstatus->userdata[EMCH_MAX_USERDATA_SIZE - 1] = '\0';
+		snprintf(emchstatus->userdata, EMCH_MAX_USERDATA_SIZE, "Failed to initialize symbol handler");
 		return(EXCEPTION_CONTINUE_EXECUTION);
 	}
 
@@ -77,8 +76,7 @@ static LONG WINAPI VEHCrashHandler(EXCEPTION_POINTERS *ei)
 	SYMBOL_INFO *symbol = calloc(sizeof(SYMBOL_INFO) + EMCH_MAX_FRAME_SIZE, sizeof(char));
 	if (!symbol)
 	{
-		snprintf(emchstatus->userdata, EMCH_MAX_USERDATA_SIZE - 1, "Failed to allocate memory for symbol, cannot produce backtrace for this itteration");
-		emchstatus->userdata[EMCH_MAX_USERDATA_SIZE - 1] = '\0';
+		snprintf(emchstatus->userdata, EMCH_MAX_USERDATA_SIZE, "Failed to allocate memory for symbol, cannot produce backtrace for this itteration");
 		return(EXCEPTION_CONTINUE_EXECUTION);
 	}
 
@@ -90,13 +88,10 @@ static LONG WINAPI VEHCrashHandler(EXCEPTION_POINTERS *ei)
 		if (SymFromAddr(process, (DWORD64)(stack[i]), 0, symbol))
 		{
 			snprintf(emchstatus->stacktrace[i], EMCH_MAX_FRAME_SIZE, "Frame %u: %s - 0x%llx", i, symbol->Name, (DWORD64)symbol->Address);
-			emchstatus->stacktrace[i][EMCH_MAX_FRAME_SIZE - 1] = '\0';
 			continue;
 		}
 
-		snprintf(emchstatus->userdata, EMCH_MAX_USERDATA_SIZE - 1, "Failed to get symbol information for stack frame %u", i);
-		emchstatus->userdata[EMCH_MAX_USERDATA_SIZE - 1] = '\0';
-
+		snprintf(emchstatus->userdata, EMCH_MAX_USERDATA_SIZE, "Failed to get symbol information for stack frame %u", i);
 		snprintf(emchstatus->stacktrace[i], EMCH_MAX_FRAME_SIZE, "Frame %u: Unknown - 0x%llx", i, (DWORD64)stack[i]);
 	}
 
@@ -350,12 +345,11 @@ cmdline_t *Sys_ParseCommandLine(void)
 {
 	const int maxcmdlinelen = SYS_MAX_CMD_ARGS * SYS_MAX_CMD_LEN;
 
-	static char cmdargs[SYS_MAX_CMD_ARGS][SYS_MAX_CMD_LEN];
-	static char cmdargsbuf[SYS_MAX_CMD_LEN * SYS_MAX_CMD_ARGS];
+	static char cmdlinebuff[SYS_MAX_CMD_LEN * SYS_MAX_CMD_ARGS];
 
 	memset(&cmdline, 0, sizeof(cmdline));	// zero it out to avoid issues if this function is called multiple times
 
-	int len = WideCharToMultiByte(CP_UTF8, 0, win32state.pcmdline, -1, cmdargsbuf, maxcmdlinelen, NULL, NULL);
+	int len = WideCharToMultiByte(CP_UTF8, 0, win32state.pcmdline, -1, cmdlinebuff, maxcmdlinelen, NULL, NULL);
 	if (len == 0)
 	{
 		Common_Errorf("Failed to convert command line to UTF-8");
@@ -371,7 +365,7 @@ cmdline_t *Sys_ParseCommandLine(void)
 	int argc = 0;
 
 	char *context = NULL;
-	char *token = Sys_Strtok(cmdargsbuf, " ", &context);
+	char *token = Sys_Strtok(cmdlinebuff, " ", &context);
 	while (token)
 	{
 		if (argc >= SYS_MAX_CMD_ARGS)
