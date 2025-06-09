@@ -51,34 +51,54 @@ static bool ProcessCommandLine(void)
 
 	for (int i=0; i<cmdline->count; i++)
 	{
-		if (strcmp(cmdline->args[i], "-help") == 0)
+		switch (cmdline->args[i][0])
 		{
-			static const char *helpmsg = "MEngine\n"
-				"Usage: MEngine [options]\n"
-				"Options:\n"
-				"\t-help\t\tPrint this help message\n"
-				"\t-editor\t\tRun the editor\n"
-				"\t-debug\t\tRun the game in debug mode\n"
-				"\t-ignoreosver\tIgnore OS version check\n"
-				"\t-nocache\tDo not use the memory cache allocator\n";
+			case '-':	// command line flag
+			{
+				char *cmd = cmdline->args[i] + 1;	// skip the '-' character
 
-			printf("%s", helpmsg);	// this is the standard printf because its run on the command line
-			fflush(stdout);
+				if (strcmp(cmd, "help") == 0)
+				{
+					static const char *helpmsg = "MEngine\n"
+						"Usage: MEngine [options]\n"
+						"Options:\n"
+						"\t-help\t\tPrint this help message\n"
+						"\t-editor\t\tRun the editor\n"
+						"\t-debug\t\tRun the game in debug mode\n"
+						"\t-ignoreosver\tIgnore OS version check\n"
+						"\t-nocache\tDo not use the memory cache allocator\n";
 
-			return(false);
+					fprintf(stderr, "%s", helpmsg);		// this is the standard printf because its run on the command line
+					return(false);
+				}
+
+				else if (strcmp(cmd, "editor") == 0)
+					cmdlineflags |= CMD_MODE_EDITOR;
+
+				else if (strcmp(cmd, "debug") == 0)
+					cmdlineflags |= CMD_MODE_DEBUG;
+
+				else if (strcmp(cmd, "ignoreosver") == 0)
+					cmdlineflags |= CMD_IGNORE_OSVER;
+
+				else if (strcmp(cmd, "nocache") == 0)
+					cmdlineflags |= CMD_USE_DEF_ALLOC;
+
+				else
+					fprintf(stderr, "Unknown command line flag: %s\n", cmd);
+
+				break;
+			}
+
+			case '+':	// command line cvar
+			{
+				char *cmd = cmdline->args[i] + 1;	// skip the '+' character
+				break;
+			}
+
+			default:	// cvar value or skip
+				break;
 		}
-
-		else if (strcmp(cmdline->args[i], "-editor") == 0)
-			cmdlineflags |= CMD_MODE_EDITOR;
-
-		else if (strcmp(cmdline->args[i], "-debug") == 0)
-			cmdlineflags |= CMD_MODE_DEBUG;
-
-		else if (strcmp(cmdline->args[i], "-ignoreosver") == 0)
-			cmdlineflags |= CMD_IGNORE_OSVER;
-
-		else if (strcmp(cmdline->args[i], "-nocache") == 0)
-			cmdlineflags |= CMD_USE_DEF_ALLOC;
 	}
 
 	return(true);
@@ -102,7 +122,7 @@ static void CreateMServices(void)
 		.Alloc = MemCache_Alloc,
 		.Free = MemCache_Free,
 		.Reset = MemCache_Reset,
-		.GetMemUsed = MemCache_GetTotalMemory,
+		.GetMemUsed = MemCache_GetMemUsed,
 		.GetTotalMemory = MemCache_GetTotalMemory
 	};
 

@@ -39,7 +39,7 @@ void MemCache_Shutdown(void);
 void *MemCache_Alloc(size_t size);
 void MemCache_Free(void *ptr);
 void MemCache_Reset(void);
-size_t MemCahce_GetMemUsed(void);
+size_t MemCache_GetMemUsed(void);
 size_t MemCache_GetTotalMemory(void);
 bool MemCache_UseCache(void);
 

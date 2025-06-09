@@ -621,7 +621,7 @@ void MemCache_Reset(void)
 * 
 * Returns: The total memory used by the allocator
 */
-size_t MemCahce_GetMemUsed(void)
+size_t MemCache_GetMemUsed(void)
 {
 	return(memcacheused);
 }
