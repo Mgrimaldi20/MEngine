@@ -591,6 +591,10 @@ void MemCache_Shutdown(void)
 /*
 * Function: MemCache_Alloc
 * Allocates memory polymorphically using the appropriate allocator
+* 
+*	size: The size of the memory to allocate
+* 
+* Returns: A pointer to the allocated memory, or NULL if allocation failed
 */
 void *MemCache_Alloc(size_t size)
 {
@@ -600,6 +604,8 @@ void *MemCache_Alloc(size_t size)
 /*
 * Function: MemCache_Free
 * Frees memory polymorphically using the appropriate allocator
+* 
+*	ptr: The pointer to the memory to deallocate
 */
 void MemCache_Free(void *ptr)
 {
