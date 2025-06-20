@@ -73,7 +73,7 @@ int main(int argc, char **argv)
 			break;
 		}
 
-		if (emstatus->status != EMSTATUS_OK)
+		if (emstatus->status != EMSTATUS_EXIT_CRASH)
 		{
 			fprintf(logfile, "[EMSTATUS_ERROR] | An error has occurred during engine runtime, please check file[%s] for stack trace\n", logfullpath);
 

@@ -164,7 +164,7 @@ bool Sys_Init(void)
 	Log_Writef(LOG_INFO, "Thread stack limits: Low: %llu, High: %llu", lowlimit, highlimit);
 	Log_Writef(LOG_INFO, "Stack size: %juMB", stacksize / (1024 * 1024));
 
-	Cvar_RegisterString("g_gamedll", "DemoGame.dll", CVAR_GAME, "The name of the game DLL for Windows systems");
+	Cvar_RegisterString("g_gamedll", "DemoGame.dll", CVAR_SYSTEM, "The name of the game DLL for Windows systems");
 
 	// create the crash handler shm region and start the process
 	emchmapfile = CreateFileMapping(

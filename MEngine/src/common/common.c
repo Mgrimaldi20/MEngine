@@ -55,9 +55,9 @@ static bool ProcessCommandLine(void)
 		{
 			case '-':	// command line flag
 			{
-				char *cmd = cmdline->args[i] + 1;	// skip the '-' character
+				const char *flag = cmdline->args[i] + 1;	// skip the '-' character
 
-				if (strcmp(cmd, "help") == 0)
+				if (strcmp(flag, "help") == 0)
 				{
 					static const char *helpmsg = "MEngine\n"
 						"Usage: MEngine [options]\n"
@@ -72,31 +72,39 @@ static bool ProcessCommandLine(void)
 					return(false);
 				}
 
-				else if (strcmp(cmd, "editor") == 0)
+				else if (strcmp(flag, "editor") == 0)
 					cmdlineflags |= CMD_MODE_EDITOR;
 
-				else if (strcmp(cmd, "debug") == 0)
+				else if (strcmp(flag, "debug") == 0)
 					cmdlineflags |= CMD_MODE_DEBUG;
 
-				else if (strcmp(cmd, "ignoreosver") == 0)
+				else if (strcmp(flag, "ignoreosver") == 0)
 					cmdlineflags |= CMD_IGNORE_OSVER;
 
-				else if (strcmp(cmd, "nocache") == 0)
+				else if (strcmp(flag, "nocache") == 0)
 					cmdlineflags |= CMD_USE_DEF_ALLOC;
 
 				else
-					fprintf(stderr, "Unknown command line flag: %s\n", cmd);
+					fprintf(stderr, "Unknown command line flag: %s\n", cmdline->args[i]);
 
 				break;
 			}
 
 			case '+':	// command line cvar
 			{
-				char *cmd = cmdline->args[i] + 1;	// skip the '+' character
+				const char *cvarname = cmdline->args[i] + 1;	// skip the '+' character
+				const char *cvarvalue = strchr(cvarname, '=') + 1;
+
+				while (!strchr(cvarvalue, '"'))
+				{
+					cvarvalue = cmdline->args[i++];
+				}
+
 				break;
 			}
 
-			default:	// cvar value or skip
+			default:	// bad token
+				fprintf(stderr, "Unknown command line token: %s\n", cmdline->args[i]);
 				break;
 		}
 	}
