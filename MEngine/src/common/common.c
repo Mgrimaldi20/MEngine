@@ -94,12 +94,6 @@ static bool ProcessCommandLine(void)
 			{
 				const char *cvarname = cmdline->args[i] + 1;	// skip the '+' character
 				const char *cvarvalue = strchr(cvarname, '=') + 1;
-
-				while (!strchr(cvarvalue, '"'))
-				{
-					cvarvalue = cmdline->args[i++];
-				}
-
 				break;
 			}
 
