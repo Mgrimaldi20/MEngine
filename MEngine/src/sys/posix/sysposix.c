@@ -79,9 +79,6 @@ bool SysInitCommon(void)
 	if (emchfd == -1)
 		Sys_Error("Failed to create shared memory file mapping: %s", strerror(errno));
 
-	if (shm_unlink("/EMCrashHandlerFileMapping") == -1)
-		Sys_Error("Failed to unlink the shared memory file mapping: %s", strerror(errno));
-
 	if (ftruncate(emchfd, sizeof(emstatus_t)) == -1)
 		Sys_Error("Failed to set the size of the shared memory file mapping: %s", strerror(errno));
 
@@ -102,6 +99,9 @@ bool SysInitCommon(void)
 			emchpid = getpid();
 			break;
 	}
+
+	if (shm_unlink("/EMCrashHandlerFileMapping") == -1)
+		Sys_Error("Failed to unlink the shared memory file mapping: %s", strerror(errno));
 
 	return(true);
 }

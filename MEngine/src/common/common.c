@@ -94,6 +94,12 @@ static bool ProcessCommandLine(void)
 			{
 				const char *cvarname = cmdline->args[i] + 1;	// skip the '+' character
 				const char *cvarvalue = strchr(cvarname, '=') + 1;
+
+				do
+				{
+					cvarvalue = strchr(cmdline->args[++i], '"');
+				} while (!cvarvalue);
+
 				break;
 			}
 
@@ -317,7 +323,14 @@ bool Common_Init(void)
 	}
 
 	if (!MemCache_UseCache())
-		Log_Write(LOG_WARN, "Not enough system memory for the memory cache, using the default allocator");
+	{
+		const char *memcachemsg = memcachemsg = "Not enough system memory for the memory cache, using the default allocator";
+
+		if (Common_UseDefaultAlloc())
+			memcachemsg = "Using the default allocator (malloc/free), memory cache is disabled";
+
+		Log_Writef(LOG_WARN, "%s", memcachemsg);
+	}
 
 	else
 		Log_Writef(LOG_INFO, "Memory Cache allocated [bytes: %zu]", MemCache_GetTotalMemory());

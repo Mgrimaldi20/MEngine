@@ -285,14 +285,14 @@ bool Log_Init(void)
 
 /*
 * Function: Log_Shutdown
-* Shuts down the logging service
+* Shuts down the logging system, wait for all the logs to be processed and join
 */
 void Log_Shutdown(void)
 {
 	if (!initialized)
 		return;
 
-	Log_Write(LOG_INFO, "Shutting down logging service...");
+	Log_Write(LOG_INFO, "Shutting down logging system...");
 
 	stopthreads = true;
 
