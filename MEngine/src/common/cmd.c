@@ -92,8 +92,7 @@ static void ExecuteCommand(const char *cmdstr)
 
 	snprintf(args.cmdstr, CMD_MAX_STR_LEN, "%s", cmdstr);
 
-	char *token = NULL;
-	char *saveptr = NULL;
+	char *token = NULL, *saveptr = NULL;
 	bool inquotes = false;
 	char argbuffer[CMD_MAX_STR_LEN] = { 0 };
 	size_t argbufferlen = 0;
