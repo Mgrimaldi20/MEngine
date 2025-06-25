@@ -51,62 +51,48 @@ static bool ProcessCommandLine(void)
 
 	for (int i=0; i<cmdline->count; i++)
 	{
-		switch (cmdline->args[i][0])
+		const char *arg = cmdline->args[i] + 1;	// skip the '-' character
+
+		if (strcmp(arg, "help") == 0)
 		{
-			case '-':	// command line flag
-			{
-				const char *flag = cmdline->args[i] + 1;	// skip the '-' character
+			static const char *helpmsg = "MEngine\n"
+				"Usage: MEngine [options]\n"
+				"Options:\n"
+				"-help\t\tPrint this help message\n"
+				"-editor\t\tRun the editor\n"
+				"-debug\t\tRun the game in debug mode\n"
+				"-ignoreosver\t\tIgnore OS version check\n"
+				"-nocache\t\tDo not use the memory cache allocator\n"
+				"-dllpath=\"<fullpath>\"\t\tThe full path of the DLL/SO in quotes: -dllpath=\"yourfile.dll\" and -dllpath=\"/path/to/yourfile.dll\"\n";
 
-				if (strcmp(flag, "help") == 0)
-				{
-					static const char *helpmsg = "MEngine\n"
-						"Usage: MEngine [options]\n"
-						"Options:\n"
-						"\t-help\t\tPrint this help message\n"
-						"\t-editor\t\tRun the editor\n"
-						"\t-debug\t\tRun the game in debug mode\n"
-						"\t-ignoreosver\tIgnore OS version check\n"
-						"\t-nocache\tDo not use the memory cache allocator\n";
-
-					fprintf(stderr, "%s", helpmsg);		// this is the standard printf because its run on the command line
-					return(false);
-				}
-
-				else if (strcmp(flag, "editor") == 0)
-					cmdlineflags |= CMD_MODE_EDITOR;
-
-				else if (strcmp(flag, "debug") == 0)
-					cmdlineflags |= CMD_MODE_DEBUG;
-
-				else if (strcmp(flag, "ignoreosver") == 0)
-					cmdlineflags |= CMD_IGNORE_OSVER;
-
-				else if (strcmp(flag, "nocache") == 0)
-					cmdlineflags |= CMD_USE_DEF_ALLOC;
-
-				else
-					fprintf(stderr, "Unknown command line flag: %s\n", cmdline->args[i]);
-
-				break;
-			}
-
-			case '+':	// command line cvar
-			{
-				const char *cvarname = cmdline->args[i] + 1;	// skip the '+' character
-				const char *cvarvalue = strchr(cvarname, '=') + 1;
-
-				do
-				{
-					cvarvalue = strchr(cmdline->args[++i], '"');
-				} while (!cvarvalue);
-
-				break;
-			}
-
-			default:	// bad token
-				fprintf(stderr, "Unknown command line token: %s\n", cmdline->args[i]);
-				break;
+			fprintf(stderr, "%s", helpmsg);		// this is the standard printf because its run on the command line
+			return(false);
 		}
+
+		else if (strcmp(arg, "editor") == 0)
+			cmdlineflags |= CMD_MODE_EDITOR;
+
+		else if (strcmp(arg, "debug") == 0)
+			cmdlineflags |= CMD_MODE_DEBUG;
+
+		else if (strcmp(arg, "ignoreosver") == 0)
+			cmdlineflags |= CMD_IGNORE_OSVER;
+
+		else if (strcmp(arg, "nocache") == 0)
+			cmdlineflags |= CMD_USE_DEF_ALLOC;
+
+		else if (strcmp(arg, "dllpath") == 0)
+		{
+			const char *argvalue = strchr(arg, '=') + 1;
+
+			do
+			{
+				argvalue = strchr(cmdline->args[++i], '"');
+			} while (!argvalue);
+		}
+
+		else
+			fprintf(stderr, "Unknown command line token: %s\n", cmdline->args[i]);
 	}
 
 	return(true);
