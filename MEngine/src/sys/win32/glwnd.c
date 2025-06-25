@@ -179,7 +179,7 @@ static bool CreateFakeWindowExt(void)
 		NULL
 	);
 
-	if (!hwnd)
+	if (!hwnd)	// TODO: kinda dumb
 		Sys_Error("%s: Could not create fake window for WGL extensions", __func__);
 
 	if (hwnd)	// Sys_Error calls exit(), but for some reason MSVC brokenly complains
@@ -671,6 +671,8 @@ bool GLWnd_Init(glwndparams_t params)
 void GLWnd_Shutdown(void)
 {
 	Log_Write(LOG_INFO, "Shutting down OpenGL system");
+
+	EMGL_Shutdown();	// close the gl library and remove function pointers
 
 	wglMakeCurrent(NULL, NULL);
 

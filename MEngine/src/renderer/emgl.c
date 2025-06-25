@@ -54,8 +54,8 @@ void EMGL_Shutdown(void)
 	{
 		Sys_UnloadDLL(dllhandle);
 		dllhandle = NULL;
-	}
 
-	glDebugMessageCallback = NULL;
-	glDebugMessageControl = NULL;
+		glDebugMessageCallback = NULL;
+		glDebugMessageControl = NULL;
+	}
 }
