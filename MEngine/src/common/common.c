@@ -35,6 +35,22 @@ static bool isatty;
 static bool gameinitialized;
 
 /*
+* Function: PrintUsage
+* Prints the useage message to console, called when the -help command line argument is passed, program will exit after this
+*/
+static void PrintUsage(void)
+{
+	fprintf(stderr, "MEngine\n");
+	fprintf(stderr, "Usage: MEngine [options]\n");
+	fprintf(stderr, "%-25s %s\n", "-help", "Print this help message and exits");
+	fprintf(stderr, "%-25s %s\n", "-editor", "Run the editor");
+	fprintf(stderr, "%-25s %s\n", "-debug", "Run the game in debug mode");
+	fprintf(stderr, "%-25s %s\n", "-ignoreosver", "Ignore OS version check");
+	fprintf(stderr, "%-25s %s\n", "-nocache", "Do not use the memory cache allocator");
+	fprintf(stderr, "%-25s %s\n", "-dllpath=\"<fullpath>\"", "Quoted full path of the game DLL/SO: -dllpath=\"game.dll\" or -dllpath=\"/path/to/game/file.dll\"");
+}
+
+/*
 * Function: ProcessCommandLine
 * Parses the command line arguments and sets the appropriate flags, can also call command line functions here, different from the command system
 * 
@@ -55,17 +71,7 @@ static bool ProcessCommandLine(void)
 
 		if (strcmp(arg, "help") == 0)
 		{
-			static const char *helpmsg = "MEngine\n"
-				"Usage: MEngine [options]\n"
-				"Options:\n"
-				"-help\t\tPrint this help message\n"
-				"-editor\t\tRun the editor\n"
-				"-debug\t\tRun the game in debug mode\n"
-				"-ignoreosver\t\tIgnore OS version check\n"
-				"-nocache\t\tDo not use the memory cache allocator\n"
-				"-dllpath=\"<fullpath>\"\t\tThe full path of the DLL/SO in quotes: -dllpath=\"yourfile.dll\" and -dllpath=\"/path/to/yourfile.dll\"\n";
-
-			fprintf(stderr, "%s", helpmsg);		// this is the standard printf because its run on the command line
+			PrintUsage();
 			return(false);
 		}
 
