@@ -26,8 +26,6 @@ int WINAPI wWinMain(HINSTANCE hinst, HINSTANCE hprevinst, PWSTR pcmdline, int nc
 
 	win32state.conshow = false;		// just use this to control console creation
 
-	win32state.pcmdline = L"-help";
-
 #if defined(MENGINE_DEBUG)
 	win32state.conshow = true;
 #endif

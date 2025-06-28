@@ -7,8 +7,8 @@
 #include "common.h"
 
 #define DEF_CVAR_MAP_CAPACITY 128
-#define CVAR_MAX_STR_LEN 256
-#define CVAR_MAX_LINE_LEN 512		// double the max string length
+#define CVAR_MAX_STR_LEN 260
+#define CVAR_MAX_LINE_LEN 520		// double the max string length
 
 typedef enum
 {
@@ -521,10 +521,10 @@ bool Cvar_Init(void)
 	if (initialized)
 		return(true);
 
-	Cmd_RegisterCommand("seta", Seta_Cmd, "Sets a cvar to a string value");
-	Cmd_RegisterCommand("seti", Seti_Cmd, "Sets a cvar to an integer value");
-	Cmd_RegisterCommand("setf", Setf_Cmd, "Sets a cvar to a float value");
-	Cmd_RegisterCommand("setb", Setb_Cmd, "Sets a cvar to a boolean value");
+	Cmd_RegisterCommand("seta", Seta_Cmd, "Sets or registers a cvar to a string value");
+	Cmd_RegisterCommand("seti", Seti_Cmd, "Sets or registers a cvar to an integer value");
+	Cmd_RegisterCommand("setf", Setf_Cmd, "Sets or registers a cvar to a float value");
+	Cmd_RegisterCommand("setb", Setb_Cmd, "Sets or registers a cvar to a boolean value");
 
 	cvarmap = MemCache_Alloc(sizeof(*cvarmap));
 	if (!cvarmap)
@@ -786,7 +786,7 @@ bool Cvar_GetString(const cvar_t *cvar, char *out)
 	if ((!cvar) || (cvar->type != CVAR_STRING))
 		return(false);
 
-	snprintf(out, CVAR_MAX_STR_LEN, "%s", cvar->value.s);
+	snprintf(out, sizeof(cvar->value.s), "%s", cvar->value.s);
 	return(true);
 }
 
