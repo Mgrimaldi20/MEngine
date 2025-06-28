@@ -32,6 +32,8 @@ static FILE *outfp;
 static FILE *errfp;
 static bool isatty;
 
+static char dllpath[SYS_MAX_PATH];
+
 static bool gameinitialized;
 
 /*
@@ -90,10 +92,12 @@ static bool ProcessCommandLine(void)
 		else if (strcmp(arg, "dllpath") == 0)
 		{
 			const char *argvalue = strchr(arg, '=') + 1;
+			int length = 0;
 
 			do
 			{
 				argvalue = strchr(cmdline->args[++i], '"');
+				length += snprintf(dllpath + length, sizeof(dllpath) - length, "%s", argvalue);
 			} while (!argvalue);
 		}
 
@@ -206,6 +210,9 @@ static bool InitGame(void)
 		Log_Write(LOG_ERROR, "Failed to find game DLL name in Cvar system");
 		return(false);
 	}
+
+	if (dllpath[0])
+		Cvar_SetString(gamedll, dllpath);
 
 	char gamedllname[SYS_MAX_PATH] = { 0 };
 	if (!Cvar_GetString(gamedll, gamedllname))
