@@ -27,9 +27,18 @@ bool Sys_Init(void)
 	else if (strcmp(posixstate.osinfo.sysname, "Darwin") != 0)
 		Sys_Error("Requires MacOS to run, you are using: %s", posixstate.osinfo.sysname);
 
-	Cvar_RegisterString("g_gamedll", "./DemoGame.dylib", CVAR_SYSTEM, "The name of the game DLL for MacOS systems");
-
 	posixstate.initialized = true;
 
 	return(true);
+}
+
+/*
+* Function: Sys_GetDefDLLName
+* Gets the default DLL name for the demo game library for MacOS systems
+*
+* Returns: The name of the demo game DLL as a statically allocated string
+*/
+const char *Sys_GetDefDLLName(void)
+{
+	return("./DemoGame.dylib");
 }

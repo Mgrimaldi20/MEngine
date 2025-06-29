@@ -53,3 +53,5 @@ void Sys_SignalCondVar(condvar_t *condvar);
 void *Sys_LoadDLL(const char *dllname);
 void Sys_UnloadDLL(void *handle);
 void *Sys_GetProcAddress(void *handle, const char *procname);
+
+const char *Sys_GetDefDLLName(void);
