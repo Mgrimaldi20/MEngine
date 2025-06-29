@@ -164,8 +164,6 @@ bool Sys_Init(void)
 	Log_Writef(LOG_INFO, "Thread stack limits: Low: %llu, High: %llu", lowlimit, highlimit);
 	Log_Writef(LOG_INFO, "Stack size: %juMB", stacksize / (1024 * 1024));
 
-	Cvar_RegisterString("g_gamedll", "DemoGame.dll", CVAR_SYSTEM, "The name of the game DLL for Windows systems");
-
 	// create the crash handler shm region and start the process
 	emchmapfile = CreateFileMapping(
 		INVALID_HANDLE_VALUE,
@@ -840,4 +838,15 @@ void *Sys_GetProcAddress(void *handle, const char *procname)
 
 	return(proc);
 #pragma warning(pop)
+}
+
+/*
+* Function: Sys_GetDefDLLName
+* Gets the default DLL name for the demo game library for Windows systems
+* 
+* Returns: The name of the demo game DLL as a statically allocated string
+*/
+const char *Sys_GetDefDLLName(void)
+{
+	return("DemoGame.dll");
 }

@@ -204,22 +204,12 @@ static void CreateMServices(void)
 */
 static bool InitGame(void)
 {
-	cvar_t * const gamedll = Cvar_Find("g_gamedll");	// get the game DLL name from the Cvar system, designed to be overriden by the client
-	if (!gamedll)
-	{
-		Log_Write(LOG_ERROR, "Failed to find game DLL name in Cvar system");
-		return(false);
-	}
+	char gamedllname[SYS_MAX_PATH] = { 0 };
+
+	snprintf(gamedllname, SYS_MAX_PATH, Sys_GetDefDLLName());
 
 	if (dllpath[0])
-		Cvar_SetString(gamedll, dllpath);
-
-	char gamedllname[SYS_MAX_PATH] = { 0 };
-	if (!Cvar_GetString(gamedll, gamedllname))
-	{
-		Log_Write(LOG_ERROR, "Failed to get game DLL name from Cvar system");
-		return(false);
-	}
+		snprintf(gamedllname, SYS_MAX_PATH, "%s", dllpath);
 
 	gamedllhandle = Sys_LoadDLL(gamedllname);
 	if (!gamedllhandle)

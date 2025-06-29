@@ -7,7 +7,7 @@ add_executable(EMCrashHandler)
 
 if(CMAKE_VERSION VERSION_GREATER 3.25)
 	set_property(TARGET EMCrashHandler PROPERTY CXX_STANDARD 20)
-	set_property(TARGET EMCrashHandler PROPERTY C_STANDARD 23)
+	set_property(TARGET EMCrashHandler PROPERTY C_STANDARD 17)
 endif()
 
 # Define some project macros
