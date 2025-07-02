@@ -39,11 +39,7 @@ static HANDLE emchconnevent;
 static PVOID vehhandler;
 
 static emstatus_t *emchstatus;
-
-static STARTUPINFO emsi;
 static PROCESS_INFORMATION empi;
-
-static cmdline_t cmdline;
 
 static bool initialized;
 
@@ -211,6 +207,8 @@ bool Sys_Init(void)
 		WindowsError();
 	}
 
+	STARTUPINFO emsi;
+
 	ZeroMemory(&emsi, sizeof(emsi));
 	emsi.cb = sizeof(emsi);
 	ZeroMemory(&empi, sizeof(empi));
@@ -343,9 +341,11 @@ cmdline_t *Sys_ParseCommandLine(void)
 {
 	const int maxcmdlinelen = SYS_MAX_CMD_ARGS * SYS_MAX_CMD_LEN;
 
+	static cmdline_t cmdline;
 	static char cmdlinebuff[SYS_MAX_CMD_LEN * SYS_MAX_CMD_ARGS];
 
 	memset(&cmdline, 0, sizeof(cmdline));	// zero it out to avoid issues if this function is called multiple times
+	memset(cmdlinebuff, 0, sizeof(cmdlinebuff));
 
 	int len = WideCharToMultiByte(CP_UTF8, 0, win32state.pcmdline, -1, cmdlinebuff, maxcmdlinelen, NULL, NULL);
 	if (len == 0)
@@ -377,12 +377,6 @@ cmdline_t *Sys_ParseCommandLine(void)
 	}
 
 	cmdline.count = argc;
-
-	if (argc == 0)
-	{
-		Common_Printf("No command line arguments found");
-		return(NULL);
-	}
 
 	return(&cmdline);
 }
