@@ -63,7 +63,7 @@ static bool ProcessCommandLine(void)
 	cmdline_t *cmdline = Sys_ParseCommandLine();
 	if (!cmdline)
 	{
-		Common_Warnf("No command line parsed, or parse failed");
+		printf("Command line failed to parse");		// terminal output
 		return(false);
 	}
 

@@ -38,6 +38,8 @@ static const videomode_t videomodes[] =
 	{ "640x480", 640, 480 }
 };
 
+glstate_t glstate;
+
 /*
 * Function: GetVideoModeInfo
 * Gets the width and height of the window based on the video mode, or custom mode if -1 is passed

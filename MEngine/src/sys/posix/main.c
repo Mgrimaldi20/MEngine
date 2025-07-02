@@ -7,8 +7,6 @@ posixvars_t posixstate;
 
 int main(int argc, char **argv)
 {
-	posixstate = (posixvars_t) { 0 };
-
 	posixstate.argc = argc;
 	posixstate.argv = argv;
 

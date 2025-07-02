@@ -4,8 +4,6 @@
 #include "common/common.h"
 #include "renderer.h"
 
-glstate_t glstate;
-
 /*
 * Function: Render_StartFrame
 * Clears the screen and depth buffer, ready for rendering

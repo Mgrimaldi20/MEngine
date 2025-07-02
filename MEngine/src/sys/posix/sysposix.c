@@ -42,8 +42,6 @@ static condvar_t condvars[SYS_MAX_CONDVARS];
 static int emchfd;
 static emstatus_t *emchstatus;
 
-static cmdline_t cmdline;
-
 static pid_t emchpid;
 
 /*
@@ -167,6 +165,8 @@ void Sys_Error(const char *error, ...)
 */
 cmdline_t *Sys_ParseCommandLine(void)
 {
+	static cmdline_t cmdline;
+
 	memset(&cmdline, 0, sizeof(cmdline));	// zero it out to avoid issues if this function is called multiple times
 
 	if (posixstate.argc == 0)
