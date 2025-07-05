@@ -43,6 +43,8 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 void WindowsError(void);
 void InitConsole(void);
 void ShutdownConsole(void);
+void OpenConsoleFiles(void);
+void CloseConsoleFiles(void);
 void ShowConsole(void);
 void HideConsole(void);
 
