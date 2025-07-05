@@ -42,14 +42,14 @@ static bool gameinitialized;
 */
 static void PrintUsage(void)
 {
-	fprintf(stderr, "MEngine\n");
+	fprintf(stderr, "\nMEngine\n");
 	fprintf(stderr, "Usage: MEngine [options]\n");
-	fprintf(stderr, "%-25s %s\n", "-help", "Print this help message and exits");
-	fprintf(stderr, "%-25s %s\n", "-editor", "Run the editor");
-	fprintf(stderr, "%-25s %s\n", "-debug", "Run the game in debug mode");
-	fprintf(stderr, "%-25s %s\n", "-ignoreosver", "Ignore OS version check");
-	fprintf(stderr, "%-25s %s\n", "-nocache", "Do not use the memory cache allocator");
-	fprintf(stderr, "%-25s %s\n", "-dllpath=\"<fullpath>\"", "Quoted full path of the game DLL/SO: -dllpath=\"game.dll\" or -dllpath=\"/path/to/game/file.dll\"");
+	fprintf(stderr, "-help                   Print this help message and exits\n");
+	fprintf(stderr, "-editor                 Run the editor\n");
+	fprintf(stderr, "-debug                  Run the game in debug mode\n");
+	fprintf(stderr, "-ignoreosver            Ignore OS version check\n");
+	fprintf(stderr, "-nocache                Do not use the memory cache allocator, use the regular malloc/free instead\n");
+	fprintf(stderr, "-dllpath=\"<fullpath>\" Quoted full path of the game DLL/SO: -dllpath=\"game.dll\" or -dllpath=\"/path/to/game/file.dll\"\n");
 }
 
 /*
@@ -63,7 +63,7 @@ static bool ProcessCommandLine(void)
 	cmdline_t *cmdline = Sys_ParseCommandLine();
 	if (!cmdline)
 	{
-		printf("Command line failed to parse");		// terminal output
+		fprintf(stderr, "Command line failed to parse");
 		return(false);
 	}
 
@@ -280,7 +280,6 @@ static void ShutdownGame(void)
 */
 bool Common_Init(void)
 {
-#if defined(MENGINE_DEBUG)
 	if (Sys_Mkdir("logs"))		// if this cant be done, just forget about this
 	{
 		char outfilename[SYS_MAX_PATH] = { 0 };
@@ -292,7 +291,6 @@ bool Common_Init(void)
 		outfp = fopen(outfilename, "w");	// truncate for each run
 		errfp = fopen(errfilename, "w");
 	}
-#endif
 
 	isatty = Sys_IsTTY();
 

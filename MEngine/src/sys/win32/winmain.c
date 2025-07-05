@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include "common/common.h"
+#include "sys/sys.h"
 
 #include "winlocal.h"
 
@@ -22,16 +23,18 @@ int WINAPI wWinMain(HINSTANCE hinst, HINSTANCE hprevinst, PWSTR pcmdline, int nc
 	win32state.pcmdline = pcmdline;
 	win32state.ncmdshow = ncmdshow;
 
-	win32state.conshow = false;		// just use this to control console creation
-
 #if defined(MENGINE_DEBUG)
 	win32state.conshow = true;
 #endif
+
+	if (AttachConsole(ATTACH_PARENT_PROCESS))
+		OpenConsoleFiles();
 
 	if (win32state.conshow)
 	{
 		if (!GetConsoleWindow())
 		{
+			OpenConsoleFiles();
 			InitConsole();
 			HideConsole();
 		}
@@ -45,6 +48,8 @@ int WINAPI wWinMain(HINSTANCE hinst, HINSTANCE hprevinst, PWSTR pcmdline, int nc
 
 		if (win32state.conshow)
 			ShutdownConsole();
+
+		CloseConsoleFiles();
 
 		return(1);
 	}
@@ -118,19 +123,38 @@ void InitConsole(void)
 		return;
 	}
 
-	errno_t err = 0;
+	Common_Printf("Opening debugging console");
+}
 
-	err = freopen_s(&outfp, "CONOUT$", "w", stdout);
-	if (err)
-		Common_Errorf("Failed to redirect stdout to console");
+/*
+* Function: ShutdownConsole
+* Shuts down the debugging console
+*/
+void ShutdownConsole(void)
+{
+	Common_Printf("\nClosing debugging console");
 
-	err = freopen_s(&errfp, "CONOUT$", "w", stderr);
-	if (err)
-		Common_Errorf("Failed to redirect stderr to console");
+	if (!FreeConsole())
+	{
+		Common_Errorf("Failed to free the console");	// just log it and move on, no need to force exit, this is prolly happening during shutdown anyway
+		return;
+	}
+}
 
-	err = freopen_s(&infp, "CONIN$", "r", stdin);
-	if (err)
-		Common_Errorf("Failed to redirect stdin to console");
+/*
+* Function: OpenConsoleFiles
+* Opens the console files for stdout, stdin and stderr if they are not already opened
+*/
+void OpenConsoleFiles(void)
+{
+	if (!outfp)
+		freopen_s(&outfp, "CONOUT$", "w", stdout);
+
+	if (!errfp)
+		freopen_s(&errfp, "CONOUT$", "w", stderr);
+
+	if (!infp)
+		freopen_s(&infp, "CONIN$", "r", stdin);
 
 	if (!outfp || !errfp || !infp)
 	{
@@ -144,21 +168,15 @@ void InitConsole(void)
 			fclose(infp);
 
 		win32state.conshow = false;
-
-		return;
 	}
-
-	Common_Printf("Opening debugging console");
 }
 
 /*
-* Function: ShutdownConsole
-* Shuts down the debugging console
+* Function: CloseConsoleFiles
+* Closes the console files for stdout, stdin and stderr if they are not already closed
 */
-void ShutdownConsole(void)
+void CloseConsoleFiles(void)
 {
-	Common_Printf("\nClosing debugging console");
-
 	if (outfp)
 		fclose(outfp);
 
@@ -167,12 +185,6 @@ void ShutdownConsole(void)
 
 	if (infp)
 		fclose(infp);
-
-	if (!FreeConsole())
-	{
-		Common_Errorf("Failed to free the console");	// just log it and move on, no need to force exit, this is prolly happening during shutdown anyway
-		return;
-	}
 }
 
 /*

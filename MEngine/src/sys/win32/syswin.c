@@ -389,7 +389,7 @@ cmdline_t *Sys_ParseCommandLine(void)
 */
 bool Sys_IsTTY(void)
 {
-	return(win32state.conshow);
+	return(IsWindowVisible(GetConsoleWindow()));
 }
 
 /*
