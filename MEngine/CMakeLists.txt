@@ -81,6 +81,8 @@ target_sources(MEngine PRIVATE
 	"src/renderer/renderer.h"
 	"src/renderer/rendererinit.c"
 	"src/renderer/renderer.c"
+	"src/renderer/world.h"
+	"src/renderer/world.c"
 )
 
 include_directories(src)														# This is useful so I can just #include framework without worrying about relative pathing
