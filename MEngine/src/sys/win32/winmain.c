@@ -28,17 +28,17 @@ int WINAPI wWinMain(HINSTANCE hinst, HINSTANCE hprevinst, PWSTR pcmdline, int nc
 #endif
 
 	if (AttachConsole(ATTACH_PARENT_PROCESS))
-		OpenConsoleFiles();
+		win32state.conshow = true;
 
 	if (win32state.conshow)
 	{
 		if (!GetConsoleWindow())
 		{
-			OpenConsoleFiles();
 			InitConsole();
 			HideConsole();
 		}
 
+		OpenConsoleFiles();
 		ShowConsole();
 	}
 	
@@ -47,9 +47,10 @@ int WINAPI wWinMain(HINSTANCE hinst, HINSTANCE hprevinst, PWSTR pcmdline, int nc
 		Common_Shutdown();
 
 		if (win32state.conshow)
+		{
 			ShutdownConsole();
-
-		CloseConsoleFiles();
+			CloseConsoleFiles();
+		}
 
 		return(1);
 	}
@@ -64,7 +65,10 @@ int WINAPI wWinMain(HINSTANCE hinst, HINSTANCE hprevinst, PWSTR pcmdline, int nc
 				Common_Shutdown();
 
 				if (win32state.conshow)
+				{
 					ShutdownConsole();
+					CloseConsoleFiles();
+				}
 
 				return(0);
 			}
@@ -122,8 +126,6 @@ void InitConsole(void)
 		WindowsError();
 		return;
 	}
-
-	Common_Printf("Opening debugging console");
 }
 
 /*
@@ -167,8 +169,10 @@ void OpenConsoleFiles(void)
 		if (infp)
 			fclose(infp);
 
-		win32state.conshow = false;
+		return;
 	}
+
+	Common_Printf("Opening debugging console");
 }
 
 /*
