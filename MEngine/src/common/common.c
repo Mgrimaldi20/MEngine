@@ -33,6 +33,7 @@ static FILE *errfp;
 static bool isatty;
 
 static char dllpath[SYS_MAX_PATH];
+static char basepath[SYS_MAX_PATH];
 
 static bool gameinitialized;
 
@@ -44,12 +45,35 @@ static void PrintUsage(void)
 {
 	fprintf(stderr, "\nMEngine\n");
 	fprintf(stderr, "Usage: MEngine [options]\n");
-	fprintf(stderr, "-help                   Print this help message and exits\n");
-	fprintf(stderr, "-editor                 Run the editor\n");
-	fprintf(stderr, "-debug                  Run the game in debug mode\n");
-	fprintf(stderr, "-ignoreosver            Ignore OS version check\n");
-	fprintf(stderr, "-nocache                Do not use the memory cache allocator, use the regular malloc/free instead\n");
-	fprintf(stderr, "-dllpath=\"<fullpath>\" Quoted full path of the game DLL/SO: -dllpath=\"game.dll\" or -dllpath=\"/path/to/game/file.dll\"\n");
+	fprintf(stderr, "-help                    Print this help message and exits\n");
+	fprintf(stderr, "-editor                  Run the editor\n");
+	fprintf(stderr, "-debug                   Run the game in debug mode\n");
+	fprintf(stderr, "-ignoreosver             Ignore OS version check\n");
+	fprintf(stderr, "-nocache                 Do not use the memory cache allocator, use the regular malloc/free instead\n");
+	fprintf(stderr, "-basepath=\"<fullpath>\" Quoted full path to the game data: -basepath=\"/root/path/to/game/data\"\n");
+	fprintf(stderr, "-dllpath=\"<fullpath>\"  Quoted name of the game DLL/SO relative to the base path: -dllpath=\"game.dll\" or -dllpath=\"/path/to/game/file.dll\"\n");
+}
+
+/*
+* Function: ExtractCommandVar
+* Extracts the value of a command line parsed cvar, like -basepath="path/to/base" or -dllpath="path/to/dll"
+* 
+*	cmdline: The command line structure containing the parsed arguments
+*	arg: The argument to extract the value from, like -basepath or -dllpath
+*	index: The index into the command line arguments array, will be incremented to the next argument after extracting the value
+*	out: The output buffer to store the extracted value
+*	outlen: The length of the output buffer
+*/
+static void ExtractCommandVar(cmdline_t *cmdline, const char *arg, int *index, char *out, size_t outlen)
+{
+	const char *argvalue = strchr(arg, '=') + 1;
+	int length = 0;
+
+	do
+	{
+		argvalue = strchr(cmdline->args[++(*index)], '"');
+		length += snprintf(out + length, outlen - length, "%s", argvalue);
+	} while (!argvalue);
 }
 
 /*
@@ -89,17 +113,11 @@ static bool ProcessCommandLine(void)
 		else if (strcmp(arg, "nocache") == 0)
 			cmdlineflags |= CMD_USE_DEF_ALLOC;
 
-		else if (strcmp(arg, "dllpath") == 0)
-		{
-			const char *argvalue = strchr(arg, '=') + 1;
-			int length = 0;
+		else if (strcmp(arg, "basepath") == 0)
+			ExtractCommandVar(cmdline, cmdline->args[i], &i, basepath, SYS_MAX_PATH);
 
-			do
-			{
-				argvalue = strchr(cmdline->args[++i], '"');
-				length += snprintf(dllpath + length, sizeof(dllpath) - length, "%s", argvalue);
-			} while (!argvalue);
-		}
+		else if (strcmp(arg, "dllpath") == 0)
+			ExtractCommandVar(cmdline, cmdline->args[i], &i, dllpath, SYS_MAX_PATH);
 
 		else
 			fprintf(stderr, "Unknown command line token: %s\n", cmdline->args[i]);
@@ -373,8 +391,6 @@ void Common_Frame(void)
 * 
 *	msg: The message to print
 *	...: The arguments to the format string, same as printf
-* 
-* Returns: The number of characters printed
 */
 void Common_Printf(const char *msg, ...)
 {
@@ -411,8 +427,6 @@ void Common_Printf(const char *msg, ...)
 * 
 *	msg: The message to print
 *	...: The arguments to the format string, same as printf
-* 
-* Returns: The number of characters printed
 */
 void Common_Warnf(const char *msg, ...)
 {
@@ -449,8 +463,6 @@ void Common_Warnf(const char *msg, ...)
 * 
 *	msg: The message to print
 *	...: The arguments to the format string, same as printf
-* 
-* Returns: The number of characters printed
 */
 void Common_Errorf(const char *msg, ...)
 {

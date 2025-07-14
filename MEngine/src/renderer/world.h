@@ -1,5 +1,5 @@
 /*
-* The engines .wld file format specification.
+* The engines .wld file format specification. Version 1.
 * This file (world.h) contains the structures used to represent the world data following the .wld format.
 * 
 * Overview:
@@ -17,52 +17,60 @@
 * 
 * File Format:
 * World Header:
-*  Offset |      Type      |    Field    | Description
-* --------|----------------|-------------|------------
-* 0       | char[4]        | magic       | Magic: "WLD1" to identify the file format
-* 4       | uint32_t       | version     | Version of the world format
-* 8       | uint32_t       | areacount   | Number of areas in the world
+*  Offset |       Type       |    Field    | Description
+* --------|------------------|-------------|------------
+* 0       | char[4]          | magic       | Magic: "WLD1" to identify the file format
+* 4       | uint32_t         | version     | Version of the world format
+* 8       | uint32_t         | areacount   | Number of areas in the world
 * 
 * Area Header:
-*  Offset |      Type      |    Field    | Description
-* --------|----------------|-------------|------------
-* 0       | char[4]        | magic       | Magic: "AREA" to identify the area format
-* 4       | uint16_t       | areanamelen | Length of the area name (length is variable, up to 255 characters) (L)
-* 6	      | char[]         | areaname    | Name of the area (variable length, up to 255 characters) (L)
-* 6+L     | uint32_t       | chunkcount  | Number of chunks in the area (C)
-* 6+L+4*C | chunkref_t[]   | chunks      | Array of chunk references
+*  Offset |       Type       |    Field    | Description
+* --------|------------------|-------------|------------
+* 0       | char[4]          | magic       | Magic: "AREA" to identify the area format
+* 4       | uint16_t         | areanamelen | Length of the area name (length is variable, up to 255 characters) (L)
+* 6	      | char[]           | areaname    | Name of the area (variable length, up to 255 characters) (L)
+* 6+L     | uint32_t         | chunkcount  | Number of chunks in the area (C)
+* 6+L+4*C | chunkref_t[]     | chunks      | Array of chunk references
 * 
 * Chunk Ref (Chunk Reference):
-*  Offset |      Type      |    Field    | Description
-* --------|----------------|-------------|------------
-* 0       | uint32_t       | posx        | X position of the chunk in the world
-* 4       | uint32_t       | posy        | Y position of the chunk in the world
-* 8       | size_t         | offset      | Offset in the file where the chunk data starts
-* 16      | size_t         | size        | Size of the chunk data in bytes
+*  Offset |       Type       |    Field    | Description
+* --------|------------------|-------------|------------
+* 0       | uint32_t         | posx        | X position of the chunk in the world
+* 4       | uint32_t         | posy        | Y position of the chunk in the world
+* 8       | size_t           | offset      | Offset in the file where the chunk data starts
+* 16      | size_t           | size        | Size of the chunk data in bytes
 * 
 * Chunk Header:
-*  Offset |      Type      |    Field    | Description
-* --------|----------------|-------------|------------
-* 0       | uint32_t       | posx        | X position of the chunk in the world
-* 4       | uint32_t       | posy        | Y position of the chunk in the world
-* 8       | uint32_t       | sectorcount | Number of sectors in the chunk
-* 12      | uint32_t       | entitycount | Number of entities in the chunk
+*  Offset |       Type       |    Field    | Description
+* --------|------------------|-------------|------------
+* 0       | uint32_t         | posx        | X position of the chunk in the world
+* 4       | uint32_t         | posy        | Y position of the chunk in the world
+* 8       | uint32_t         | sectorcount | Number of sectors in the chunk
+* 12      | uint32_t         | entitycount | Number of entities in the chunk
 * 
 * Sector:
-*  Offset |      Type      |    Field    | Description
-* --------|----------------|-------------|------------
-* 0       | worldpoint_t[] | points      | Array of points defining the sector (P)
-* 0*P+12  | uint32_t       | textureid   | Texture ID used for the sector
-* 0*P+16  | uint32_t       | flags       | Flags for the sector (e.g., solid, transparent, etc.)
+*  Offset |       Type       |    Field    | Description
+* --------|------------------|-------------|------------
+* 0       | uint32_t         | pointscount | Number of points defining the sector
+* 4       | worldpoint_t[]   | points      | Array of points defining the sector (P)
+* 4*P+12  | uint32_t         | textureid   | Texture ID used for the sector
+* 4*P+16  | uint32_t         | flags       | Flags for the sector (e.g., solid, transparent, etc.)
 * 
 * Entity:
-*  Offset |      Type      |    Field    | Description
-* --------|----------------|-------------|------------
-* 0       | worldpoint_t   | position    | Position of the entity in the world
-* 12      | uint32_t       | entityid    | Unique ID of the entity
+*  Offset |       Type       |    Field    | Description
+* --------|------------------|-------------|------------
+* 0       | worldpoint_t     | position    | Position of the entity in the world
+* 12      | uint32_t         | entityid    | Unique ID of the entity
+* 
+* Chunk:
+*  Offset |       Type       |    Field    | Description
+* --------|------------------|-------------|------------
+* 0       | chunkheader_t    | header      | Header of the chunk
+* 16      | worldsector_t[]  | sectors     | Array of sectors in the chunk
+* 16+S*12 | worldentity_t[]  | entities    | Array of entities in the chunk
 * 
 * Notes:
-*	-The size of the worldpoint_t structure is 12 bytes (3 integers (X, Y, Z), each 4 bytes).
+*	-The size of the worldpoint_t structure is 12 bytes packed (3 integers (X, Y, Z), each 4 bytes).
 */
 
 #pragma once
@@ -81,6 +89,7 @@ typedef struct
 
 typedef struct
 {
+	unsigned int pointscount;
 	worldpoint_t *points;
 	unsigned int textureid;
 	unsigned int flags;
@@ -101,8 +110,8 @@ typedef struct
 
 typedef struct
 {
-	unsigned int posx;
-	unsigned int posy;
+	unsigned int xpos;
+	unsigned int ypos;
 	size_t offset;
 	size_t size;
 } chunkref_t;
@@ -118,8 +127,8 @@ typedef struct
 
 typedef struct
 {
-	unsigned int posx;				// x position in the world
-	unsigned int posy;				// y position in the world
+	unsigned int xpos;				// x position in the world
+	unsigned int ypos;				// y position in the world
 	unsigned int sectorcount;
 	unsigned int entitycount;
 } chunkheader_t;
@@ -138,3 +147,6 @@ typedef struct
 	areaheader_t *areas;
 	void *filehandle;
 } world_t;
+
+world_t *World_Load(const char *filename);
+void World_Unload(world_t *world);
