@@ -6,6 +6,7 @@
 
 static cvar_t *fsbasepath;
 static cvar_t *fssavepath;
+static cvar_t *fsdatapath;
 
 static bool initialized;
 
@@ -60,6 +61,7 @@ bool FileSys_Init(void)
 
 	fsbasepath = Cvar_RegisterString("fs_basepath", "", CVAR_FILESYSTEM | CVAR_READONLY, "The base path for the engine. Path to the installation");
 	fssavepath = Cvar_RegisterString("fs_savepath", "save", CVAR_FILESYSTEM, "The path to the games save files, relative to the base path");
+	fsdatapath = Cvar_RegisterString("fs_datapath", "data", CVAR_FILESYSTEM, "The path to the games data files, relative to the base path");
 
 	initialized = true;
 

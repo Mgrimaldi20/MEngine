@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <time.h>
-#include "emgl.h"
 #include "common/common.h"
+#include "emgl.h"
 #include "renderer.h"
 
 /*
