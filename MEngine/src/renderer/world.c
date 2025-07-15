@@ -154,7 +154,10 @@ error:
 		MemCache_Free(world);
 
 	if (file)
+	{
 		fclose(file);
+		file = NULL;
+	}
 
 	return(NULL);
 }
