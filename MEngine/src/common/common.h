@@ -85,7 +85,7 @@ struct filedata
 	char filename[SYS_MAX_PATH];
 };
 
-bool FileSys_Init(void);
+bool FileSys_Init(const char *basepath);
 void FileSys_Shutdown(void);
 bool FileSys_FileExists(const char *filename);
 filedata_t *FileSys_ListFiles(unsigned int *numfiles, const char *directory, const char *filter);

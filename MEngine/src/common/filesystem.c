@@ -54,12 +54,15 @@ static bool PathMatchSpec(const char *path, const char *filter)
 * 
 * Returns: A boolean if initialization was successful or not
 */
-bool FileSys_Init(void)
+bool FileSys_Init(const char *basepath)
 {
 	if (initialized)
 		return(true);
 
-	fsbasepath = Cvar_RegisterString("fs_basepath", "", CVAR_FILESYSTEM | CVAR_READONLY, "The base path for the engine. Path to the installation");
+	char basepathbuf[SYS_MAX_PATH] = { 0 };
+	snprintf(basepathbuf, SYS_MAX_PATH, "%s", (!basepath || !basepath[0]) ? basepath : "");
+
+	fsbasepath = Cvar_RegisterString("fs_basepath", basepathbuf, CVAR_FILESYSTEM | CVAR_READONLY, "The base path for the engine. Defaults to the path of the installation");
 	fssavepath = Cvar_RegisterString("fs_savepath", "save", CVAR_FILESYSTEM, "The path to the games save files, relative to the base path");
 	fsdatapath = Cvar_RegisterString("fs_datapath", "data", CVAR_FILESYSTEM, "The path to the games data files, relative to the base path");
 
