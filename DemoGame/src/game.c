@@ -23,8 +23,9 @@ gameservices_t *GetMServices(mservices_t *services)
 
 	gameservices = (gameservices_t)		// ensure all fields are initialized
 	{
-		.gamename = "DemoGame",			// name of the game used by the engine for windowing
 		.version = 0,					// this field is for the verion of the engine that the game was built for
+		.gamename = "DemoGame",			// name of the game used by the engine for windowing
+		.gamewldname = "",				// name of the world file to load, if empty the engine will not load a world file
 		.iconpath = "",					// path to the icon file for the game
 		.smiconpath = "",				// path to the small icon file for the game
 		.Init = Init,					// initialize game code, called once at startup

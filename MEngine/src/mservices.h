@@ -120,6 +120,7 @@ typedef struct
 {
 	int version;							// version of the game
 	const char *gamename;					// name of the game used by the engine
+	const char *gamewldname;				// name of the .wld file used by the engine to define the game world
 	char iconpath[SYS_MAX_PATH];			// games icon path
 	char smiconpath[SYS_MAX_PATH];			// games icon path for small icon
 
