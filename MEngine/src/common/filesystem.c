@@ -52,6 +52,8 @@ static bool PathMatchSpec(const char *path, const char *filter)
 * Function: FileSys_Init
 * Initializes the filesystem, if no PAK files are found, the filesystem will use the regular disk instead of the PAKs
 * 
+*	basepath: The base path for the engine, if NULL or empty, the current working directory will be used, all paths will be relative to this base path
+* 
 * Returns: A boolean if initialization was successful or not
 */
 bool FileSys_Init(const char *basepath)

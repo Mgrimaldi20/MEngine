@@ -3,6 +3,7 @@
 #include "common/common.h"
 #include "emgl.h"
 #include "renderer.h"
+#include "world.h"
 
 typedef struct
 {
@@ -18,6 +19,8 @@ static cvar_t *rmultisamples;
 static cvar_t *rrefresh;
 static cvar_t *rvsync;
 static cvar_t *rfov;
+
+static world_t *world;
 
 static bool initialized;
 
@@ -356,9 +359,13 @@ bool Render_Init(void)
 
 	InitOpenGL();
 
-	Log_Writef(LOG_INFO, "OpenGL version: %s", (const char *)glGetString(GL_VERSION));
-	Log_Writef(LOG_INFO, "OpenGL renderer: %s", (const char *)glGetString(GL_RENDERER));
-	Log_Writef(LOG_INFO, "OpenGL vendor: %s", (const char *)glGetString(GL_VENDOR));
+	Log_Writef(LOG_INFO, "OpenGL version: %s", glGetString(GL_VERSION));
+	Log_Writef(LOG_INFO, "OpenGL renderer: %s", glGetString(GL_RENDERER));
+	Log_Writef(LOG_INFO, "OpenGL vendor: %s", glGetString(GL_VENDOR));
+
+	world = World_Load(gameservices.gamewldname);
+	if (!world)
+		return(false);
 
 	initialized = true;
 	glstate.initialized = initialized;
@@ -376,6 +383,12 @@ void Render_Shutdown(void)
 		return;
 
 	Log_Write(LOG_INFO, "Shutting down rendering system");
+
+	if (world)
+	{
+		World_Unload(world);
+		world = NULL;
+	}
 
 	GLWnd_Shutdown();
 

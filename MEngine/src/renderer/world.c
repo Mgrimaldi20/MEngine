@@ -184,7 +184,11 @@ void World_Unload(world_t *world)
 			MemCache_Free(area->chunks);
 	}
 
-	MemCache_Free(world->areas);
-	fclose(world->filehandle);
+	if (world->areas)
+		MemCache_Free(world->areas);
+
+	if (world->filehandle)
+		fclose(world->filehandle);
+
 	MemCache_Free(world);
 }
