@@ -160,15 +160,7 @@ void OpenConsoleFiles(void)
 
 	if (!outfp || !errfp || !infp)
 	{
-		if (outfp)
-			fclose(outfp);
-
-		if (errfp)
-			fclose(errfp);
-
-		if (infp)
-			fclose(infp);
-
+		CloseConsoleFiles();
 		return;
 	}
 

@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <time.h>
+#include "sys/sys.h"
 #include "common/common.h"
 #include "emgl.h"
 #include "renderer.h"
@@ -227,7 +228,6 @@ static void GLDebugCallback(GLenum source, GLenum type, GLuint id, GLenum severi
 	}
 }
 
-
 /*
 * Function: InitOpenGL
 * Initializes the OpenGL state and options
@@ -363,9 +363,15 @@ bool Render_Init(void)
 	Log_Writef(LOG_INFO, "OpenGL renderer: %s", glGetString(GL_RENDERER));
 	Log_Writef(LOG_INFO, "OpenGL vendor: %s", glGetString(GL_VENDOR));
 
-	world = World_Load(gameservices.gamewldname);
-	if (!world)
-		return(false);
+	if (gameservices.gamewldname[0] != '\0' && gameservices.gamewldname != NULL)
+	{
+		world = World_Load(gameservices.gamewldname);
+		if (!world)
+			return(false);
+	}
+
+	else
+		Log_Write(LOG_WARN, "No world file specified by the game, skipping world load");
 
 	initialized = true;
 	glstate.initialized = initialized;
