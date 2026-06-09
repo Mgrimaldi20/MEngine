@@ -1,3 +1,10 @@
+# UPDATE
+Archiving this repository... I had deleted and recovered this repo, decided to start again on this project as I had made a few decisions in this codebase that I wasnt particularly happy with.
+This code is so old and made up of the amalgamation of many started and previously deleted game engines and repos that I have started, not made much progress on, and then deleted, and is at least the first time I was able to get a working engine in a state that I was happy with.
+I have decided to not delete this repo this time, but to leave it up as a reference implementation for future projects, and for others who stumble upon this as something they may be able to learn, or take what they need from.
+
+If you find something of use within this code for your own projects, please do feel free to take and use it as you wish... Happy coding! 
+
 # MEngine
 Still a big WIP... It is very basic at the moment. Hoping that making it public will boost my motivation to work on it more.
 
